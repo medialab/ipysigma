@@ -1,0 +1,40 @@
+{
+  "name": "ipysigma",
+  "version": "0.1.0",
+  "description": "A custom Jupyter widget library to display graphs using sigma.js",
+  "author": "Yomguithereal",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com//ipysigma.git"
+  },
+  "keywords": [
+    "jupyter",
+    "widgets",
+    "ipython",
+    "ipywidgets",
+    "jupyterlab-extension"
+  ],
+  "files": [
+    "lib/**/*.js",
+    "dist/*.js"
+  ],
+  "scripts": {
+    "clean": "rimraf dist/",
+    "prepublish": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "webpack": "^3.5.5",
+    "rimraf": "^2.6.1"
+  },
+  "dependencies": {
+    "@jupyter-widgets/base": "^1.0.0",
+    "graphology": "0.11.4",
+    "lodash": "^4.17.4",
+    "sigma": "2.0.0-alpha11"
+  },
+  "jupyterlab": {
+    "extension": "lib/labplugin"
+  }
+}

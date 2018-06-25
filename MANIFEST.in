@@ -1,0 +1,2 @@
+recursive-include ipysigma/static *.*
+include ipysigma.json
