@@ -31,6 +31,7 @@
   "dependencies": {
     "@jupyter-widgets/base": "^1.0.0",
     "graphology": "0.11.4",
+    "graphology-layout-forceatlas2": "^0.1.1",
     "lodash": "^4.17.4",
     "sigma": "2.0.0-alpha11"
   },

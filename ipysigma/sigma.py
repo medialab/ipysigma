@@ -1,5 +1,5 @@
 from ipywidgets import DOMWidget, register
-from traitlets import Dict, Unicode
+from traitlets import Dict, Int, Unicode
 
 @register
 class Sigma(DOMWidget):
@@ -10,16 +10,19 @@ class Sigma(DOMWidget):
     _model_module = Unicode('ipysigma').tag(sync=True)
     _view_module_version = Unicode('^0.1.0').tag(sync=True)
     _model_module_version = Unicode('^0.1.0').tag(sync=True)
-    value = Dict({'nodes': [], 'edges': [], 'directed': False}).tag(sync=True)
 
-    def __init__(self, g, **kwargs):
+    data = Dict({'nodes': [], 'edges': [], 'directed': False}).tag(sync=True)
+    height = Int(500).tag(sync=True)
+
+    def __init__(self, graph, height=500, **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
-        nodes = list(g.nodes(data=True))
-        edges = list(g.edges(data=True))
+        nodes = list(graph.nodes(data=True))
+        edges = list(graph.edges(data=True))
 
-        self.value = {
+        self.data = {
             'nodes': nodes,
             'edges': edges,
-            'directed': g.is_directed()
+            'directed': graph.is_directed()
         }
+        self.height = height
