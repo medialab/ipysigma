@@ -4,6 +4,7 @@ var _ = require('lodash');
 var Graph = require('graphology');
 var WebGLRenderer = require('sigma/renderers/webgl').default;
 var FA2Layout = require('graphology-layout-forceatlas2/worker');
+var format = require('d3-format').format;
 
 
 // Custom Model. Custom widgets models must at least provide default values
@@ -18,6 +19,14 @@ var FA2Layout = require('graphology-layout-forceatlas2/worker');
 //  - `_model_module_version`
 //
 //  when different from the base class.
+
+var START_ICON = '▶';
+var PAUSE_ICON = '❚❚';
+var RESCALE_ICON = '⊙';
+var ZOOM_ICON = '⊕';
+var UNZOOM_ICON = '⊖';
+
+var NUMBER_FORMAT = format(',');
 
 function toRGBString(element) {
   var a = element.a,
@@ -38,12 +47,14 @@ var DESCRIPTORS = {
 
 function getGraphDescription(graph) {
     return (
+        '<b>' +
         (graph.multi ? 'Multi' : 'Simple') +
         ' ' + DESCRIPTORS[graph.type] + ' Graph' +
+        '</b>' +
         '<br>' +
-        graph.order + ' nodes' +
+        NUMBER_FORMAT(graph.order) + ' nodes' +
         '<br>' +
-        graph.size + ' edges'
+        NUMBER_FORMAT(graph.size) + ' edges'
     );
 }
 
@@ -145,8 +156,8 @@ var SigmaView = widgets.DOMWidgetView.extend({
         description.style.position = 'absolute';
         description.style.top = '10px';
         description.style.left = '10px';
-        description.style.background = 'white';
-        description.style.border = '1px solid black';
+        description.style.background = 'rgb(247, 247, 247)';
+        description.style.border = '1px solid rgb(207, 207, 207)';
         description.style.padding = '5px';
         description.style.fontSize = '0.8em';
         description.style.fontStyle = 'italic';
@@ -159,21 +170,106 @@ var SigmaView = widgets.DOMWidgetView.extend({
         layoutButton.style.position = 'absolute';
         layoutButton.style.bottom = '10px';
         layoutButton.style.right = '10px';
-        layoutButton.textContent = 'Start Layout';
+        layoutButton.textContent = START_ICON;
         layoutButton.style.zIndex = '10';
+        layoutButton.style.width = '28px';
+        layoutButton.style.height = '28px';
+        layoutButton.style.textAlign = 'center';
+        layoutButton.style.backgroundColor = '#fffffe';
+        layoutButton.style.paddingTop = '3px';
+        layoutButton.style.outline = '0';
 
         layoutButton.onclick = function() {
             if (self.layout && self.layout.running) {
-                layoutButton.textContent = 'Start Layout';
+                layoutButton.textContent = START_ICON;
                 self.layout.stop();
             }
             else {
-                layoutButton.textContent = 'Stop Layout';
+                layoutButton.textContent = PAUSE_ICON;
                 self.layout.start();
             }
         };
 
+        var unzoomButton = document.createElement('button');
+
+        unzoomButton.style.position = 'absolute';
+        unzoomButton.style.bottom = (28 + 5 + 28) + 'px';
+        unzoomButton.style.right = '10px';
+        unzoomButton.style.zIndex = '10';
+        unzoomButton.style.width = '28px';
+        unzoomButton.style.height = '28px';
+        unzoomButton.style.fontSize = '24px';
+        unzoomButton.style.textAlign = 'center';
+        unzoomButton.style.backgroundColor = '#fffffe';
+        unzoomButton.style.outline = '0';
+
+        var innerUnzoomButton = document.createElement('div');
+
+        innerUnzoomButton.style.margin = '-11px';
+        innerUnzoomButton.textContent = UNZOOM_ICON;
+
+        unzoomButton.appendChild(innerUnzoomButton);
+
+        unzoomButton.onclick = function() {
+            var state = self.camera.getState();
+
+            self.camera.animate({ratio: state.ratio * 1.5}, {duration: 150});
+        };
+
+        var zoomButton = document.createElement('button');
+
+        zoomButton.style.position = 'absolute';
+        zoomButton.style.bottom = (28 + 5 + 28 + 5 + 28) + 'px';
+        zoomButton.style.right = '10px';
+        zoomButton.style.zIndex = '10';
+        zoomButton.style.width = '28px';
+        zoomButton.style.height = '28px';
+        zoomButton.style.fontSize = '24px';
+        zoomButton.style.textAlign = 'center';
+        zoomButton.style.backgroundColor = '#fffffe';
+        zoomButton.style.outline = '0';
+
+        var innerZoomButton = document.createElement('div');
+
+        innerZoomButton.style.margin = '-11px';
+        innerZoomButton.textContent = ZOOM_ICON;
+
+        zoomButton.appendChild(innerZoomButton);
+
+        zoomButton.onclick = function() {
+            var state = self.camera.getState();
+
+            self.camera.animate({ratio: state.ratio / 1.5}, {duration: 150});
+        };
+
+        var rescaleButton = document.createElement('button');
+
+        rescaleButton.style.position = 'absolute';
+        rescaleButton.style.bottom = (28 + 5 + 28 + 5 + 28 + 5 + 28) + 'px';
+        rescaleButton.style.right = '10px';
+        rescaleButton.style.zIndex = '10';
+        rescaleButton.style.width = '28px';
+        rescaleButton.style.height = '28px';
+        rescaleButton.style.fontSize = '24px';
+        rescaleButton.style.textAlign = 'center';
+        rescaleButton.style.backgroundColor = '#fffffe';
+        rescaleButton.style.outline = '0';
+
+        var innerRescaleButton = document.createElement('div');
+
+        innerRescaleButton.style.margin = '-11px';
+        innerRescaleButton.textContent = RESCALE_ICON;
+
+        rescaleButton.appendChild(innerRescaleButton);
+
+        rescaleButton.onclick = function() {
+            self.camera.animate({x: 0.5, y: 0.5, ratio: 1});
+        };
+
         container.appendChild(layoutButton);
+        container.appendChild(zoomButton);
+        container.appendChild(unzoomButton);
+        container.appendChild(rescaleButton);
 
         this.container = container;
 
@@ -187,6 +283,7 @@ var SigmaView = widgets.DOMWidgetView.extend({
 
     renderSigma: function() {
         this.renderer = new WebGLRenderer(this.graph, this.container);
+        this.camera = this.renderer.getCamera();
         this.layout = new FA2Layout(this.graph, {settings: getFA2Settings(this.graph)});
     }
 });
