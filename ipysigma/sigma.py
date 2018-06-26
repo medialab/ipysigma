@@ -3,7 +3,10 @@ from traitlets import Dict, Int, Unicode
 
 @register
 class Sigma(DOMWidget):
-    """An example widget."""
+    """
+    Custom Sigma IPython widget.
+
+    """
     _view_name = Unicode('SigmaView').tag(sync=True)
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _view_module = Unicode('ipysigma').tag(sync=True)
