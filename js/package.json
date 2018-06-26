@@ -1,6 +1,6 @@
 {
   "name": "ipysigma",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A custom Jupyter widget library to display graphs using sigma.js",
   "author": "Yomguithereal",
   "main": "lib/index.js",
@@ -34,7 +34,7 @@
     "graphology": "0.11.4",
     "graphology-layout-forceatlas2": "^0.1.1",
     "lodash": "^4.17.4",
-    "sigma": "2.0.0-alpha11"
+    "sigma": "2.0.0-alpha12"
   },
   "jupyterlab": {
     "extension": "lib/labplugin"
