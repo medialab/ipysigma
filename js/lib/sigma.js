@@ -190,6 +190,8 @@ var SigmaView = widgets.DOMWidgetView.extend({
             }
         };
 
+        this.layoutButton = layoutButton;
+
         var unzoomButton = document.createElement('button');
 
         unzoomButton.style.position = 'absolute';
@@ -285,6 +287,9 @@ var SigmaView = widgets.DOMWidgetView.extend({
         this.renderer = new WebGLRenderer(this.graph, this.container);
         this.camera = this.renderer.getCamera();
         this.layout = new FA2Layout(this.graph, {settings: getFA2Settings(this.graph)});
+
+        if (this.model.get('start_layout'))
+            this.layoutButton.click();
     }
 });
 
