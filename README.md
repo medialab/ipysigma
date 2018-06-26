@@ -9,7 +9,7 @@ Installation
 To install use pip:
 
     $ pip install ipysigma
-    $ jupyter nbextension enable --py --sys-prefix ipysigma
+    $ jupyter nbextension enable --py --sys-prefix ipysigma # can be skipped for notebook 5.3 and above
 
 
 For a development installation (requires npm),

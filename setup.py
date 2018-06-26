@@ -80,9 +80,9 @@ class NPM(Command):
         npmName = 'npm';
         if platform.system() == 'Windows':
             npmName = 'npm.cmd';
-            
+
         return npmName;
-    
+
     def has_npm(self):
         npmName = self.get_npm_name();
         try:
@@ -150,9 +150,9 @@ setup_args = {
         'jsdeps': NPM,
     },
 
-    'author': 'Yomguithereal',
+    'author': 'Guillaume Plique',
     'author_email': 'kropotkinepiotr@gmail.com',
-    'url': 'https://github.com//ipysigma',
+    'url': 'https://github.com/ipysigma',
     'keywords': [
         'ipython',
         'jupyter',
