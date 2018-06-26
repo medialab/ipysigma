@@ -76,7 +76,7 @@ function buildGraph(data) {
             attrs.size = _.get(attrs, 'viz.size', 2);
 
         if (!attrs.color)
-            attrs.color = 'color' in attrs.viz ? toRGBString(attrs.viz.color) : Math.random();
+            attrs.color = 'color' in attrs.viz ? toRGBString(attrs.viz.color) : '#BBB';
 
         if (!attrs.label)
             attrs.label = key;
