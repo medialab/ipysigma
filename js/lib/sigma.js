@@ -30,6 +30,33 @@ function toRGBString(element) {
     ('rgb(' + r + ',' + g + ',' + b + ')');
 }
 
+var DESCRIPTORS = {
+    'mixed': 'Mixed',
+    'directed': 'Directed',
+    'undirected': 'Undirected'
+}
+
+function getGraphDescription(graph) {
+    return (
+        (graph.multi ? 'Multi' : 'Simple') +
+        ' ' + DESCRIPTORS[graph.type] + ' Graph' +
+        '<br>' +
+        graph.order + ' nodes' +
+        '<br>' +
+        graph.size + ' edges'
+    );
+}
+
+function getFA2Settings(graph) {
+    return {
+        barnesHutOptimize: graph.order > 2000,
+        strongGravityMode: true,
+        gravity: 0.05,
+        scalingRatio: 10,
+        slowDown: 1 + Math.log(graph.order)
+    };
+}
+
 function buildGraph(data) {
     var graph = new Graph({type: data.directed ? 'directed': 'undirected'});
 
@@ -68,6 +95,9 @@ function buildGraph(data) {
         if (!attrs.color)
             attrs.color = '#CCC';
 
+        if (graph.hasEdge(source, target))
+            graph.upgradeToMulti();
+
         graph.addEdge(source, target, attrs);
     });
 
@@ -98,6 +128,9 @@ var SigmaView = widgets.DOMWidgetView.extend({
         var self = this;
 
         var height = this.model.get('height');
+        var data = this.model.get('data');
+
+        this.graph = buildGraph(data);
 
         var el = this.el;
         el.style.height = height + 'px';
@@ -107,6 +140,20 @@ var SigmaView = widgets.DOMWidgetView.extend({
         container.style.height = height + 'px';
 
         el.appendChild(container);
+
+        var description = document.createElement('div');
+        description.style.position = 'absolute';
+        description.style.top = '10px';
+        description.style.left = '10px';
+        description.style.background = 'white';
+        description.style.border = '1px solid black';
+        description.style.padding = '5px';
+        description.style.fontSize = '0.8em';
+        description.style.fontStyle = 'italic';
+        description.style.zIndex = '10';
+        description.innerHTML = getGraphDescription(this.graph);
+
+        container.appendChild(description);
 
         var layoutButton = document.createElement('button');
         layoutButton.style.position = 'absolute';
@@ -135,18 +182,12 @@ var SigmaView = widgets.DOMWidgetView.extend({
     },
 
     dataChanged: function() {
-        var data = this.model.get('data');
-
-        this.graph = buildGraph(data);
-
-        var height = this.model.get('height');
-
         requestAnimationFrame(this.renderSigma);
     },
 
     renderSigma: function() {
         this.renderer = new WebGLRenderer(this.graph, this.container);
-        this.layout = new FA2Layout(this.graph);
+        this.layout = new FA2Layout(this.graph, {settings: getFA2Settings(this.graph)});
     }
 });
 
