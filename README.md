@@ -15,6 +15,11 @@ If you have JupyterLab, you will also need to install the JupyterLab extension (
 
     $ jupyter labextension install ipysigma
 
+Usage
+-----
+
+You can check out some examples [here](./notebooks/Examples.ipynb).
+
 For a development installation (requires npm),
 
     $ git clone https://github.com/ipysigma.git
