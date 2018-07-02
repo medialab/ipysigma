@@ -17,7 +17,7 @@ If you have JupyterLab, you will also need to install the JupyterLab extension:
     $ jupyter labextension install ipysigma
 
 <p align="center">
-  ![ipysigma](./img/ipysigma.gif)
+  <img alt="ipysigma" src="./img/ipysigma.gif" />
 </p>
 
 Usage
