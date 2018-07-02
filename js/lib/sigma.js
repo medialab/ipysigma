@@ -178,14 +178,17 @@ var SigmaView = widgets.DOMWidgetView.extend({
         layoutButton.style.backgroundColor = '#fffffe';
         layoutButton.style.paddingTop = '3px';
         layoutButton.style.outline = '0';
+        layoutButton.setAttribute('title', 'Start layout');
 
         layoutButton.onclick = function() {
             if (self.layout && self.layout.running) {
                 layoutButton.textContent = START_ICON;
+                layoutButton.setAttribute('title', 'Start layout');
                 self.layout.stop();
             }
             else {
                 layoutButton.textContent = PAUSE_ICON;
+                layoutButton.setAttribute('title', 'Stop layout');
                 self.layout.start();
             }
         };
@@ -204,6 +207,7 @@ var SigmaView = widgets.DOMWidgetView.extend({
         unzoomButton.style.textAlign = 'center';
         unzoomButton.style.backgroundColor = '#fffffe';
         unzoomButton.style.outline = '0';
+        unzoomButton.setAttribute('title', 'Unzoom');
 
         var innerUnzoomButton = document.createElement('div');
 
@@ -230,6 +234,7 @@ var SigmaView = widgets.DOMWidgetView.extend({
         zoomButton.style.textAlign = 'center';
         zoomButton.style.backgroundColor = '#fffffe';
         zoomButton.style.outline = '0';
+        zoomButton.setAttribute('title', 'Zoom');
 
         var innerZoomButton = document.createElement('div');
 
@@ -256,6 +261,7 @@ var SigmaView = widgets.DOMWidgetView.extend({
         rescaleButton.style.textAlign = 'center';
         rescaleButton.style.backgroundColor = '#fffffe';
         rescaleButton.style.outline = '0';
+        rescaleButton.setAttribute('title', 'Reset camera');
 
         var innerRescaleButton = document.createElement('div');
 
