@@ -16,6 +16,8 @@ If you have JupyterLab, you will also need to install the JupyterLab extension:
     $ jupyter labextension install @jupyter-widgets/jupyterlab-manager
     $ jupyter labextension install ipysigma
 
+![ipysigma](./img/ipysigma.gif)
+
 Usage
 -----
 
