@@ -1,5 +1,6 @@
 from ipywidgets import DOMWidget, register
 from traitlets import Bool, Dict, Int, Unicode
+from networkx import read_gexf
 
 @register
 class Sigma(DOMWidget):
@@ -32,3 +33,9 @@ class Sigma(DOMWidget):
 
         self.height = height
         self.start_layout = start_layout
+
+    @staticmethod
+    def from_gexf(handle, *args, **kwargs):
+        g = read_gexf(handle)
+
+        return Sigma(g, *args, **kwargs)
