@@ -1,5 +1,7 @@
 - To release a new version of ipysigma on PyPI:
 
+Don't forget to update package.json version and also the model/view versions in the python widget.
+
 Update _version.py (set release version, remove 'dev')
 git add the _version.py file and git commit
 `python setup.py sdist upload`
