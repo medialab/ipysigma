@@ -26,6 +26,8 @@ var RESCALE_ICON = '⊙';
 var ZOOM_ICON = '⊕';
 var UNZOOM_ICON = '⊖';
 
+var MUTED_COLOR = '#FBFBFB';
+
 var NUMBER_FORMAT = format(',');
 
 function toRGBString(element) {
@@ -75,6 +77,8 @@ function buildGraph(data) {
         var key = node[0];
         var attrs = node[1];
 
+        attrs.z = 1;
+
         if (!attrs.viz)
             attrs.viz = {};
 
@@ -86,8 +90,10 @@ function buildGraph(data) {
         if (!attrs.size)
             attrs.size = _.get(attrs, 'viz.size', 2);
 
-        if (!attrs.color)
+        if (!attrs.color) {
             attrs.color = 'color' in attrs.viz ? toRGBString(attrs.viz.color) : '#333';
+            attrs.originalColor = attrs.color;
+        }
 
         if (!attrs.label)
             attrs.label = key;
@@ -100,11 +106,15 @@ function buildGraph(data) {
         var target = edge[1];
         var attrs = edge[2];
 
+        attrs.z = 1;
+
         if (!attrs.viz)
             attrs.viz = {};
 
-        if (!attrs.color)
+        if (!attrs.color) {
             attrs.color = '#CCC';
+            attrs.originalColor = attrs.color;
+        }
 
         if (graph.hasEdge(source, target))
             graph.upgradeToMulti();
@@ -290,9 +300,80 @@ var SigmaView = widgets.DOMWidgetView.extend({
     },
 
     renderSigma: function() {
-        this.renderer = new WebGLRenderer(this.graph, this.container);
+        var g = this.graph;
+
+        this.renderer = new WebGLRenderer(g, this.container, {
+            zIndex: true
+        });
         this.camera = this.renderer.getCamera();
         this.layout = new FA2Layout(this.graph, {settings: getFA2Settings(this.graph)});
+
+        var highlightedNodes = new Set(),
+            highlightedEdges = new Set();
+
+        function highlightNode(h) {
+            highlightedNodes.clear();
+            highlightedEdges.clear();
+            highlightedNodes.add(h);
+
+            g.forEachNeighbor(h, function(neighbor) {
+                highlightedNodes.add(neighbor);
+            });
+
+            g.forEachEdge(h, function(edge) {
+                highlightedEdges.add(edge);
+            });
+
+            g.forEachNode(function(node, attrs) {
+                if (highlightedNodes.has(node)) {
+                    g.setNodeAttribute(node, 'color', attrs.originalColor);
+                    g.setNodeAttribute(node, 'z', 1);
+                }
+                else {
+                    g.setNodeAttribute(node, 'color', MUTED_COLOR);
+                    g.setNodeAttribute(node, 'z', 0);
+                }
+            });
+
+            g.forEachEdge(function(edge, attrs) {
+                if (highlightedEdges.has(edge)) {
+                    g.setEdgeAttribute(edge, 'color', attrs.originalColor);
+                    g.setEdgeAttribute(edge, 'z', 1);
+                }
+                else {
+                    g.setEdgeAttribute(edge, 'color', MUTED_COLOR);
+                    g.setEdgeAttribute(edge, 'z', 0);
+                }
+            });
+        }
+
+        function unhighlightNode() {
+            if (!highlightedNodes.size)
+                return;
+
+            highlightedNodes.clear();
+            highlightedEdges.clear();
+
+            g.forEachNode(function(node, attrs) {
+                g.setNodeAttribute(node, 'color', attrs.originalColor);
+                g.setNodeAttribute(node, 'z', 1);
+            });
+
+            g.forEachEdge(function(edge, attrs) {
+                g.setEdgeAttribute(edge, 'color', attrs.originalColor);
+                g.setEdgeAttribute(edge, 'z', 1);
+            });
+        }
+
+        this.renderer.on('clickNode', function(data) {
+            var node = data.node;
+
+            highlightNode(node);
+        });
+
+        this.renderer.on('clickStage', function() {
+            unhighlightNode();
+        });
 
         if (this.model.get('start_layout'))
             this.layoutButton.click();
