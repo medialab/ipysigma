@@ -136,7 +136,7 @@ setup_args = {
             'ipysigma/static/index.js',
             'ipysigma/static/index.js.map',
         ],),
-        ('etc/jupyter/nbconfig/notebook.d/' ,['ipysigma.json'])
+        ('etc/jupyter/nbconfig/notebook.d' ,['ipysigma.json'])
     ],
     'install_requires': [
         'ipywidgets>=7.0.0',
