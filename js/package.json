@@ -38,5 +38,6 @@
   },
   "jupyterlab": {
     "extension": "lib/labplugin"
-  }
+  },
+  "license": "MIT"
 }
