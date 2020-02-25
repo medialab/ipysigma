@@ -171,7 +171,9 @@ setup_args = {
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'License :: OSI Approved :: MIT License'
     ],
+    'license': 'License :: OSI Approved :: MIT License'
 }
 
 setup(**setup_args)
