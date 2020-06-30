@@ -12,8 +12,8 @@ class Sigma(DOMWidget):
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _view_module = Unicode('ipysigma').tag(sync=True)
     _model_module = Unicode('ipysigma').tag(sync=True)
-    _view_module_version = Unicode('^0.6.0').tag(sync=True)
-    _model_module_version = Unicode('^0.6.0').tag(sync=True)
+    _view_module_version = Unicode('^0.6.1').tag(sync=True)
+    _model_module_version = Unicode('^0.6.1').tag(sync=True)
 
     data = Dict({'nodes': [], 'edges': [], 'directed': False}).tag(sync=True)
     height = Int(500).tag(sync=True)
