@@ -44,3 +44,7 @@
 .ipysigma-widget .ipysigma-layout-button {
   top: 194px;
 }
+
+.ipysigma-widget .ipysigma-snapshot-button {
+  bottom: 10px;
+}

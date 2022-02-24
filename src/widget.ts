@@ -15,6 +15,7 @@ import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
+import saveAsPNG from './saveAsPNG';
 
 // Import the CSS
 import '../css/widget.css';
@@ -40,6 +41,7 @@ export class SigmaModel extends DOMWidgetModel {
       data: { nodes: [], edges: [] },
       height: 500,
       start_layout: false,
+      snapshot: null,
     };
   }
 
@@ -168,6 +170,7 @@ export class SigmaView extends DOMWidgetView {
   unzoomButton: HTMLElement;
   rescaleButton: HTMLElement;
   layoutButton: HTMLElement;
+  snapshotButton: HTMLElement;
 
   render() {
     super.render();
@@ -219,11 +222,20 @@ export class SigmaView extends DOMWidgetView {
 
     this.el.appendChild(this.layoutButton);
 
+    // Snapshot controls
+    this.snapshotButton = createElement('div', {
+      className: 'ipysigma-button ipysigma-snapshot-button',
+      innerHTML: 'snapshot',
+    });
+
+    this.el.appendChild(this.snapshotButton);
+
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
       this.renderer = new Sigma(graph, container, selectSigmaSettings(graph));
       this.bindCameraHandlers();
       this.bindLayoutHandlers();
+      this.bindSnapshotHandlers();
     });
   }
 
@@ -266,6 +278,13 @@ export class SigmaView extends DOMWidgetView {
       } else {
         startLayout();
       }
+    };
+  }
+
+  bindSnapshotHandlers() {
+    this.snapshotButton.onclick = () => {
+      this.model.set('snapshot', saveAsPNG(this.renderer));
+      this.touch();
     };
   }
 

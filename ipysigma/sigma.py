@@ -39,6 +39,7 @@ class Sigma(DOMWidget):
     data = Dict({'nodes': [], 'edges': []}).tag(sync=True)
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
+    snapshot = Unicode(allow_none=True).tag(sync=True)
 
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
@@ -75,6 +76,7 @@ class Sigma(DOMWidget):
 
         self.height = height
         self.start_layout = start_layout
+        self.snapshot = None
 
     @staticmethod
     def from_gexf(path_or_file, *args, **kwargs):
