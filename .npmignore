@@ -5,3 +5,4 @@ tests/
 # Ignore any build output from python:
 dist/*.tar.gz
 dist/*.wheel
+dist/*.whl

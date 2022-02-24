@@ -28,8 +28,8 @@ release:
 	npm publish .
 	@echo Publishing on pypi...
 	python -m build .
-	twine check dist/*
-	twine upload dist/*
+	twine check dist/ipysigma-*
+	twine upload dist/ipysigma-*
 	@echo
 
 watch:
