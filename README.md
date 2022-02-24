@@ -2,9 +2,16 @@
 
 A custom Jupyter widget library to display graphs using sigma.js.
 
-## Table of contents
+## Summary
 
-...
+- [Installation](#installation)
+- [Usage](#usage)
+- [Development Installation](#development-installation)
+  - [How to see your changes](#how-to-see-your-changes)
+    - [Typescript:](#typescript)
+    - [Python:](#python)
+  - [How to bump version](#how-to-bump-version)
+  - [How to release](#how-to-release)
 
 ## Installation
 
@@ -27,7 +34,25 @@ jupyter nbextension enable --py --system ipysigma
 
 ## Usage
 
-TODO...
+```python
+import networkx as nx
+from ipysigma import Sigma
+
+# Creating a dummy graph to serve as example
+g = nx.karate_club_graph()
+
+# Displaying the graph
+Sigma(g)
+
+# Tweaking height of widget
+Sigma(g, height=300)
+
+# Starting layout automatically
+Sigma(g, start_layout=True)
+
+# Displaying a gexf file
+Sigma.from_gexf('./path/to/file.gexf')
+```
 
 ## Development Installation
 
