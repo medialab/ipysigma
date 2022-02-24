@@ -1,4 +1,46 @@
 .ipysigma-widget {
-  margin: 0;
+  margin: 0 10px;
   padding: 0;
+  border: 1px solid #e0e0e0;
+}
+
+.ipysigma-widget .ipysigma-graph-description {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  padding: 5px 10px;
+  font-size: 0.8em;
+  font-style: italic;
+  z-index: 10;
+}
+
+.ipysigma-widget .ipysigma-button {
+  cursor: pointer;
+  position: absolute;
+  left: 10px;
+  text-align: center;
+  padding: 5px;
+  font-size: 0.8em;
+  z-index: 10;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  user-select: none;
+}
+
+.ipysigma-widget .ipysigma-zoom-button {
+  top: 80px;
+}
+
+.ipysigma-widget .ipysigma-unzoom-button {
+  top: 114px;
+}
+
+.ipysigma-widget .ipysigma-rescale-button {
+  top: 148px;
+}
+
+.ipysigma-widget .ipysigma-layout-button {
+  top: 194px;
 }

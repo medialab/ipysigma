@@ -50,8 +50,10 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
+    "comma-number": "^2.1.0",
     "graphology": "^0.24.1",
     "graphology-layout-forceatlas2": "^0.8.2",
+    "seedrandom": "^3.0.5",
     "sigma": "^2.2.0"
   },
   "devDependencies": {
@@ -60,12 +62,15 @@
     "@jupyterlab/builder": "^3.0.0",
     "@phosphor/application": "^1.6.0",
     "@phosphor/widgets": "^1.6.0",
+    "@types/comma-number": "^2.1.0",
     "@types/jest": "^26.0.0",
+    "@types/seedrandom": "^3.0.2",
     "@types/webpack-env": "^1.13.6",
     "@typescript-eslint/eslint-plugin": "^3.6.0",
     "@typescript-eslint/parser": "^3.6.0",
     "acorn": "^7.2.0",
     "css-loader": "^3.2.0",
+    "csstype": "^3.0.10",
     "eslint": "^7.4.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",

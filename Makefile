@@ -12,6 +12,8 @@ deps:
 	pip3 install -e ".[test, examples]"
 	npm i -g yarn
 	jupyter labextension develop --overwrite .
+	jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
+	jupyter nbextension enable --sys-prefix --py ipysigma
 	yarn run build
 
 unit:

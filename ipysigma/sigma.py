@@ -18,8 +18,6 @@ DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 
 
 class Sigma(DOMWidget):
-    """TODO: Add docstring here
-    """
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
@@ -34,6 +32,9 @@ class Sigma(DOMWidget):
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
+        is_directed = isinstance(graph, DIRECTED_GRAPHS)
+
+        # Serializing graph as per graphology's JSON format
         nodes = []
 
         for node, attr in graph.nodes(data=True):
@@ -42,14 +43,29 @@ class Sigma(DOMWidget):
                 'attributes': attr
             })
 
+        edges = []
+
+        for source, target, attr in graph.edges(data=True):
+            edges.append({
+                'source': source,
+                'target': target,
+                'attributes': attr,
+                'undirected': not is_directed
+            })
+
         self.data = {
             'nodes': nodes,
-            'edges': [],
+            'edges': edges,
             'settings': {
-                'type': 'directed' if isinstance(graph, DIRECTED_GRAPHS) else 'undirected',
+                'type': 'directed' if is_directed else 'undirected',
                 'multi': isinstance(graph, MULTI_GRAPHS),
             }
         }
 
         self.height = height
         self.start_layout = start_layout
+
+    @staticmethod
+    def from_gexf(path_or_file, *args, **kwargs):
+        g = nx.read_gexf(path_or_file)
+        return Sigma(g, *args, **kwargs)
