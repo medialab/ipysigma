@@ -3,11 +3,6 @@
 
 # Copyright (c) Yomguithereal.
 # Distributed under the terms of the Modified BSD License.
-
-"""
-TODO: Add module docstring
-"""
-
 from ipywidgets import DOMWidget
 from traitlets import Unicode, Dict, Int, Bool
 import networkx as nx
