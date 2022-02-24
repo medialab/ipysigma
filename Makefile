@@ -7,10 +7,12 @@ clean:
 	rm -rf dist
 
 deps:
-	pip3 install build twine
+	pip3 install build twine jupyter_packaging
 	pip3 install jupyterlab
 	pip3 install -e ".[test, examples]"
 	npm i -g yarn
+	jupyter labextension develop --overwrite .
+	yarn run build
 
 unit:
 	@echo Running python tests...
@@ -27,3 +29,7 @@ release:
 	twine check dist/*
 	twine upload dist/*
 	@echo
+
+watch:
+	@echo Watching js files...
+	yarn run watch

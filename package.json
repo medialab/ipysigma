@@ -49,7 +49,10 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0"
+    "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
+    "graphology": "^0.24.1",
+    "graphology-layout-forceatlas2": "^0.8.2",
+    "sigma": "^2.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

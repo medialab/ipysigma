@@ -13,14 +13,14 @@ describe('Sigma', () => {
     it('should be createable', () => {
       const model = createTestModel(SigmaModel);
       expect(model).toBeInstanceOf(SigmaModel);
-      expect(model.get('value')).toEqual('Hello World');
+      expect(model.get('height')).toEqual(500);
     });
 
-    it('should be createable with a value', () => {
-      const state = { value: 'Foo Bar!' };
+    it('should be createable with a different height', () => {
+      const state = { height: 300 };
       const model = createTestModel(SigmaModel, state);
       expect(model).toBeInstanceOf(SigmaModel);
-      expect(model.get('value')).toEqual('Foo Bar!');
+      expect(model.get('height')).toEqual(300);
     });
   });
 });

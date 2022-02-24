@@ -7,6 +7,10 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
+import Graph from 'graphology';
+import { SerializedGraph } from 'graphology-types';
+import Sigma from 'sigma';
+
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
 // Import the CSS
@@ -22,7 +26,9 @@ export class SigmaModel extends DOMWidgetModel {
       _view_name: SigmaModel.view_name,
       _view_module: SigmaModel.view_module,
       _view_module_version: SigmaModel.view_module_version,
-      value: 'Hello World',
+      data: { nodes: [], edges: [] },
+      height: 500,
+      start_layout: false,
     };
   }
 
@@ -39,15 +45,56 @@ export class SigmaModel extends DOMWidgetModel {
   static view_module_version = MODULE_VERSION;
 }
 
-export class SigmaView extends DOMWidgetView {
-  render() {
-    this.el.classList.add('custom-widget');
+function isValidNumber(value: any): boolean {
+  return typeof value === 'number' && !isNaN(value);
+}
 
-    this.value_changed();
-    this.model.on('change:value', this.value_changed, this);
+function buildGraph(data: SerializedGraph): Graph {
+  const graph = Graph.from(data);
+
+  graph.updateEachNodeAttributes((_, attr) => {
+    // Random position for nodes without positions
+    if (!isValidNumber(attr.x)) attr.x = Math.random();
+    if (!isValidNumber(attr.y)) attr.y = Math.random();
+
+    return attr;
+  });
+
+  return graph;
+}
+
+function adjustDimensions(el: HTMLElement, height: number): void {
+  el.style.height = height + 'px';
+  el.style.width = '100%';
+}
+
+export class SigmaView extends DOMWidgetView {
+  renderer: Sigma;
+
+  render() {
+    super.render();
+
+    this.el.classList.add('ipysigma-widget');
+
+    var height = this.model.get('height');
+    var data = this.model.get('data');
+
+    var graph = buildGraph(data);
+
+    adjustDimensions(this.el, height);
+
+    var container = document.createElement('div');
+    this.el.appendChild(container);
+    adjustDimensions(container, height);
+
+    this.displayed.then(() => {
+      this.renderer = new Sigma(graph, container);
+    });
   }
 
-  value_changed() {
-    this.el.textContent = this.model.get('value');
+  remove() {
+    // Cleanup to avoid leaks and free GPU slots
+    if (this.renderer) this.renderer.kill();
+    super.remove();
   }
 }

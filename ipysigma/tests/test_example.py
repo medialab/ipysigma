@@ -5,10 +5,11 @@
 # Distributed under the terms of the Modified BSD License.
 
 import pytest
+import networkx as nx
 
 from ..sigma import Sigma
 
 
 def test_example_creation_blank():
-    w = Sigma()
-    assert w.value == 'Hello World'
+    w = Sigma(nx.Graph())
+    assert w.height == 500

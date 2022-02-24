@@ -93,6 +93,7 @@ setup_args = dict(
     python_requires=">=3.6",
     install_requires = [
         'ipywidgets>=7.0.0',
+        'networkx>=2'
     ],
     extras_require = {
         'test': [
