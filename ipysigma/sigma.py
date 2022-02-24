@@ -17,6 +17,22 @@ MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 
 
+def extract_rgba_from_viz(viz_color):
+    if 'a' in viz_color:
+        return 'rgba(%s, %s, %s, %s)' % (
+            viz_color['r'],
+            viz_color['g'],
+            viz_color['b'],
+            viz_color['a'],
+        )
+
+    return 'rgba(%s, %s, %s)' % (
+            viz_color['r'],
+            viz_color['g'],
+            viz_color['b'],
+        )
+
+
 class Sigma(DOMWidget):
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
@@ -56,7 +72,7 @@ class Sigma(DOMWidget):
         self.data = {
             'nodes': nodes,
             'edges': edges,
-            'settings': {
+            'options': {
                 'type': 'directed' if is_directed else 'undirected',
                 'multi': isinstance(graph, MULTI_GRAPHS),
             }
@@ -68,4 +84,45 @@ class Sigma(DOMWidget):
     @staticmethod
     def from_gexf(path_or_file, *args, **kwargs):
         g = nx.read_gexf(path_or_file)
+
+        # Mangling nodes
+        for _, attr in g.nodes(data=True):
+            if 'viz' not in attr:
+                continue
+
+            viz = attr['viz']
+
+            # Size
+            if 'size' in viz:
+                attr['size'] = viz['size']
+
+            # Position
+            if 'position' in viz:
+                pos = viz['position']
+
+                if 'x' in pos:
+                    attr['x'] = pos['x']
+
+                if 'y' in pos:
+                    attr['y'] = pos['y']
+
+            # Color
+            if 'color' in viz:
+                attr['color'] = extract_rgba_from_viz(viz['color'])
+
+        # Mangling edges
+        for _, _, attr in g.edges(data=True):
+            if 'viz' not in attr:
+                continue
+
+            viz = attr['viz']
+
+            # Thickness
+            if 'thickness' in viz:
+                attr['size'] = viz['thickness']
+
+            # Color
+            if 'color' in viz:
+                attr['color'] = extract_rgba_from_viz(viz['color'])
+
         return Sigma(g, *args, **kwargs)

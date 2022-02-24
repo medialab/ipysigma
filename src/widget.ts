@@ -9,6 +9,7 @@ import { SerializedGraph } from 'graphology-types';
 import LayoutSupervisor from 'graphology-layout-forceatlas2/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import Sigma from 'sigma';
+import { Settings as SigmaSettings } from 'sigma/settings';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
@@ -65,15 +66,28 @@ function isValidNumber(value: any): boolean {
 function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
   const graph = Graph.from(data);
 
-  graph.updateEachNodeAttributes((_, attr) => {
+  graph.updateEachNodeAttributes((key, attr) => {
     // Random position for nodes without positions
     if (!isValidNumber(attr.x)) attr.x = rng();
     if (!isValidNumber(attr.y)) attr.y = rng();
+
+    // If we don't have a label we keep the key instead
+    if (!attr.label) attr.label = key;
 
     return attr;
   });
 
   return graph;
+}
+
+function selectSigmaSettings(graph: Graph): Partial<SigmaSettings> {
+  const settings: Partial<SigmaSettings> = {};
+
+  if (graph.type !== 'undirected') {
+    settings.defaultEdgeType = 'arrow';
+  }
+
+  return settings;
 }
 
 function adjustDimensions(el: HTMLElement, height: number): void {
@@ -207,7 +221,7 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      this.renderer = new Sigma(graph, container);
+      this.renderer = new Sigma(graph, container, selectSigmaSettings(graph));
       this.bindCameraHandlers();
       this.bindLayoutHandlers();
     });
