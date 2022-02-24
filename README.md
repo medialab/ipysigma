@@ -8,8 +8,8 @@ A custom Jupyter widget library to display graphs using sigma.js.
 - [Usage](#usage)
 - [Development Installation](#development-installation)
   - [How to see your changes](#how-to-see-your-changes)
-    - [Typescript:](#typescript)
-    - [Python:](#python)
+    - [Typescript](#typescript)
+    - [Python](#python)
   - [How to bump version](#how-to-bump-version)
   - [How to release](#how-to-release)
 
@@ -98,7 +98,7 @@ Alternatively you can also run `make deps` that will handle all of the above for
 
 ### How to see your changes
 
-#### Typescript:
+#### Typescript
 
 If you use JupyterLab to develop then you can watch the source directory and run JupyterLab at the same time in different
 terminals to watch for changes in the extension's source and automatically rebuild the widget.
@@ -112,7 +112,7 @@ jupyter lab
 
 After a change wait for the build to finish and then refresh your browser and the changes should take effect.
 
-#### Python:
+#### Python
 
 If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
 
