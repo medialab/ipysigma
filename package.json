@@ -3,6 +3,8 @@
   "version": "0.7.0",
   "description": "A custom Jupyter widget library to display graphs using sigma.js.",
   "keywords": [
+    "sigma",
+    "graph",
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension",
@@ -17,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/Yomguithereal/ipysigma/issues"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "author": {
     "name": "Yomguithereal",
     "email": "guillaume.plique@sciencespo.fr"

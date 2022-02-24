@@ -74,9 +74,9 @@ setup_args = dict(
     author          = 'Guillaume Plique',
     author_email    = 'guillaume.plique@sciencespo.fr',
     url             = 'https://github.com/Yomguithereal/ipysigma',
-    license         = 'BSD',
+    license         = 'MIT',
     platforms       = "Linux, Mac OS X, Windows",
-    keywords        = ['Jupyter', 'Widgets', 'IPython'],
+    keywords        = ['Jupyter', 'Widgets', 'IPython', 'Sigma', 'graph'],
     classifiers     = [
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
