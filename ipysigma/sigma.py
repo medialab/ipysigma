@@ -1,17 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# Copyright (c) Yomguithereal.
-# Distributed under the terms of the Modified BSD License.
+# =============================================================================
+# Sigma Jupyter Widget
+# =============================================================================
+#
+#
 from ipywidgets import DOMWidget
 from traitlets import Unicode, Dict, Int, Bool
 import networkx as nx
 from ._frontend import module_name, module_version
 
+# =============================================================================
+# Constants
+# =============================================================================
 MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 
 
+# =============================================================================
+# Helpers
+# =============================================================================
 def pretty_print_int(v):
     return '{:,}'.format(int(v))
 
@@ -32,6 +40,9 @@ def extract_rgba_from_viz(viz_color):
         )
 
 
+# =============================================================================
+# Widget definition
+# =============================================================================
 class Sigma(DOMWidget):
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
