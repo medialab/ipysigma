@@ -51,6 +51,7 @@ class Sigma(DOMWidget):
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
 
+    singleton_lock = Bool(False).tag(sync=True)
     data = Dict({'nodes': [], 'edges': []}).tag(sync=True)
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
@@ -58,6 +59,9 @@ class Sigma(DOMWidget):
 
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
+
+        if height < 230:
+            raise TypeError('Sigma widget cannot have a height < 230 px')
 
         self.graph = graph
 
@@ -103,6 +107,9 @@ class Sigma(DOMWidget):
         )
 
     def render_snasphot(self):
+        if not self.singleton_lock:
+            raise TypeError('Widget needs to be displayed on screen to render a snapshot. Maybe you reinstantiated it and forgot to display the new instance?')
+
         self.snapshot = None
 
         html = HTML('<i>rendering snapshot...</i>')

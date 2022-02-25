@@ -161,6 +161,8 @@ function createGraphDescription(graph: Graph): HTMLElement {
  * View declaration.
  */
 export class SigmaView extends DOMWidgetView {
+  singleton: boolean = true;
+
   renderer: Sigma;
   rng: RNGFunction;
   layout: LayoutSupervisor;
@@ -172,8 +174,22 @@ export class SigmaView extends DOMWidgetView {
   layoutButton: HTMLElement;
   snapshotButton: HTMLElement;
 
+  renderSingletonError() {
+    this.el.innerHTML =
+      '<i>You cannot render two independent views of the same Sigma widget, sorry...</i>';
+  }
+
   render() {
     super.render();
+
+    if (this.model.get('singleton_lock')) {
+      this.renderSingletonError();
+      this.singleton = false;
+      return;
+    }
+
+    this.model.set('singleton_lock', true);
+    this.touch();
 
     this.rng = seedrandom('ipysigma');
     this.el.classList.add('ipysigma-widget');
@@ -290,6 +306,12 @@ export class SigmaView extends DOMWidgetView {
   remove() {
     // Cleanup to avoid leaks and free GPU slots
     if (this.renderer) this.renderer.kill();
+
+    if (this.singleton) {
+      this.model.set('singleton_lock', false);
+      this.touch();
+    }
+
     super.remove();
   }
 }
