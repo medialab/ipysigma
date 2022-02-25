@@ -21,7 +21,6 @@
   position: absolute;
   left: 10px;
   text-align: center;
-  padding: 5px;
   font-size: 0.8em;
   z-index: 10;
   background-color: white;
@@ -29,18 +28,24 @@
   user-select: none;
 }
 
+.ipysigma-widget .ipysigma-svg-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 24px;
+}
+
 .ipysigma-widget .ipysigma-zoom-button {
   top: 80px;
 }
 
 .ipysigma-widget .ipysigma-unzoom-button {
-  top: 114px;
+  top: 113px;
 }
 
-.ipysigma-widget .ipysigma-rescale-button {
-  top: 148px;
+.ipysigma-widget .ipysigma-reset-zoom-button {
+  top: 146px;
 }
 
 .ipysigma-widget .ipysigma-layout-button {
-  top: 194px;
+  top: 189px;
 }

@@ -17,7 +17,8 @@ import comma from 'comma-number';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import saveAsPNG from './saveAsPNG';
 
-// Import the CSS
+import { zoomIcon, unzoomIcon, resetIcon, playIcon, pauseIcon } from './icons';
+
 import '../css/widget.css';
 
 /**
@@ -170,7 +171,7 @@ export class SigmaView extends DOMWidgetView {
 
   zoomButton: HTMLElement;
   unzoomButton: HTMLElement;
-  rescaleButton: HTMLElement;
+  resetZoomButton: HTMLElement;
   layoutButton: HTMLElement;
   snapshotButton: HTMLElement;
 
@@ -214,26 +215,30 @@ export class SigmaView extends DOMWidgetView {
 
     // Camera controls
     this.zoomButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-zoom-button',
-      innerHTML: 'zoom',
+      className: 'ipysigma-button ipysigma-zoom-button ipysigma-svg-icon',
+      innerHTML: zoomIcon,
+      title: 'zoom',
     });
     this.unzoomButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-unzoom-button',
-      innerHTML: 'unzoom',
+      className: 'ipysigma-button ipysigma-unzoom-button ipysigma-svg-icon',
+      innerHTML: unzoomIcon,
+      title: 'unzoom',
     });
-    this.rescaleButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-rescale-button',
-      innerHTML: 'rescale',
+    this.resetZoomButton = createElement('div', {
+      className: 'ipysigma-button ipysigma-reset-zoom-button ipysigma-svg-icon',
+      innerHTML: resetIcon,
+      title: 'reset zoom',
     });
 
     this.el.appendChild(this.zoomButton);
     this.el.appendChild(this.unzoomButton);
-    this.el.appendChild(this.rescaleButton);
+    this.el.appendChild(this.resetZoomButton);
 
     // Layout controls
     this.layoutButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-layout-button',
-      innerHTML: 'start layout',
+      className: 'ipysigma-button ipysigma-layout-button ipysigma-svg-icon',
+      innerHTML: playIcon,
+      title: 'start layout',
     });
 
     this.el.appendChild(this.layoutButton);
@@ -270,7 +275,7 @@ export class SigmaView extends DOMWidgetView {
       this.renderer.getCamera().animatedUnzoom();
     };
 
-    this.rescaleButton.onclick = () => {
+    this.resetZoomButton.onclick = () => {
       this.renderer.getCamera().animatedReset();
     };
   }
@@ -281,14 +286,16 @@ export class SigmaView extends DOMWidgetView {
         this.layoutSpinner[1]();
         this.layoutSpinner = null;
       }
-      this.layoutButton.innerHTML = 'start layout';
+      this.layoutButton.innerHTML = playIcon;
+      this.layoutButton.setAttribute('title', 'start layout');
       this.layout.stop();
     };
 
     const startLayout = () => {
       this.layoutSpinner = createSpinner();
-      this.layoutButton.innerHTML = 'stop layout - ';
+      this.layoutButton.innerHTML = pauseIcon;
       this.layoutButton.appendChild(this.layoutSpinner[0]);
+      this.layoutButton.setAttribute('title', 'stop layout');
       this.layout.start();
     };
 
