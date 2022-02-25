@@ -5,7 +5,7 @@
 # =============================================================================
 #
 #
-from ipywidgets import DOMWidget
+from ipywidgets import DOMWidget, HTML
 from traitlets import Unicode, Dict, Int, Bool
 import networkx as nx
 from ._frontend import module_name, module_version
@@ -101,6 +101,20 @@ class Sigma(DOMWidget):
             pretty_print_int(self.graph.order()),
             pretty_print_int(self.graph.size())
         )
+
+    def render_snasphot(self):
+        self.snapshot = None
+
+        html = HTML('<i>rendering snapshot...</i>')
+
+        def update(change):
+            html.value = '<img src="{}" style="max-width: 100%; height: auto; border: 1px solid #e0e0e0;">'.format(change.new)
+            self.unobserve(update, 'snapshot')
+
+        self.observe(update, 'snapshot')
+        self.send({'msg': 'render_snapshot'})
+
+        return html
 
     @staticmethod
     def from_gexf(path_or_file, *args, **kwargs):

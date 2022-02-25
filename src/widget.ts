@@ -164,7 +164,7 @@ export class SigmaView extends DOMWidgetView {
   renderer: Sigma;
   rng: RNGFunction;
   layout: LayoutSupervisor;
-  spinner: [HTMLElement, () => void] | null = null;
+  layoutSpinner: [HTMLElement, () => void] | null = null;
 
   zoomButton: HTMLElement;
   unzoomButton: HTMLElement;
@@ -222,20 +222,26 @@ export class SigmaView extends DOMWidgetView {
 
     this.el.appendChild(this.layoutButton);
 
-    // Snapshot controls
-    this.snapshotButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-snapshot-button',
-      innerHTML: 'snapshot',
-    });
-
-    this.el.appendChild(this.snapshotButton);
-
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
       this.renderer = new Sigma(graph, container, selectSigmaSettings(graph));
+
+      this.bindMessageHandlers();
       this.bindCameraHandlers();
       this.bindLayoutHandlers();
-      this.bindSnapshotHandlers();
+    });
+  }
+
+  renderSnapshot() {
+    this.model.set('snapshot', saveAsPNG(this.renderer));
+    this.touch();
+  }
+
+  bindMessageHandlers() {
+    this.model.on('msg:custom', (content) => {
+      if (content.msg === 'render_snapshot') {
+        this.renderSnapshot();
+      }
     });
   }
 
@@ -255,18 +261,18 @@ export class SigmaView extends DOMWidgetView {
 
   bindLayoutHandlers() {
     const stopLayout = () => {
-      if (this.spinner) {
-        this.spinner[1]();
-        this.spinner = null;
+      if (this.layoutSpinner) {
+        this.layoutSpinner[1]();
+        this.layoutSpinner = null;
       }
       this.layoutButton.innerHTML = 'start layout';
       this.layout.stop();
     };
 
     const startLayout = () => {
-      this.spinner = createSpinner();
+      this.layoutSpinner = createSpinner();
       this.layoutButton.innerHTML = 'stop layout - ';
-      this.layoutButton.appendChild(this.spinner[0]);
+      this.layoutButton.appendChild(this.layoutSpinner[0]);
       this.layout.start();
     };
 
@@ -278,13 +284,6 @@ export class SigmaView extends DOMWidgetView {
       } else {
         startLayout();
       }
-    };
-  }
-
-  bindSnapshotHandlers() {
-    this.snapshotButton.onclick = () => {
-      this.model.set('snapshot', saveAsPNG(this.renderer));
-      this.touch();
     };
   }
 

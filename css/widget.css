@@ -1,5 +1,5 @@
 .ipysigma-widget {
-  margin: 0 10px;
+  margin: 0;
   padding: 0;
   border: 1px solid #e0e0e0;
 }
@@ -43,8 +43,4 @@
 
 .ipysigma-widget .ipysigma-layout-button {
   top: 194px;
-}
-
-.ipysigma-widget .ipysigma-snapshot-button {
-  bottom: 10px;
 }
