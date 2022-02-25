@@ -12,6 +12,10 @@ MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 
 
+def pretty_print_int(v):
+    return '{:,}'.format(int(v))
+
+
 def extract_rgba_from_viz(viz_color):
     if 'a' in viz_color:
         return 'rgba(%s, %s, %s, %s)' % (
@@ -43,6 +47,8 @@ class Sigma(DOMWidget):
 
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
+
+        self.graph = graph
 
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
 
@@ -77,6 +83,13 @@ class Sigma(DOMWidget):
         self.height = height
         self.start_layout = start_layout
         self.snapshot = None
+
+    def __repr__(self):
+        return 'Sigma(nx.%s with %s nodes and %s edges)' % (
+            self.graph.__class__.__name__,
+            pretty_print_int(self.graph.order()),
+            pretty_print_int(self.graph.size())
+        )
 
     @staticmethod
     def from_gexf(path_or_file, *args, **kwargs):
