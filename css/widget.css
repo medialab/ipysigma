@@ -49,3 +49,8 @@
 .ipysigma-widget .ipysigma-layout-button {
   top: 189px;
 }
+
+.ipysigma-widget .ipysigma-reset-layout-button {
+  top: 189px;
+  left: 43px;
+}

@@ -17,7 +17,14 @@ import comma from 'comma-number';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import saveAsPNG from './saveAsPNG';
 
-import { zoomIcon, unzoomIcon, resetIcon, playIcon, pauseIcon } from './icons';
+import {
+  zoomIcon,
+  unzoomIcon,
+  resetZoomIcon,
+  playIcon,
+  pauseIcon,
+  resetLayoutIcon,
+} from './icons';
 
 import '../css/widget.css';
 
@@ -146,11 +153,13 @@ function createSpinner(): [HTMLElement, () => void] {
 }
 
 function createGraphDescription(graph: Graph): HTMLElement {
-  let innerHTML = graph.multi ? 'Multi ' : '';
-  innerHTML += graph.type === 'undirected' ? 'Undirected' : 'Directed';
-  innerHTML += ` Graph<br><b>${comma(graph.order)}</b> nodes<br><b>${comma(
-    graph.size
-  )}</b> edges`;
+  let graphTitle = `${graph.multi ? 'Multi ' : ''}${
+    graph.type === 'undirected' ? 'Undirected' : 'Directed'
+  } Graph`;
+
+  let innerHTML = `<u>${graphTitle}</u><br><b>${comma(
+    graph.order
+  )}</b> nodes<br><b>${comma(graph.size)}</b> edges`;
 
   return createElement('div', {
     className: 'ipysigma-graph-description',
@@ -173,7 +182,7 @@ export class SigmaView extends DOMWidgetView {
   unzoomButton: HTMLElement;
   resetZoomButton: HTMLElement;
   layoutButton: HTMLElement;
-  snapshotButton: HTMLElement;
+  resetLayoutButton: HTMLElement;
 
   renderSingletonError() {
     this.el.innerHTML =
@@ -226,7 +235,7 @@ export class SigmaView extends DOMWidgetView {
     });
     this.resetZoomButton = createElement('div', {
       className: 'ipysigma-button ipysigma-reset-zoom-button ipysigma-svg-icon',
-      innerHTML: resetIcon,
+      innerHTML: resetZoomIcon,
       title: 'reset zoom',
     });
 
@@ -240,8 +249,18 @@ export class SigmaView extends DOMWidgetView {
       innerHTML: playIcon,
       title: 'start layout',
     });
+    this.resetLayoutButton = createElement('div', {
+      className:
+        'ipysigma-button ipysigma-reset-layout-button ipysigma-svg-icon',
+      innerHTML: resetLayoutIcon,
+      title: 'reset layout',
+    });
 
     this.el.appendChild(this.layoutButton);
+    this.el.appendChild(this.resetLayoutButton);
+
+    // TODO: code button, show/hide function
+    this.resetLayoutButton.style.display = 'none';
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
