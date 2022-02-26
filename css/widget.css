@@ -5,19 +5,20 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.ipysigma-widget .ipysigma-left-panel {
+.ipysigma-widget #ipysigma-left-panel {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-.ipysigma-widget .ipysigma-right-panel {
+.ipysigma-widget #ipysigma-right-panel {
   position: absolute;
   top: 10px;
   right: 10px;
+  width: 200px;
 }
 
-.ipysigma-widget .ipysigma-graph-description {
+.ipysigma-widget #ipysigma-graph-description {
   background-color: white;
   border: 1px solid #e0e0e0;
   padding: 5px 10px;
@@ -42,19 +43,19 @@
   box-sizing: border-box;
 }
 
-.ipysigma-widget .ipysigma-zoom-button {
+.ipysigma-widget #ipysigma-zoom-button {
   margin-top: 15px;
 }
 
-.ipysigma-widget .ipysigma-unzoom-button {
+.ipysigma-widget #ipysigma-unzoom-button {
   margin-top: 5px;
 }
 
-.ipysigma-widget .ipysigma-reset-zoom-button {
+.ipysigma-widget #ipysigma-reset-zoom-button {
   margin-top: 5px;
 }
 
-.ipysigma-widget .ipysigma-layout-controls {
+.ipysigma-widget #ipysigma-layout-controls {
   width: 100%;
   margin-top: 15px;
   display: flex;
@@ -66,6 +67,6 @@
   line-height: 26px;
 }
 
-.ipysigma-widget .ipysigma-reset-layout-button {
+.ipysigma-widget #ipysigma-reset-layout-button {
   margin-top: 5px;
 }

@@ -24,16 +24,42 @@ import {
   resetZoomIcon,
   playIcon,
   pauseIcon,
-  resetLayoutIcon,
 } from './icons';
 
-// import 'choices.js/public/assets/styles/base.min.css';
+import 'choices.js/public/assets/styles/choices.min.css';
 import '../css/widget.css';
 
 /**
  * Types.
  */
 type RNGFunction = () => number;
+
+/**
+ * Template.
+ */
+const TEMPLATE = `
+<div id="ipysigma-container"></div>
+<div id="ipysigma-left-panel">
+  <div id="ipysigma-graph-description"></div>
+  <div id="ipysigma-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="zoom">
+    ${zoomIcon}
+  </div>
+  <div id="ipysigma-unzoom-button" class="ipysigma-button ipysigma-svg-icon" title="unzoom">
+    ${unzoomIcon}
+  </div>
+  <div id="ipysigma-reset-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="reset zoom">
+    ${resetZoomIcon}
+  </div>
+  <div id="ipysigma-layout-controls">
+    <div id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
+      ${playIcon}
+    </div>
+  </div>
+</div>
+<div id="ipysigma-right-panel">
+  <select id="ipysigma-search"></select>
+</div>
+`;
 
 /**
  * Model declaration.
@@ -157,19 +183,16 @@ function createSpinner(): [HTMLElement, () => void] {
   return [span, () => frame !== null && clearTimeout(frame)];
 }
 
-function createGraphDescription(graph: Graph): HTMLElement {
+function getGraphDescription(graph: Graph): string {
   let graphTitle = `${graph.multi ? 'Multi ' : ''}${
     graph.type === 'undirected' ? 'Undirected' : 'Directed'
   } Graph`;
 
-  let innerHTML = `<u>${graphTitle}</u><br><b>${comma(
+  let html = `<u>${graphTitle}</u><br><b>${comma(
     graph.order
   )}</b> nodes<br><b>${comma(graph.size)}</b> edges`;
 
-  return createElement('div', {
-    className: 'ipysigma-graph-description',
-    innerHTML,
-  });
+  return html;
 }
 
 /**
@@ -189,7 +212,6 @@ export class SigmaView extends DOMWidgetView {
   unzoomButton: HTMLElement;
   resetZoomButton: HTMLElement;
   layoutButton: HTMLElement;
-  resetLayoutButton: HTMLElement;
 
   choices: Choices;
 
@@ -201,6 +223,7 @@ export class SigmaView extends DOMWidgetView {
   render() {
     super.render();
 
+    // Lock management
     if (this.model.get('singleton_lock')) {
       this.renderSingletonError();
       this.singleton = false;
@@ -222,78 +245,47 @@ export class SigmaView extends DOMWidgetView {
       settings: forceAtlas2.inferSettings(graph),
     });
 
+    this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     adjustDimensions(this.el, height);
 
-    const container = document.createElement('div');
-    this.el.appendChild(container);
+    const container = this.el.querySelector(
+      '#ipysigma-container'
+    ) as HTMLElement;
     adjustDimensions(container, height);
 
-    // Panels
-    const leftPanel = createElement('div', {
-      className: 'ipysigma-left-panel',
-    });
-    const rightPanel = createElement('div', {
-      className: 'ipysigma-right-panel',
-    });
-    this.el.appendChild(leftPanel);
-    this.el.appendChild(rightPanel);
-
     // Description
-    leftPanel.appendChild(createGraphDescription(graph));
+    const description = this.el.querySelector(
+      '#ipysigma-graph-description'
+    ) as HTMLElement;
+    description.innerHTML = getGraphDescription(graph);
 
     // Camera controls
-    this.zoomButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-zoom-button ipysigma-svg-icon',
-      innerHTML: zoomIcon,
-      title: 'zoom',
-    });
-    this.unzoomButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-unzoom-button ipysigma-svg-icon',
-      innerHTML: unzoomIcon,
-      title: 'unzoom',
-    });
-    this.resetZoomButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-reset-zoom-button ipysigma-svg-icon',
-      innerHTML: resetZoomIcon,
-      title: 'reset zoom',
-    });
-
-    leftPanel.appendChild(this.zoomButton);
-    leftPanel.appendChild(this.unzoomButton);
-    leftPanel.appendChild(this.resetZoomButton);
+    this.zoomButton = this.el.querySelector(
+      '#ipysigma-zoom-button'
+    ) as HTMLElement;
+    this.unzoomButton = this.el.querySelector(
+      '#ipysigma-unzoom-button'
+    ) as HTMLElement;
+    this.resetZoomButton = this.el.querySelector(
+      '#ipysigma-reset-zoom-button'
+    ) as HTMLElement;
 
     // Layout controls
-    this.layoutControls = createElement('div', {
-      className: 'ipysigma-layout-controls',
-    });
-    leftPanel.appendChild(this.layoutControls);
-
-    this.layoutButton = createElement('div', {
-      className: 'ipysigma-button ipysigma-layout-button ipysigma-svg-icon',
-      innerHTML: playIcon,
-      title: 'start layout',
-    });
-    this.resetLayoutButton = createElement('div', {
-      className:
-        'ipysigma-button ipysigma-reset-layout-button ipysigma-svg-icon',
-      innerHTML: resetLayoutIcon,
-      title: 'reset layout',
-    });
-
-    this.layoutControls.appendChild(this.layoutButton);
-    this.layoutControls.appendChild(this.resetLayoutButton);
-
-    // TODO: code button, show/hide function
-    this.resetLayoutButton.style.display = 'none';
+    this.layoutControls = this.el.querySelector(
+      '#ipysigma-layout-controls'
+    ) as HTMLElement;
+    this.layoutButton = this.el.querySelector(
+      '#ipysigma-layout-button'
+    ) as HTMLElement;
 
     // Search
-    var searchContainer = createElement('select', {
-      className: 'ipysigma-search',
+    var searchContainer = this.el.querySelector(
+      '#ipysigma-search'
+    ) as HTMLElement;
+
+    this.choices = new Choices(searchContainer, {
+      items: [{ label: 'apple', value: 'Apple' }],
     });
-    rightPanel.appendChild(searchContainer);
-    // this.choices = new Choices(searchContainer, {
-    //   items: [{ label: 'apple', value: 'Apple' }],
-    // });
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
