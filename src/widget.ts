@@ -14,6 +14,7 @@ import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
 import Choices from 'choices.js';
+import screenfull from 'screenfull';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import saveAsPNG from './saveAsPNG';
@@ -24,6 +25,8 @@ import {
   resetZoomIcon,
   playIcon,
   pauseIcon,
+  fullscreenEnterIcon,
+  fullscreenExitIcon,
 } from './icons';
 
 import 'choices.js/public/assets/styles/choices.min.css';
@@ -35,29 +38,58 @@ import '../css/widget.css';
 type RNGFunction = () => number;
 
 /**
+ * Constants.
+ */
+const CAMERA_OFFSET = 0.65;
+
+/**
  * Template.
  */
 const TEMPLATE = `
 <div id="ipysigma-container"></div>
 <div id="ipysigma-left-panel">
   <div id="ipysigma-graph-description"></div>
-  <div id="ipysigma-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="zoom">
-    ${zoomIcon}
+  <div>
+    <button id="ipysigma-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="zoom">
+      ${zoomIcon}
+    </button>
+    <button id="ipysigma-unzoom-button" class="ipysigma-button ipysigma-svg-icon" title="unzoom">
+      ${unzoomIcon}
+    </button>
+    <button id="ipysigma-reset-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="reset zoom">
+      ${resetZoomIcon}
+    </button>
   </div>
-  <div id="ipysigma-unzoom-button" class="ipysigma-button ipysigma-svg-icon" title="unzoom">
-    ${unzoomIcon}
-  </div>
-  <div id="ipysigma-reset-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="reset zoom">
-    ${resetZoomIcon}
+  <div>
+    <button id="ipysigma-fullscreen-button" class="ipysigma-button ipysigma-svg-icon" title="enter fullscreen">
+      ${fullscreenEnterIcon}
+    </button>
   </div>
   <div id="ipysigma-layout-controls">
-    <div id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
+    <button id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
       ${playIcon}
-    </div>
+    </button>
   </div>
 </div>
 <div id="ipysigma-right-panel">
-  <select id="ipysigma-search"></select>
+  <select id="ipysigma-search">
+    <option value="">Search a node...</option>
+  </select>
+  <div id="ipysigma-information-display"></div>
+  <div id="ipysigma-download-controls">
+    <button id="ipysigma-download-png-button" class="ipysigma-button">
+      png
+    </button>
+    <button id="ipysigma-download-svg-button" class="ipysigma-button">
+      svg
+    </button>
+    <button id="ipysigma-download-gexf-button" class="ipysigma-button">
+      gexf
+    </button>
+    <button id="ipysigma-download-json-button" class="ipysigma-button">
+      json
+    </button>
+  </div>
 </div>
 `;
 
@@ -97,6 +129,15 @@ export class SigmaModel extends DOMWidgetModel {
 /**
  * Helper functions.
  */
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function isValidNumber(value: any): boolean {
   return typeof value === 'number' && !isNaN(value);
 }
@@ -126,11 +167,6 @@ function selectSigmaSettings(graph: Graph): Partial<SigmaSettings> {
   }
 
   return settings;
-}
-
-function adjustDimensions(el: HTMLElement, height: number): void {
-  el.style.height = height + 'px';
-  el.style.width = '100%';
 }
 
 function createElement(
@@ -200,20 +236,25 @@ function getGraphDescription(graph: Graph): string {
  */
 export class SigmaView extends DOMWidgetView {
   singleton: boolean = true;
-
-  renderer: Sigma;
   rng: RNGFunction;
-  layout: LayoutSupervisor;
-  layoutSpinner: [HTMLElement, () => void] | null = null;
 
+  container: HTMLElement;
+  renderer: Sigma;
+
+  layout: LayoutSupervisor;
+  layoutButton: HTMLElement;
+  layoutSpinner: [HTMLElement, () => void] | null = null;
   layoutControls: HTMLElement;
 
   zoomButton: HTMLElement;
   unzoomButton: HTMLElement;
   resetZoomButton: HTMLElement;
-  layoutButton: HTMLElement;
+
+  fullscreenButton: HTMLElement;
 
   choices: Choices;
+  informationDisplay: HTMLElement;
+  selectedNode: string | null = null;
 
   renderSingletonError() {
     this.el.innerHTML =
@@ -246,12 +287,14 @@ export class SigmaView extends DOMWidgetView {
     });
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
-    adjustDimensions(this.el, height);
+    this.el.style.width = '100%';
+    this.el.style.height = height + 'px';
 
-    const container = this.el.querySelector(
+    this.container = this.el.querySelector(
       '#ipysigma-container'
     ) as HTMLElement;
-    adjustDimensions(container, height);
+    this.container.style.width = '100%';
+    this.container.style.height = height + 'px';
 
     // Description
     const description = this.el.querySelector(
@@ -270,6 +313,11 @@ export class SigmaView extends DOMWidgetView {
       '#ipysigma-reset-zoom-button'
     ) as HTMLElement;
 
+    // Fullscreen controls
+    this.fullscreenButton = this.el.querySelector(
+      '#ipysigma-fullscreen-button'
+    ) as HTMLElement;
+
     // Layout controls
     this.layoutControls = this.el.querySelector(
       '#ipysigma-layout-controls'
@@ -283,16 +331,47 @@ export class SigmaView extends DOMWidgetView {
       '#ipysigma-search'
     ) as HTMLElement;
 
-    this.choices = new Choices(searchContainer, {
-      items: [{ label: 'apple', value: 'Apple' }],
+    const options = graph.mapNodes((key, attr) => {
+      return { value: key, label: attr.label };
     });
+
+    this.choices = new Choices(searchContainer, {
+      removeItemButton: true,
+      renderChoiceLimit: 10,
+      choices: options,
+      itemSelectText: '',
+      position: 'bottom',
+    });
+
+    this.informationDisplay = this.el.querySelector(
+      '#ipysigma-information-display'
+    ) as HTMLElement;
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      this.renderer = new Sigma(graph, container, selectSigmaSettings(graph));
+      const rendererSettings = selectSigmaSettings(graph);
+
+      // Node reducer
+      rendererSettings.nodeReducer = (node, data) => {
+        const displayData = { ...data };
+
+        if (node === this.selectedNode) {
+          displayData.highlighted = true;
+        }
+
+        return displayData;
+      };
+
+      this.renderer = new Sigma(graph, this.container, rendererSettings);
+      this.renderer.getCamera().setState({ x: CAMERA_OFFSET });
+
+      this.clearSelectedNode();
 
       this.bindMessageHandlers();
+      this.bindRendererHandlers();
+      this.bindChoicesHandlers();
       this.bindCameraHandlers();
+      this.bindFullscreenHandlers();
       this.bindLayoutHandlers();
     });
   }
@@ -302,12 +381,72 @@ export class SigmaView extends DOMWidgetView {
     this.touch();
   }
 
+  clearSelectedNode() {
+    this.selectedNode = null;
+    this.informationDisplay.innerHTML =
+      '<i>Click on a node or search a node to display information about it...</i>';
+
+    this.renderer.refresh();
+  }
+
+  selectNode(key: string) {
+    this.selectedNode = key;
+
+    const attr = this.renderer.getGraph().getNodeAttributes(key);
+
+    const infos = [`<b>key</b> <i>${escapeHtml(key)}</i>`];
+    infos.push(`<b>label</b> <i>${escapeHtml(attr.label)}</i>`);
+
+    this.informationDisplay.innerHTML = infos.join('<br>');
+
+    this.renderer.refresh();
+  }
+
   bindMessageHandlers() {
     this.model.on('msg:custom', (content) => {
       if (content.msg === 'render_snapshot') {
         this.renderSnapshot();
       }
     });
+  }
+
+  bindRendererHandlers() {
+    this.renderer.on('enterNode', () => {
+      this.container.style.cursor = 'pointer';
+    });
+
+    this.renderer.on('leaveNode', () => {
+      this.container.style.cursor = 'default';
+    });
+
+    this.renderer.on('clickNode', ({ node }) => {
+      if (node === this.selectedNode) return;
+
+      this.selectNode(node);
+      this.choices.setChoiceByValue(node);
+    });
+
+    this.renderer.on('clickStage', () => {
+      if (!this.selectedNode) return;
+
+      this.clearSelectedNode();
+      this.choices.setChoiceByValue('');
+    });
+  }
+
+  bindChoicesHandlers() {
+    this.choices.passedElement.element.addEventListener(
+      'change',
+      (event: any) => {
+        const node = event.detail.value;
+
+        if (node === this.selectedNode) return;
+
+        if (!node) return this.clearSelectedNode();
+
+        this.selectNode(node);
+      }
+    );
   }
 
   bindCameraHandlers() {
@@ -320,7 +459,25 @@ export class SigmaView extends DOMWidgetView {
     };
 
     this.resetZoomButton.onclick = () => {
-      this.renderer.getCamera().animatedReset();
+      this.renderer
+        .getCamera()
+        .animate({ ratio: 1, x: CAMERA_OFFSET, y: 0.5, angle: 0 });
+    };
+  }
+
+  bindFullscreenHandlers() {
+    this.fullscreenButton.onclick = () => {
+      if (screenfull.isFullscreen) {
+        screenfull.exit();
+        this.container.style.height = this.model.get('height') + 'px';
+        this.fullscreenButton.innerHTML = fullscreenEnterIcon;
+        this.fullscreenButton.setAttribute('title', 'enter fullscreen');
+      } else {
+        screenfull.request(this.el);
+        this.container.style.height = '100%';
+        this.fullscreenButton.innerHTML = fullscreenExitIcon;
+        this.fullscreenButton.setAttribute('title', 'exit fullscreen');
+      }
     };
   }
 

@@ -1,4 +1,18 @@
+/* Choices.js overrides */
+.choices {
+  margin-bottom: 5px;
+}
+
+.choices__inner {
+  border-radius: 0;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+
+/* Ipysigma own styles */
 .ipysigma-widget {
+  background-color: white;
   margin: 0;
   padding: 0;
   border: 1px solid #e0e0e0;
@@ -15,7 +29,8 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 200px;
+  width: 250px;
+  height: calc(100% - 20px);
 }
 
 .ipysigma-widget #ipysigma-graph-description {
@@ -39,25 +54,29 @@
   width: 32px;
   height: 32px;
   font-size: 24px;
-  line-height: 33px;
+  line-height: 30px;
   box-sizing: border-box;
 }
 
 .ipysigma-widget #ipysigma-zoom-button {
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 .ipysigma-widget #ipysigma-unzoom-button {
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .ipysigma-widget #ipysigma-reset-zoom-button {
-  margin-top: 5px;
+  margin-top: 10px;
+}
+
+.ipysigma-widget #ipysigma-fullscreen-button {
+  margin-top: 10px;
 }
 
 .ipysigma-widget #ipysigma-layout-controls {
   width: 100%;
-  margin-top: 15px;
+  margin-top: 10px;
   display: flex;
 }
 
@@ -69,4 +88,29 @@
 
 .ipysigma-widget #ipysigma-reset-layout-button {
   margin-top: 5px;
+}
+
+.ipysigma-widget #ipysigma-information-display {
+  width: 100%;
+  height: calc(100% - 45px - 5px - 30px);
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 16px;
+  padding: 10px;
+}
+
+.ipysigma-widget #ipysigma-download-controls {
+  margin-top: 5px;
+  /* display: flex; */
+  height: 30px;
+}
+
+.ipysigma-widget #ipysigma-download-png-button,
+.ipysigma-widget #ipysigma-download-svg-button,
+.ipysigma-widget #ipysigma-download-gexf-button {
+  margin-right: 3px;
 }

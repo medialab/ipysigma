@@ -56,6 +56,7 @@
     "comma-number": "^2.1.0",
     "graphology": "^0.24.1",
     "graphology-layout-forceatlas2": "^0.8.2",
+    "screenfull": "^6.0.1",
     "seedrandom": "^3.0.5",
     "sigma": "^2.2.0"
   },
