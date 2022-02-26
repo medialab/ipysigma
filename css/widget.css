@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   border: 1px solid #e0e0e0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .ipysigma-widget .ipysigma-left-panel {
@@ -22,14 +23,12 @@
   padding: 5px 10px;
   font-size: 12px;
   font-style: italic;
-  z-index: 10;
+  line-height: 16px;
 }
 
 .ipysigma-widget .ipysigma-button {
   cursor: pointer;
   text-align: center;
-  font-size: 0.8em;
-  z-index: 10;
   background-color: white;
   border: 1px solid #e0e0e0;
   user-select: none;
@@ -39,6 +38,8 @@
   width: 32px;
   height: 32px;
   font-size: 24px;
+  line-height: 33px;
+  box-sizing: border-box;
 }
 
 .ipysigma-widget .ipysigma-zoom-button {
@@ -62,6 +63,7 @@
 .ipysigma-widget .ipysigma-spinner {
   font-size: 20px;
   padding-left: 5px;
+  line-height: 26px;
 }
 
 .ipysigma-widget .ipysigma-reset-layout-button {

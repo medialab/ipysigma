@@ -27,7 +27,7 @@ import {
   resetLayoutIcon,
 } from './icons';
 
-import 'choices.js/public/assets/styles/base.min.css';
+// import 'choices.js/public/assets/styles/base.min.css';
 import '../css/widget.css';
 
 /**
@@ -291,9 +291,9 @@ export class SigmaView extends DOMWidgetView {
       className: 'ipysigma-search',
     });
     rightPanel.appendChild(searchContainer);
-    this.choices = new Choices(searchContainer, {
-      items: [{ label: 'apple', value: 'Apple' }],
-    });
+    // this.choices = new Choices(searchContainer, {
+    //   items: [{ label: 'apple', value: 'Apple' }],
+    // });
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
