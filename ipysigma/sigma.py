@@ -60,8 +60,8 @@ class Sigma(DOMWidget):
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
-        if height < 230:
-            raise TypeError('Sigma widget cannot have a height < 230 px')
+        if height < 250:
+            raise TypeError('Sigma widget cannot have a height < 250 px')
 
         self.graph = graph
 

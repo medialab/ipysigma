@@ -13,6 +13,7 @@ import { Settings as SigmaSettings } from 'sigma/settings';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
+import Choices from 'choices.js';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import saveAsPNG from './saveAsPNG';
@@ -26,6 +27,7 @@ import {
   resetLayoutIcon,
 } from './icons';
 
+import 'choices.js/public/assets/styles/base.min.css';
 import '../css/widget.css';
 
 /**
@@ -134,7 +136,10 @@ function createElement(
 const SPINNER_STATES = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
 function createSpinner(): [HTMLElement, () => void] {
-  const span = createElement('span', { innerHTML: SPINNER_STATES[0] });
+  const span = createElement('span', {
+    className: 'ipysigma-spinner',
+    innerHTML: SPINNER_STATES[0],
+  });
 
   let state = -1;
   let frame: ReturnType<typeof setTimeout> | null = null;
@@ -178,11 +183,15 @@ export class SigmaView extends DOMWidgetView {
   layout: LayoutSupervisor;
   layoutSpinner: [HTMLElement, () => void] | null = null;
 
+  layoutControls: HTMLElement;
+
   zoomButton: HTMLElement;
   unzoomButton: HTMLElement;
   resetZoomButton: HTMLElement;
   layoutButton: HTMLElement;
   resetLayoutButton: HTMLElement;
+
+  choices: Choices;
 
   renderSingletonError() {
     this.el.innerHTML =
@@ -219,8 +228,18 @@ export class SigmaView extends DOMWidgetView {
     this.el.appendChild(container);
     adjustDimensions(container, height);
 
+    // Panels
+    const leftPanel = createElement('div', {
+      className: 'ipysigma-left-panel',
+    });
+    const rightPanel = createElement('div', {
+      className: 'ipysigma-right-panel',
+    });
+    this.el.appendChild(leftPanel);
+    this.el.appendChild(rightPanel);
+
     // Description
-    this.el.appendChild(createGraphDescription(graph));
+    leftPanel.appendChild(createGraphDescription(graph));
 
     // Camera controls
     this.zoomButton = createElement('div', {
@@ -239,11 +258,16 @@ export class SigmaView extends DOMWidgetView {
       title: 'reset zoom',
     });
 
-    this.el.appendChild(this.zoomButton);
-    this.el.appendChild(this.unzoomButton);
-    this.el.appendChild(this.resetZoomButton);
+    leftPanel.appendChild(this.zoomButton);
+    leftPanel.appendChild(this.unzoomButton);
+    leftPanel.appendChild(this.resetZoomButton);
 
     // Layout controls
+    this.layoutControls = createElement('div', {
+      className: 'ipysigma-layout-controls',
+    });
+    leftPanel.appendChild(this.layoutControls);
+
     this.layoutButton = createElement('div', {
       className: 'ipysigma-button ipysigma-layout-button ipysigma-svg-icon',
       innerHTML: playIcon,
@@ -256,11 +280,20 @@ export class SigmaView extends DOMWidgetView {
       title: 'reset layout',
     });
 
-    this.el.appendChild(this.layoutButton);
-    this.el.appendChild(this.resetLayoutButton);
+    this.layoutControls.appendChild(this.layoutButton);
+    this.layoutControls.appendChild(this.resetLayoutButton);
 
     // TODO: code button, show/hide function
     this.resetLayoutButton.style.display = 'none';
+
+    // Search
+    var searchContainer = createElement('select', {
+      className: 'ipysigma-search',
+    });
+    rightPanel.appendChild(searchContainer);
+    this.choices = new Choices(searchContainer, {
+      items: [{ label: 'apple', value: 'Apple' }],
+    });
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
@@ -302,6 +335,7 @@ export class SigmaView extends DOMWidgetView {
   bindLayoutHandlers() {
     const stopLayout = () => {
       if (this.layoutSpinner) {
+        this.layoutControls.removeChild(this.layoutSpinner[0]);
         this.layoutSpinner[1]();
         this.layoutSpinner = null;
       }
@@ -313,7 +347,7 @@ export class SigmaView extends DOMWidgetView {
     const startLayout = () => {
       this.layoutSpinner = createSpinner();
       this.layoutButton.innerHTML = pauseIcon;
-      this.layoutButton.appendChild(this.layoutSpinner[0]);
+      this.layoutControls.appendChild(this.layoutSpinner[0]);
       this.layoutButton.setAttribute('title', 'stop layout');
       this.layout.start();
     };
