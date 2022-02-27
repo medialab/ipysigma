@@ -152,6 +152,8 @@ class Sigma(DOMWidget):
             if 'color' in viz:
                 attr['color'] = extract_rgba_from_viz(viz['color'])
 
+            del attr['viz']
+
         # Mangling edges
         for _, _, attr in g.edges(data=True):
             if 'viz' not in attr:
@@ -166,5 +168,7 @@ class Sigma(DOMWidget):
             # Color
             if 'color' in viz:
                 attr['color'] = extract_rgba_from_viz(viz['color'])
+
+            del attr['viz']
 
         return Sigma(g, *args, **kwargs)

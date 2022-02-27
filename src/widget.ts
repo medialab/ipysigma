@@ -36,11 +36,13 @@ import '../css/widget.css';
  * Types.
  */
 type RNGFunction = () => number;
+type InformationDisplayTab = 'legend' | 'node-info';
 
 /**
  * Constants.
  */
 const CAMERA_OFFSET = 0.65;
+const NODE_VIZ_ATTRIBUTES = new Set(['size', 'color', 'x', 'y']);
 
 /**
  * Template.
@@ -75,7 +77,16 @@ const TEMPLATE = `
   <select id="ipysigma-search">
     <option value="">Search a node...</option>
   </select>
-  <div id="ipysigma-information-display"></div>
+  <div id="ipysigma-information-display">
+    <div id="ipysigma-information-display-tabs">
+      <em id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</em>
+      &middot;
+      <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">node info</em>
+    </div>
+    <hr>
+    <div id="ipysigma-legend"><em>Todo: legend...</em></div>
+    <div id="ipysigma-node-information"></div>
+  </div>
   <div id="ipysigma-download-controls">
     <button id="ipysigma-download-png-button" class="ipysigma-button">
       png
@@ -129,6 +140,10 @@ export class SigmaModel extends DOMWidgetModel {
 /**
  * Helper functions.
  */
+function isValidNumber(value: any): boolean {
+  return typeof value === 'number' && !isNaN(value);
+}
+
 function escapeHtml(unsafe: string): string {
   return unsafe
     .replace(/&/g, '&amp;')
@@ -138,13 +153,29 @@ function escapeHtml(unsafe: string): string {
     .replace(/'/g, '&#039;');
 }
 
-function isValidNumber(value: any): boolean {
-  return typeof value === 'number' && !isNaN(value);
+function renderAttributeValue(value: any): string {
+  const safe = escapeHtml('' + value);
+
+  let type = 'unknown';
+
+  if (typeof value === 'number') {
+    type = 'number';
+  } else if (typeof value === 'string') {
+    type = 'string';
+  } else if (typeof value === 'boolean') {
+    type = 'boolean';
+  }
+
+  return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;
 }
 
 function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
   const graph = Graph.from(data);
 
+  let minSize = Infinity;
+  let maxSize = -Infinity;
+
+  // Rectifications
   graph.updateEachNodeAttributes((key, attr) => {
     // Random position for nodes without positions
     if (!isValidNumber(attr.x)) attr.x = rng();
@@ -153,14 +184,23 @@ function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
     // If we don't have a label we keep the key instead
     if (!attr.label) attr.label = key;
 
+    if (attr.size) {
+      if (attr.size < minSize) minSize = attr.size;
+      if (attr.size > maxSize) maxSize = attr.size;
+    }
+
     return attr;
   });
+
+  // const hasConstantNodeSizes = minSize === Infinity || minSize === maxSize;
 
   return graph;
 }
 
 function selectSigmaSettings(graph: Graph): Partial<SigmaSettings> {
-  const settings: Partial<SigmaSettings> = {};
+  const settings: Partial<SigmaSettings> = {
+    zIndex: true,
+  };
 
   if (graph.type !== 'undirected') {
     settings.defaultEdgeType = 'arrow';
@@ -193,6 +233,14 @@ function createElement(
   if (title) element.setAttribute('title', title);
 
   return element;
+}
+
+function hide(el: HTMLElement): void {
+  el.style.display = 'none';
+}
+
+function show(el: HTMLElement): void {
+  el.style.display = 'block';
 }
 
 const SPINNER_STATES = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
@@ -253,8 +301,13 @@ export class SigmaView extends DOMWidgetView {
   fullscreenButton: HTMLElement;
 
   choices: Choices;
-  informationDisplay: HTMLElement;
+  currentTab: InformationDisplayTab = 'legend';
+  nodeInfoElement: HTMLElement;
+  legendElement: HTMLElement;
+  legendButton: HTMLElement;
+  nodeInfoButton: HTMLElement;
   selectedNode: string | null = null;
+  focusedNodes: Set<string> | null = null;
 
   renderSingletonError() {
     this.el.innerHTML =
@@ -343,9 +396,21 @@ export class SigmaView extends DOMWidgetView {
       position: 'bottom',
     });
 
-    this.informationDisplay = this.el.querySelector(
-      '#ipysigma-information-display'
+    this.nodeInfoElement = this.el.querySelector(
+      '#ipysigma-node-information'
     ) as HTMLElement;
+    this.legendElement = this.el.querySelector(
+      '#ipysigma-legend'
+    ) as HTMLElement;
+
+    this.nodeInfoButton = this.el.querySelector(
+      '#ipysigma-information-node-info-button'
+    ) as HTMLElement;
+    this.legendButton = this.el.querySelector(
+      '#ipysigma-information-legend-button'
+    ) as HTMLElement;
+
+    this.changeInformationDisplayTab('legend');
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
@@ -359,6 +424,29 @@ export class SigmaView extends DOMWidgetView {
           displayData.highlighted = true;
         }
 
+        if (this.focusedNodes && !this.focusedNodes.has(node)) {
+          displayData.color = 'lightgray';
+          displayData.zIndex = 0;
+          displayData.size = displayData.size ? displayData.size / 2 : 1;
+        } else {
+          displayData.zIndex = 1;
+        }
+
+        return displayData;
+      };
+
+      // Edge reducer
+      rendererSettings.edgeReducer = (edge, data) => {
+        if (!this.focusedNodes) return data;
+
+        const [source, target] = graph.extremities(edge);
+
+        const displayData = { ...data };
+
+        if (!this.focusedNodes.has(source) && !this.focusedNodes.has(target)) {
+          displayData.hidden = true;
+        }
+
         return displayData;
       };
 
@@ -370,6 +458,7 @@ export class SigmaView extends DOMWidgetView {
       this.bindMessageHandlers();
       this.bindRendererHandlers();
       this.bindChoicesHandlers();
+      this.bindInformationDisplayHandlers();
       this.bindCameraHandlers();
       this.bindFullscreenHandlers();
       this.bindLayoutHandlers();
@@ -381,23 +470,81 @@ export class SigmaView extends DOMWidgetView {
     this.touch();
   }
 
+  changeInformationDisplayTab(tab: InformationDisplayTab) {
+    if (tab === 'legend') {
+      hide(this.nodeInfoElement);
+      show(this.legendElement);
+      this.legendButton.classList.remove('selectable');
+      this.nodeInfoButton.classList.add('selectable');
+    } else {
+      hide(this.legendElement);
+      show(this.nodeInfoElement);
+      this.legendButton.classList.add('selectable');
+      this.nodeInfoButton.classList.remove('selectable');
+    }
+  }
+
   clearSelectedNode() {
     this.selectedNode = null;
-    this.informationDisplay.innerHTML =
+    this.focusedNodes = null;
+    this.nodeInfoElement.innerHTML =
       '<i>Click on a node or search a node to display information about it...</i>';
+
+    this.changeInformationDisplayTab('legend');
 
     this.renderer.refresh();
   }
 
   selectNode(key: string) {
+    const graph = this.renderer.getGraph();
+
     this.selectedNode = key;
+    const focusedNodes: Set<string> = new Set();
 
-    const attr = this.renderer.getGraph().getNodeAttributes(key);
+    focusedNodes.add(this.selectedNode);
 
-    const infos = [`<b>key</b> <i>${escapeHtml(key)}</i>`];
-    infos.push(`<b>label</b> <i>${escapeHtml(attr.label)}</i>`);
+    graph.forEachNeighbor(key, (neighbor) => {
+      focusedNodes.add(neighbor);
+    });
 
-    this.informationDisplay.innerHTML = infos.join('<br>');
+    this.focusedNodes = focusedNodes;
+
+    const attr = graph.getNodeAttributes(key);
+
+    let innerHTML = `<b>key</b> <i>${escapeHtml(
+      key
+    )}</i><br><b>label</b> <i>${escapeHtml(attr.label)}</i>`;
+
+    const vizInfo: string[] = [];
+    const info: string[] = [];
+
+    for (const k in attr) {
+      if (k === 'label') continue;
+
+      const target = NODE_VIZ_ATTRIBUTES.has(k) ? vizInfo : info;
+
+      target.push(`<b>${k}</b> ${renderAttributeValue(attr[k])}`);
+    }
+
+    if (info.length !== 0) innerHTML += '<hr>' + info.join('<br>');
+
+    if (vizInfo.length !== 0) innerHTML += '<hr>' + vizInfo.join('<br>');
+
+    innerHTML += '<hr>';
+    innerHTML += `<b>degree</b> ${renderAttributeValue(graph.degree(key))}<br>`;
+
+    if (graph.directedSize !== 0) {
+      innerHTML += `<b>indegree</b> ${renderAttributeValue(
+        graph.inDegree(key)
+      )}<br>`;
+      innerHTML += `<b>outdegree</b> ${renderAttributeValue(
+        graph.outDegree(key)
+      )}<br>`;
+    }
+
+    this.nodeInfoElement.innerHTML = innerHTML;
+
+    this.changeInformationDisplayTab('node-info');
 
     this.renderer.refresh();
   }
@@ -447,6 +594,20 @@ export class SigmaView extends DOMWidgetView {
         this.selectNode(node);
       }
     );
+  }
+
+  bindInformationDisplayHandlers() {
+    this.legendButton.onclick = () => {
+      if (!this.legendButton.classList.contains('selectable')) return;
+
+      this.changeInformationDisplayTab('legend');
+    };
+
+    this.nodeInfoButton.onclick = () => {
+      if (!this.nodeInfoButton.classList.contains('selectable')) return;
+
+      this.changeInformationDisplayTab('node-info');
+    };
   }
 
   bindCameraHandlers() {
