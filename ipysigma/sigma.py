@@ -56,6 +56,7 @@ class Sigma(DOMWidget):
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
+    layout = Dict(allow_none=True).tag(sync=True)
 
     def __init__(self, graph, height=500, start_layout=False, **kwargs):
         super(Sigma, self).__init__(**kwargs)
@@ -98,6 +99,7 @@ class Sigma(DOMWidget):
         self.height = height
         self.start_layout = start_layout
         self.snapshot = None
+        self.layout = None
 
     def __repr__(self):
         return 'Sigma(nx.%s with %s nodes and %s edges)' % (
@@ -105,6 +107,18 @@ class Sigma(DOMWidget):
             pretty_print_int(self.graph.order()),
             pretty_print_int(self.graph.size())
         )
+
+    def retrieve_layout(self):
+        return self.layout
+
+    def persist_layout(self):
+        if self.layout is None:
+            raise TypeError('Widget did not compute any layout yet. Are you sure you displayed it?')
+
+        for node, attr in self.graph.nodes(data=True):
+            pos = self.layout[node]
+            attr['x'] = pos['x']
+            attr['y'] = pos['y']
 
     def render_snasphot(self):
         if not self.singleton_lock:

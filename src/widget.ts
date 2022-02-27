@@ -43,6 +43,8 @@ import '../css/widget.css';
  */
 type RNGFunction = () => number;
 type InformationDisplayTab = 'legend' | 'node-info';
+type Position = { x: number; y: number };
+type LayoutMapping = Record<string, Position>;
 
 /**
  * Constants.
@@ -304,6 +306,7 @@ export class SigmaView extends DOMWidgetView {
 
   container: HTMLElement;
   renderer: Sigma;
+  graph: Graph;
 
   layout: LayoutSupervisor;
   layoutButton: HTMLElement;
@@ -355,6 +358,8 @@ export class SigmaView extends DOMWidgetView {
     const data = this.model.get('data');
 
     const graph = buildGraph(data, this.rng);
+    this.graph = graph;
+    this.saveLayout();
 
     this.layout = new LayoutSupervisor(graph, {
       settings: forceAtlas2.inferSettings(graph),
@@ -506,6 +511,17 @@ export class SigmaView extends DOMWidgetView {
     this.touch();
   }
 
+  saveLayout() {
+    const mapping: LayoutMapping = {};
+
+    this.graph.forEachNode((node, attr) => {
+      mapping[node] = { x: attr.x, y: attr.y };
+    });
+
+    this.model.set('layout', mapping);
+    this.touch();
+  }
+
   changeInformationDisplayTab(tab: InformationDisplayTab) {
     if (tab === 'legend') {
       hide(this.nodeInfoElement);
@@ -532,7 +548,7 @@ export class SigmaView extends DOMWidgetView {
   }
 
   selectNode(key: string) {
-    const graph = this.renderer.getGraph();
+    const graph = this.graph;
 
     this.selectedNode = key;
     const focusedNodes: Set<string> = new Set();
@@ -703,6 +719,7 @@ export class SigmaView extends DOMWidgetView {
       this.layoutButton.innerHTML = playIcon;
       this.layoutButton.setAttribute('title', 'start layout');
       this.layout.stop();
+      this.saveLayout();
     };
 
     const startLayout = () => {
