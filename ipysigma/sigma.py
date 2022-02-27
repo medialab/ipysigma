@@ -15,6 +15,7 @@ from ._frontend import module_name, module_version
 # =============================================================================
 MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
+DEFAULT_NODE_SIZE_RANGE = [2, 15]
 
 
 # =============================================================================
@@ -57,16 +58,52 @@ class Sigma(DOMWidget):
     start_layout = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
+    visual_variables = Dict({
+        'node_color': {
+            'type': 'raw'
+        },
+        'node_size': {
+            'type': 'continuous',
+            'attribute': 'size',
+            'range': DEFAULT_NODE_SIZE_RANGE
+        }
+    }).tag(sync=True)
 
-    def __init__(self, graph, height=500, start_layout=False, **kwargs):
+    def __init__(self, graph, height=500, start_layout=False, node_color=None,
+                 node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE, **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
         if height < 250:
             raise TypeError('Sigma widget cannot have a height < 250 px')
 
+        # Own
         self.graph = graph
 
+        # Traits
+        self.height = height
+        self.start_layout = start_layout
+        self.snapshot = None
+        self.layout = None
+
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
+
+        # Serializing visual variables
+        visual_variables = self.visual_variables.copy()
+
+        if node_color is not None:
+            visual_variables['node_color'] = {
+                'type': 'category',
+                'attribute': node_color
+            }
+
+        if node_size is not None:
+            visual_variables['node_size'] = {
+                'type': 'continuous',
+                'attribute': node_size,
+                'range': node_size_range
+            }
+
+        self.visual_variables = visual_variables
 
         # Serializing graph as per graphology's JSON format
         nodes = []
@@ -95,11 +132,6 @@ class Sigma(DOMWidget):
                 'multi': isinstance(graph, MULTI_GRAPHS),
             }
         }
-
-        self.height = height
-        self.start_layout = start_layout
-        self.snapshot = None
-        self.layout = None
 
     def __repr__(self):
         return 'Sigma(nx.%s with %s nodes and %s edges)' % (

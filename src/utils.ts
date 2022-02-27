@@ -1,6 +1,7 @@
 // Taken and adapted from: https://github.com/jacomyal/sigma.js/blob/main/examples/png-snapshot/saveAsPNG.ts
 import Sigma from 'sigma';
 import FileSaver from 'file-saver';
+import iwanthue from 'iwanthue';
 import * as gexf from 'graphology-gexf/browser';
 // @ts-ignore
 import renderAsSVG from 'graphology-svg/renderer';
@@ -115,4 +116,24 @@ export function saveAsGEXF(renderer: Sigma): void {
 export function saveAsSVG(renderer: Sigma): void {
   const data = renderAsSVG(renderer.getGraph(), SVG_DEFAULTS);
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
+}
+
+const DEFAULT_COLOR_SPACE = {
+  cmin: 25.59,
+  cmax: 55.59,
+  lmin: 60.94,
+  lmax: 90.94,
+};
+
+const SINGLE_COLOR_PALETTE = ['#999'];
+
+export function generatePalette(name: string, count: number): string[] {
+  if (count === 1) return SINGLE_COLOR_PALETTE;
+
+  return iwanthue(count, {
+    colorSpace: DEFAULT_COLOR_SPACE,
+    seed: name,
+    clustering: 'force-vector',
+    attempts: 5,
+  });
 }

@@ -15,6 +15,8 @@ import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
 import Choices from 'choices.js';
 import screenfull from 'screenfull';
+import MultiSet from 'mnemonist/multi-set';
+import { scaleLinear, ScaleLinear } from 'd3-scale';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import {
@@ -23,6 +25,7 @@ import {
   saveAsGEXF,
   saveAsJSON,
   saveAsSVG,
+  generatePalette,
 } from './utils';
 
 import {
@@ -45,12 +48,41 @@ type RNGFunction = () => number;
 type InformationDisplayTab = 'legend' | 'node-info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
+type Range = [number, number];
+type Palette = Record<string, string>;
+
+type RawVisualVariable = {
+  type: 'raw';
+};
+
+type CategoryVisualVariable = {
+  type: 'category';
+  attribute: string;
+};
+
+type ContinuousVisualVariable = {
+  type: 'continuous';
+  attribute: string;
+  range: Range;
+};
+
+type VisualVariable =
+  | RawVisualVariable
+  | CategoryVisualVariable
+  | ContinuousVisualVariable;
+
+type VisualVariables = {
+  node_color: VisualVariable;
+  node_size: VisualVariable;
+};
 
 /**
  * Constants.
  */
 const CAMERA_OFFSET = 0.65;
 const NODE_VIZ_ATTRIBUTES = new Set(['size', 'color', 'x', 'y']);
+// const DEFAULT_NODE_SIZE_RANGE = [2, 15];
+const DEFAULT_CONSTANT_NODE_SIZE = 5;
 
 /**
  * Template.
@@ -139,6 +171,8 @@ export class SigmaModel extends DOMWidgetModel {
       height: 500,
       start_layout: false,
       snapshot: null,
+      layout: null,
+      visual_variables: {},
     };
   }
 
@@ -190,9 +224,6 @@ function renderAttributeValue(value: any): string {
 function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
   const graph = Graph.from(data);
 
-  let minSize = Infinity;
-  let maxSize = -Infinity;
-
   // Rectifications
   graph.updateEachNodeAttributes((key, attr) => {
     // Random position for nodes without positions
@@ -202,29 +233,10 @@ function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
     // If we don't have a label we keep the key instead
     if (!attr.label) attr.label = key;
 
-    if (attr.size) {
-      if (attr.size < minSize) minSize = attr.size;
-      if (attr.size > maxSize) maxSize = attr.size;
-    }
-
     return attr;
   });
 
-  // const hasConstantNodeSizes = minSize === Infinity || minSize === maxSize;
-
   return graph;
-}
-
-function selectSigmaSettings(graph: Graph): Partial<SigmaSettings> {
-  const settings: Partial<SigmaSettings> = {
-    zIndex: true,
-  };
-
-  if (graph.type !== 'undirected') {
-    settings.defaultEdgeType = 'arrow';
-  }
-
-  return settings;
 }
 
 function createElement(
@@ -454,12 +466,91 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      const rendererSettings = selectSigmaSettings(graph);
+      const rendererSettings: Partial<SigmaSettings> = {
+        zIndex: true,
+        defaultEdgeType: graph.type !== 'undirected' ? 'arrow' : 'line',
+      };
+
+      // Gathering info about the graph to build reducers correctly
+      const visualVariables = this.model.get(
+        'visual_variables'
+      ) as VisualVariables;
+
+      let nodeColorPalette: Palette | null = null;
+      let nodeColorCategory =
+        visualVariables.node_color.type === 'category'
+          ? visualVariables.node_color.attribute
+          : null;
+
+      const nodeCategoryFrequencies = new MultiSet<string>();
+
+      let nodeSizeAttribute =
+        visualVariables.node_size.type === 'continuous'
+          ? visualVariables.node_size.attribute
+          : 'size';
+
+      let minNodeSize = Infinity;
+      let maxNodeSize = -Infinity;
+
+      graph.forEachNode((node, attr) => {
+        if (nodeColorCategory) {
+          nodeCategoryFrequencies.add(attr[nodeColorCategory]);
+        }
+
+        const size = attr[nodeSizeAttribute];
+
+        if (typeof size === 'number') {
+          if (size < minNodeSize) minNodeSize = size;
+          if (size > maxNodeSize) maxNodeSize = size;
+        }
+      });
+
+      if (nodeColorCategory) {
+        const count = Math.max(nodeCategoryFrequencies.dimension, 10);
+        const colors = generatePalette(nodeColorCategory, count);
+
+        nodeColorPalette = {};
+
+        nodeCategoryFrequencies.top(count).forEach(([value], i) => {
+          (<Palette>nodeColorPalette)[value] = colors[i];
+        });
+      }
+
+      const hasConstantNodeSizes =
+        minNodeSize === Infinity || minNodeSize === maxNodeSize;
+
+      rendererSettings.labelRenderedSizeThreshold = hasConstantNodeSizes
+        ? DEFAULT_CONSTANT_NODE_SIZE
+        : Math.min(maxNodeSize, 6);
+
+      let nodeSizeScale: ScaleLinear<number, number> | null = null;
+
+      if (
+        !hasConstantNodeSizes &&
+        visualVariables.node_size.type === 'continuous'
+      ) {
+        nodeSizeScale = scaleLinear()
+          .domain([minNodeSize, maxNodeSize])
+          .range(visualVariables.node_size.range);
+      }
 
       // Node reducer
       rendererSettings.nodeReducer = (node, data) => {
         const displayData = { ...data };
 
+        // Visual variables
+        if (nodeColorCategory && nodeColorPalette) {
+          displayData.color =
+            nodeColorPalette[data[nodeColorCategory]] || '#999';
+        }
+
+        if (hasConstantNodeSizes) {
+          displayData.size = DEFAULT_CONSTANT_NODE_SIZE;
+        } else if (nodeSizeScale) {
+          displayData.size = nodeSizeScale(data[nodeSizeAttribute] || 1);
+        }
+
+        // Transient state
         if (node === this.selectedNode) {
           displayData.highlighted = true;
         }
@@ -477,14 +568,17 @@ export class SigmaView extends DOMWidgetView {
 
       // Edge reducer
       rendererSettings.edgeReducer = (edge, data) => {
-        if (!this.focusedNodes) return data;
-
-        const [source, target] = graph.extremities(edge);
-
         const displayData = { ...data };
 
-        if (!this.focusedNodes.has(source) && !this.focusedNodes.has(target)) {
-          displayData.hidden = true;
+        if (this.focusedNodes) {
+          const [source, target] = graph.extremities(edge);
+
+          if (
+            !this.focusedNodes.has(source) &&
+            !this.focusedNodes.has(target)
+          ) {
+            displayData.hidden = true;
+          }
         }
 
         return displayData;
