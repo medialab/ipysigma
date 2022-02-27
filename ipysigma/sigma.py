@@ -15,7 +15,7 @@ from ._frontend import module_name, module_version
 # =============================================================================
 MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
-DEFAULT_NODE_SIZE_RANGE = [2, 15]
+DEFAULT_NODE_SIZE_RANGE = [2, 12]
 
 
 # =============================================================================
@@ -59,8 +59,13 @@ class Sigma(DOMWidget):
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
     visual_variables = Dict({
+        'node_label': {
+            'type': 'raw',
+            'attribute': 'label'
+        },
         'node_color': {
-            'type': 'raw'
+            'type': 'raw',
+            'attribute': 'color'
         },
         'node_size': {
             'type': 'continuous',
@@ -70,7 +75,8 @@ class Sigma(DOMWidget):
     }).tag(sync=True)
 
     def __init__(self, graph, height=500, start_layout=False, node_color=None,
-                 node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE, **kwargs):
+                 node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE,
+                 node_label='label', **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
         if height < 250:
@@ -101,6 +107,12 @@ class Sigma(DOMWidget):
                 'type': 'continuous',
                 'attribute': node_size,
                 'range': node_size_range
+            }
+
+        if node_label is not None:
+            visual_variables['node_label'] = {
+                'type': 'raw',
+                'attribute': node_label
             }
 
         self.visual_variables = visual_variables

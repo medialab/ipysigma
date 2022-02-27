@@ -53,6 +53,7 @@ type Palette = Record<string, string>;
 
 type RawVisualVariable = {
   type: 'raw';
+  attribute: string;
 };
 
 type CategoryVisualVariable = {
@@ -74,14 +75,15 @@ type VisualVariable =
 type VisualVariables = {
   node_color: VisualVariable;
   node_size: VisualVariable;
+  node_label: RawVisualVariable;
 };
 
 /**
  * Constants.
  */
 const CAMERA_OFFSET = 0.65;
-const NODE_VIZ_ATTRIBUTES = new Set(['size', 'color', 'x', 'y']);
-// const DEFAULT_NODE_SIZE_RANGE = [2, 15];
+const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
+const CATEGORY_MAX_COUNT = 10;
 const DEFAULT_CONSTANT_NODE_SIZE = 5;
 
 /**
@@ -124,17 +126,7 @@ const TEMPLATE = `
       <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">node info</em>
     </div>
     <hr>
-    <div id="ipysigma-legend">
-      <b>Node size:</b> <em><span class="ipysigma-keyword">size</span> attribute</em>
-      <hr>
-      <b>Node color:</b> <em><span class="ipysigma-keyword">color</span> attribute</em>
-      <hr>
-      <b>Edge size:</b> <em><span class="ipysigma-keyword">size</span> attribute</em>
-      <hr>
-      <b>Edge color:</b> <em><span class="ipysigma-keyword">color</span> attribute</em>
-      <hr>
-      <b>Node labels:</b> <em><span class="ipysigma-keyword">label</span> attribute or node key if absent.</em>
-    </div>
+    <div id="ipysigma-legend"></div>
     <div id="ipysigma-node-information"></div>
   </div>
   <div id="ipysigma-download-controls">
@@ -229,9 +221,6 @@ function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
     // Random position for nodes without positions
     if (!isValidNumber(attr.x)) attr.x = rng();
     if (!isValidNumber(attr.y)) attr.y = rng();
-
-    // If we don't have a label we keep the key instead
-    if (!attr.label) attr.label = key;
 
     return attr;
   });
@@ -492,6 +481,8 @@ export class SigmaView extends DOMWidgetView {
       let minNodeSize = Infinity;
       let maxNodeSize = -Infinity;
 
+      let nodeLabelAttribute = visualVariables.node_label.attribute;
+
       graph.forEachNode((node, attr) => {
         if (nodeColorCategory) {
           nodeCategoryFrequencies.add(attr[nodeColorCategory]);
@@ -506,7 +497,10 @@ export class SigmaView extends DOMWidgetView {
       });
 
       if (nodeColorCategory) {
-        const count = Math.max(nodeCategoryFrequencies.dimension, 10);
+        const count = Math.max(
+          nodeCategoryFrequencies.dimension,
+          CATEGORY_MAX_COUNT
+        );
         const colors = generatePalette(nodeColorCategory, count);
 
         nodeColorPalette = {};
@@ -534,6 +528,8 @@ export class SigmaView extends DOMWidgetView {
           .range(visualVariables.node_size.range);
       }
 
+      this.updateLegend(visualVariables, { nodeColor: nodeColorPalette });
+
       // Node reducer
       rendererSettings.nodeReducer = (node, data) => {
         const displayData = { ...data };
@@ -549,6 +545,8 @@ export class SigmaView extends DOMWidgetView {
         } else if (nodeSizeScale) {
           displayData.size = nodeSizeScale(data[nodeSizeAttribute] || 1);
         }
+
+        displayData.label = data[nodeLabelAttribute] || node;
 
         // Transient state
         if (node === this.selectedNode) {
@@ -573,10 +571,7 @@ export class SigmaView extends DOMWidgetView {
         if (this.focusedNodes) {
           const [source, target] = graph.extremities(edge);
 
-          if (
-            !this.focusedNodes.has(source) &&
-            !this.focusedNodes.has(target)
-          ) {
+          if (source !== this.selectedNode && target !== this.selectedNode) {
             displayData.hidden = true;
           }
         }
@@ -630,6 +625,59 @@ export class SigmaView extends DOMWidgetView {
     }
   }
 
+  updateLegend(
+    variables: VisualVariables,
+    palettes: { nodeColor: Palette | null }
+  ) {
+    function renderLegend(
+      title: string,
+      variable: VisualVariable,
+      palette?: Palette | null
+    ) {
+      let html = `<b>${title}</b><br>`;
+
+      if (variable.type === 'raw') {
+        html += `<span class="ipysigma-keyword">${escapeHtml(
+          variable.attribute
+        )}</span> attribute`;
+      } else if (variable.type === 'continuous') {
+        html += `<span class="ipysigma-keyword">${escapeHtml(
+          variable.attribute
+        )}</span> attribute (scaled to <span class="ipysigma-number">${
+          variable.range[0]
+        }</span>-<span class="ipysigma-number">${variable.range[1]}</span> px)`;
+      } else if (variable.type === 'category') {
+        html += `<span class="ipysigma-keyword">${escapeHtml(
+          variable.attribute
+        )}</span> attribute as a category:`;
+
+        const paletteItems: string[] = [];
+
+        if (palette) {
+          for (const k in palette) {
+            paletteItems.push(
+              `<span style="color: ${palette[k]}">■</span> ${k}`
+            );
+          }
+        } else {
+          paletteItems.push('<span style="color: #999">■</span> default');
+        }
+
+        html += '<br>' + paletteItems.join('<br>');
+      }
+
+      return html;
+    }
+
+    const items = [
+      renderLegend('Node labels', variables.node_label),
+      renderLegend('Node colors', variables.node_color, palettes.nodeColor),
+      renderLegend('Node sizes', variables.node_size),
+    ];
+
+    this.legendElement.innerHTML = items.join('<hr>');
+  }
+
   clearSelectedNode() {
     this.selectedNode = null;
     this.focusedNodes = null;
@@ -657,16 +705,12 @@ export class SigmaView extends DOMWidgetView {
 
     const attr = graph.getNodeAttributes(key);
 
-    let innerHTML = `<b>key</b> <i>${escapeHtml(
-      key
-    )}</i><br><b>label</b> <i>${escapeHtml(attr.label)}</i>`;
+    let innerHTML = `<b>key</b> <i>${escapeHtml(key)}</i>`;
 
     const vizInfo: string[] = [];
     const info: string[] = [];
 
     for (const k in attr) {
-      if (k === 'label') continue;
-
       const target = NODE_VIZ_ATTRIBUTES.has(k) ? vizInfo : info;
 
       target.push(`<b>${k}</b> ${renderAttributeValue(attr[k])}`);

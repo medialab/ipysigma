@@ -27,6 +27,8 @@
   height: 1px;
   border: none;
   background-color: #e0e0e0;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .ipysigma-widget #ipysigma-left-panel {
