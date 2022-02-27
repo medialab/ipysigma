@@ -90,7 +90,17 @@ const TEMPLATE = `
       <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">node info</em>
     </div>
     <hr>
-    <div id="ipysigma-legend"><em>Todo: legend...</em></div>
+    <div id="ipysigma-legend">
+      <b>Node size:</b> <em><span class="ipysigma-keyword">size</span> attribute</em>
+      <hr>
+      <b>Node color:</b> <em><span class="ipysigma-keyword">color</span> attribute</em>
+      <hr>
+      <b>Edge size:</b> <em><span class="ipysigma-keyword">size</span> attribute</em>
+      <hr>
+      <b>Edge color:</b> <em><span class="ipysigma-keyword">color</span> attribute</em>
+      <hr>
+      <b>Node labels:</b> <em><span class="ipysigma-keyword">label</span> attribute or node key if absent.</em>
+    </div>
     <div id="ipysigma-node-information"></div>
   </div>
   <div id="ipysigma-download-controls">
