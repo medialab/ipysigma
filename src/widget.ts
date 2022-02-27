@@ -17,7 +17,13 @@ import Choices from 'choices.js';
 import screenfull from 'screenfull';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
-import saveAsPNG from './saveAsPNG';
+import {
+  renderAsDataURL,
+  saveAsPNG,
+  saveAsGEXF,
+  saveAsJSON,
+  saveAsSVG,
+} from './utils';
 
 import {
   zoomIcon,
@@ -309,6 +315,11 @@ export class SigmaView extends DOMWidgetView {
   selectedNode: string | null = null;
   focusedNodes: Set<string> | null = null;
 
+  downloadPNGButton: HTMLElement;
+  downloadGEXFButton: HTMLElement;
+  downloadSVGButton: HTMLElement;
+  downloadJSONButton: HTMLElement;
+
   renderSingletonError() {
     this.el.innerHTML =
       '<i>You cannot render two independent views of the same Sigma widget, sorry...</i>';
@@ -412,6 +423,20 @@ export class SigmaView extends DOMWidgetView {
 
     this.changeInformationDisplayTab('legend');
 
+    // Download controls
+    this.downloadPNGButton = this.el.querySelector(
+      '#ipysigma-download-png-button'
+    ) as HTMLElement;
+    this.downloadGEXFButton = this.el.querySelector(
+      '#ipysigma-download-gexf-button'
+    ) as HTMLElement;
+    this.downloadSVGButton = this.el.querySelector(
+      '#ipysigma-download-svg-button'
+    ) as HTMLElement;
+    this.downloadJSONButton = this.el.querySelector(
+      '#ipysigma-download-json-button'
+    ) as HTMLElement;
+
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
       const rendererSettings = selectSigmaSettings(graph);
@@ -459,6 +484,7 @@ export class SigmaView extends DOMWidgetView {
       this.bindRendererHandlers();
       this.bindChoicesHandlers();
       this.bindInformationDisplayHandlers();
+      this.bindDownloadHandlers();
       this.bindCameraHandlers();
       this.bindFullscreenHandlers();
       this.bindLayoutHandlers();
@@ -466,7 +492,7 @@ export class SigmaView extends DOMWidgetView {
   }
 
   renderSnapshot() {
-    this.model.set('snapshot', saveAsPNG(this.renderer));
+    this.model.set('snapshot', renderAsDataURL(this.renderer));
     this.touch();
   }
 
@@ -607,6 +633,21 @@ export class SigmaView extends DOMWidgetView {
       if (!this.nodeInfoButton.classList.contains('selectable')) return;
 
       this.changeInformationDisplayTab('node-info');
+    };
+  }
+
+  bindDownloadHandlers() {
+    this.downloadPNGButton.onclick = () => {
+      saveAsPNG(this.renderer);
+    };
+    this.downloadGEXFButton.onclick = () => {
+      saveAsGEXF(this.renderer);
+    };
+    this.downloadSVGButton.onclick = () => {
+      saveAsSVG(this.renderer);
+    };
+    this.downloadJSONButton.onclick = () => {
+      saveAsJSON(this.renderer);
     };
   }
 

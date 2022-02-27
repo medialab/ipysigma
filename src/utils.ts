@@ -1,10 +1,16 @@
 // Taken and adapted from: https://github.com/jacomyal/sigma.js/blob/main/examples/png-snapshot/saveAsPNG.ts
 import Sigma from 'sigma';
+import FileSaver from 'file-saver';
+import * as gexf from 'graphology-gexf/browser';
+// @ts-ignore
+import renderAsSVG from 'graphology-svg/renderer';
+// @ts-ignore
+import { DEFAULTS as SVG_DEFAULTS } from 'graphology-svg/defaults';
 
-export default function saveAsPNG(
+function renderToAuxiliaryCanvas(
   renderer: Sigma,
   inputLayers?: string[]
-): string {
+): [HTMLCanvasElement, () => void] {
   const { width, height } = renderer.getDimensions();
 
   // This pixel ratio is here to deal with retina displays.
@@ -48,6 +54,7 @@ export default function saveAsPNG(
   const layers = inputLayers
     ? inputLayers.filter((id) => !!canvases[id])
     : Object.keys(canvases);
+
   layers.forEach((id) => {
     ctx.drawImage(
       canvases[id],
@@ -62,12 +69,50 @@ export default function saveAsPNG(
     );
   });
 
-  // Save the canvas as a PNG image:
+  return [
+    canvas,
+    () => {
+      // Cleanup:
+      tmpRenderer.kill();
+      tmpRoot.remove();
+    },
+  ];
+}
+
+export function renderAsDataURL(renderer: Sigma): string {
+  const [canvas, cleanup] = renderToAuxiliaryCanvas(renderer);
+
   const dataURL = canvas.toDataURL();
 
-  // Cleanup:
-  tmpRenderer.kill();
-  tmpRoot.remove();
+  cleanup();
 
   return dataURL;
+}
+
+export function saveAsPNG(renderer: Sigma): void {
+  const [canvas, cleanup] = renderToAuxiliaryCanvas(renderer);
+
+  // Save the canvas as a PNG image:
+  canvas.toBlob((blob) => {
+    if (blob) FileSaver.saveAs(blob, 'graph.png');
+    cleanup();
+  }, 'image/png');
+}
+
+export function saveAsJSON(renderer: Sigma): void {
+  const data = JSON.stringify(renderer.getGraph(), null, 2);
+  FileSaver.saveAs(
+    new Blob([data], { type: 'application/json' }),
+    'graph.json'
+  );
+}
+
+export function saveAsGEXF(renderer: Sigma): void {
+  const data = gexf.write(renderer.getGraph());
+  FileSaver.saveAs(new Blob([data], { type: 'application/xml' }), 'graph.gexf');
+}
+
+export function saveAsSVG(renderer: Sigma): void {
+  const data = renderAsSVG(renderer.getGraph(), SVG_DEFAULTS);
+  FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
 }
