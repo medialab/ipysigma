@@ -234,10 +234,12 @@ class Sigma(DOMWidget):
             if process_gexf_viz:
                 process_node_gexf_viz(attr)
 
-            nodes.append({
+            serialized_node = {
                 'key': node,
                 'attributes': attr
-            })
+            }
+
+            nodes.append(serialized_node)
 
         edges = []
 
@@ -247,12 +249,16 @@ class Sigma(DOMWidget):
             if process_gexf_viz:
                 process_edge_gexf_viz(attr)
 
-            edges.append({
+            serialized_edge = {
                 'source': source,
                 'target': target,
-                'attributes': attr,
-                'undirected': not is_directed
-            })
+                'attributes': attr
+            }
+
+            if not is_directed:
+                serialized_edge['undirected'] = True
+
+            edges.append(serialized_edge)
 
         # Serializing visual variables
         visual_variables = self.visual_variables.copy()
