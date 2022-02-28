@@ -758,20 +758,27 @@ export class SigmaView extends DOMWidgetView {
     ) {
       let html = `<b>${title}</b><br>`;
 
+      const source = variable.attribute.startsWith('$$')
+        ? 'kwarg'
+        : 'attribute';
+      const name = variable.attribute.startsWith('$$')
+        ? variable.attribute.slice(2)
+        : variable.attribute;
+
       if (variable.type === 'raw') {
         html += `<span class="ipysigma-keyword">${escapeHtml(
-          variable.attribute
-        )}</span> attribute`;
+          name
+        )}</span> ${source}`;
       } else if (variable.type === 'continuous') {
         html += `<span class="ipysigma-keyword">${escapeHtml(
-          variable.attribute
-        )}</span> attribute (scaled to <span class="ipysigma-number">${
+          name
+        )}</span> ${source} (scaled to <span class="ipysigma-number">${
           variable.range[0]
         }</span>-<span class="ipysigma-number">${variable.range[1]}</span> px)`;
       } else if (variable.type === 'category') {
         html += `<span class="ipysigma-keyword">${escapeHtml(
-          variable.attribute
-        )}</span> attribute as a category:`;
+          name
+        )}</span> ${source} as a category:`;
 
         const paletteItems: string[] = [];
 
@@ -845,20 +852,31 @@ export class SigmaView extends DOMWidgetView {
 
     let innerHTML = `<b>key</b> <i>${escapeHtml(key)}</i>`;
 
+    const kwargInfo: string[] = [];
     const vizInfo: string[] = [];
     const info: string[] = [];
 
-    for (const k in attr) {
-      const target = NODE_VIZ_ATTRIBUTES.has(k) ? vizInfo : info;
+    for (let k in attr) {
+      let target = info;
 
-      target.push(`<b>${k}</b> ${renderAttributeValue(attr[k])}`);
+      if (NODE_VIZ_ATTRIBUTES.has(k)) target = vizInfo;
+      else if (k.startsWith('$$')) target = kwargInfo;
+
+      target.push(
+        `<b>${k.startsWith('$$') ? k.slice(2) : k}</b> ${renderAttributeValue(
+          attr[k]
+        )}`
+      );
     }
 
-    if (info.length !== 0) innerHTML += '<hr>' + info.join('<br>');
+    if (kwargInfo.length !== 0)
+      innerHTML += '<hr>From kwargs:<br>' + kwargInfo.join('<br>');
+    if (info.length !== 0)
+      innerHTML += '<hr>Node attributes:<br>' + info.join('<br>');
+    if (vizInfo.length !== 0)
+      innerHTML += '<hr>Known viz data:<br>' + vizInfo.join('<br>');
 
-    if (vizInfo.length !== 0) innerHTML += '<hr>' + vizInfo.join('<br>');
-
-    innerHTML += '<hr>';
+    innerHTML += '<hr>Computed metrics:<br>';
     innerHTML += `<b>degree</b> ${renderAttributeValue(graph.degree(key))}<br>`;
 
     if (graph.directedSize !== 0) {

@@ -5,6 +5,7 @@
 # =============================================================================
 #
 #
+from collections.abc import Iterable, Mapping
 from ipywidgets import DOMWidget, HTML
 from traitlets import Unicode, Dict, Int, Bool
 import networkx as nx
@@ -40,6 +41,31 @@ def extract_rgba_from_viz(viz_color):
             viz_color['g'],
             viz_color['b'],
         )
+
+
+def resolve_variable_kwarg(items, variable, name, target, allow_arbitrary_data=True):
+    if isinstance(target, str):
+        variable['attribute'] = target
+
+    elif isinstance(target, (Iterable, Mapping)):
+        if not allow_arbitrary_data:
+            raise TypeError('%s should be a string' % name)
+
+        mapping = dict(target)
+        target = '$$%s' % name
+
+        for node in items:
+            v = mapping.get(node['key'])
+
+            if v is None:
+                continue
+
+            node['attributes'][target] = v
+
+        variable['attribute'] = target
+
+    else:
+        raise TypeError('%s should be a string, an iterable or a mapping' % name)
 
 
 # =============================================================================
@@ -152,58 +178,13 @@ class Sigma(DOMWidget):
 
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
 
-        # Serializing visual variables
-        visual_variables = self.visual_variables.copy()
-
-        # Nodes
-        if node_color is not None:
-            visual_variables['node_color'] = {
-                'type': 'category',
-                'attribute': node_color
-            }
-
-        if node_size is not None:
-            visual_variables['node_size'] = {
-                'type': 'continuous',
-                'attribute': node_size,
-                'range': node_size_range
-            }
-
-        if node_label is not None:
-            visual_variables['node_label'] = {
-                'type': 'raw',
-                'attribute': node_label
-            }
-
-        # Edges
-        if edge_color is not None:
-            visual_variables['edge_color'] = {
-                'type': 'category',
-                'attribute': edge_color
-            }
-
-        if edge_size is not None:
-            visual_variables['edge_size'] = {
-                'type': 'continuous',
-                'attribute': edge_size,
-                'range': edge_size_range
-            }
-
-        if edge_label is not None:
-            visual_variables['edge_label'] = {
-                'type': 'raw',
-                'attribute': edge_label
-            }
-
-        self.visual_variables = visual_variables
-
         # Serializing graph as per graphology's JSON format
         nodes = []
 
         for node, attr in graph.nodes(data=True):
             nodes.append({
                 'key': node,
-                'attributes': attr
+                'attributes': attr.copy()
             })
 
         edges = []
@@ -212,10 +193,105 @@ class Sigma(DOMWidget):
             edges.append({
                 'source': source,
                 'target': target,
-                'attributes': attr,
+                'attributes': attr.copy(),
                 'undirected': not is_directed
             })
 
+        # Serializing visual variables
+        visual_variables = self.visual_variables.copy()
+
+        # Nodes
+        if node_color is not None:
+            variable = {
+                'type': 'category'
+            }
+
+            resolve_variable_kwarg(
+                nodes,
+                variable,
+                'node_color',
+                node_color
+            )
+
+            visual_variables['node_color'] = variable
+
+        if node_size is not None:
+            variable = {
+                'type': 'continuous',
+                'range': node_size_range
+            }
+
+            resolve_variable_kwarg(
+                nodes,
+                variable,
+                'node_size',
+                node_size
+            )
+
+            visual_variables['node_size'] = variable
+
+        if node_label is not None:
+            variable = {
+                'type': 'raw'
+            }
+
+            resolve_variable_kwarg(
+                nodes,
+                variable,
+                'node_label',
+                node_label
+            )
+
+            visual_variables['node_label'] = variable
+
+        # Edges
+        if edge_color is not None:
+            variable = {
+                'type': 'category'
+            }
+
+            resolve_variable_kwarg(
+                edges,
+                variable,
+                'edge_color',
+                edge_color,
+                allow_arbitrary_data=False
+            )
+
+            visual_variables['edge_color'] = variable
+
+        if edge_size is not None:
+            variable = {
+                'type': 'continuous',
+                'range': edge_size_range
+            }
+
+            resolve_variable_kwarg(
+                edges,
+                variable,
+                'edge_size',
+                edge_size,
+                allow_arbitrary_data=False
+            )
+
+            visual_variables['edge_size'] = variable
+
+        if edge_label is not None:
+            variable = {
+                'type': 'raw'
+            }
+
+            resolve_variable_kwarg(
+                edges,
+                variable,
+                'edge_label',
+                edge_label,
+                allow_arbitrary_data=False
+            )
+
+            visual_variables['edge_label'] = variable
+
+        self.visual_variables = visual_variables
         self.data = {
             'nodes': nodes,
             'edges': edges,
