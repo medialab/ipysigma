@@ -16,6 +16,7 @@ from ._frontend import module_name, module_version
 MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 DEFAULT_NODE_SIZE_RANGE = (2, 12)
+DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 
 
 # =============================================================================
@@ -60,7 +61,8 @@ class Sigma(DOMWidget):
         node_color (str, optional): name of the node attribute that should
             be interpreted as a category to be used for node color. Note that
             a suitable color palette will be automatically generated for you.
-            Defaults to None.
+            Defaults to None, i.e. will read the "color" attribute of nodes
+            directly or use a grey color if none is to be found.
         node_size (str, optional): name of the node attribute that should be
             used for node size. Note the provided size is scaled using
             the range provided by the `node_size_range` kwarg.
@@ -97,12 +99,23 @@ class Sigma(DOMWidget):
             'type': 'continuous',
             'attribute': 'size',
             'range': DEFAULT_NODE_SIZE_RANGE
+        },
+        'edge_color': {
+            'type': 'raw',
+            'attribute': 'color'
+        },
+        'edge_size': {
+            'type': 'continuous',
+            'attribute': 'size',
+            'range': DEFAULT_EDGE_SIZE_RANGE
         }
     }).tag(sync=True)
 
     def __init__(self, graph, height=500, start_layout=False, node_color=None,
                  node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE,
-                 node_label='label', **kwargs):
+                 node_label='label', edge_color=None, edge_size='size',
+                 edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
+                 **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
         if height < 250:
@@ -139,6 +152,19 @@ class Sigma(DOMWidget):
             visual_variables['node_label'] = {
                 'type': 'raw',
                 'attribute': node_label
+            }
+
+        if edge_color is not None:
+            visual_variables['edge_color'] = {
+                'type': 'category',
+                'attribute': edge_color
+            }
+
+        if edge_size is not None:
+            visual_variables['edge_size'] = {
+                'type': 'continuous',
+                'attribute': edge_size,
+                'range': edge_size_range
             }
 
         self.visual_variables = visual_variables
