@@ -96,14 +96,14 @@
   display: flex;
 }
 
+.ipysigma-widget #ipysigma-reset-layout-button {
+  margin-left: 4px;
+}
+
 .ipysigma-widget .ipysigma-spinner {
   font-size: 20px;
   padding-left: 5px;
   line-height: 26px;
-}
-
-.ipysigma-widget #ipysigma-reset-layout-button {
-  margin-top: 5px;
 }
 
 .ipysigma-widget .ipysigma-tab-button.selectable {

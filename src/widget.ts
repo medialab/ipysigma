@@ -34,6 +34,7 @@ import {
   resetZoomIcon,
   playIcon,
   pauseIcon,
+  resetLayoutIcon,
   fullscreenEnterIcon,
   fullscreenExitIcon,
 } from './icons';
@@ -120,6 +121,9 @@ const TEMPLATE = `
   <div id="ipysigma-layout-controls">
     <button id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
       ${playIcon}
+    </button>
+    <button id="ipysigma-reset-layout-button" class="ipysigma-button ipysigma-svg-icon" title="reset layout">
+      ${resetLayoutIcon}
     </button>
   </div>
 </div>
@@ -222,6 +226,16 @@ function renderAttributeValue(value: any): string {
   return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;
 }
 
+function collectLayout(graph: Graph): LayoutMapping {
+  const mapping: LayoutMapping = {};
+
+  graph.forEachNode((node, attr) => {
+    mapping[node] = { x: attr.x, y: attr.y };
+  });
+
+  return mapping;
+}
+
 function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
   const graph = Graph.from(data);
 
@@ -318,8 +332,10 @@ export class SigmaView extends DOMWidgetView {
   renderer: Sigma;
   graph: Graph;
 
+  originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
   layoutButton: HTMLElement;
+  resetLayoutButton: HTMLElement;
   layoutSpinner: [HTMLElement, () => void] | null = null;
   layoutControls: HTMLElement;
 
@@ -371,6 +387,7 @@ export class SigmaView extends DOMWidgetView {
     this.graph = graph;
     this.saveLayout();
 
+    this.originalLayoutPositions = collectLayout(graph);
     this.layout = new LayoutSupervisor(graph, {
       settings: forceAtlas2.inferSettings(graph),
     });
@@ -413,6 +430,9 @@ export class SigmaView extends DOMWidgetView {
     ) as HTMLElement;
     this.layoutButton = this.el.querySelector(
       '#ipysigma-layout-button'
+    ) as HTMLElement;
+    this.resetLayoutButton = this.el.querySelector(
+      '#ipysigma-reset-layout-button'
     ) as HTMLElement;
 
     // Search
@@ -723,13 +743,13 @@ export class SigmaView extends DOMWidgetView {
   }
 
   saveLayout() {
-    const mapping: LayoutMapping = {};
-
-    this.graph.forEachNode((node, attr) => {
-      mapping[node] = { x: attr.x, y: attr.y };
-    });
-
+    const mapping = collectLayout(this.graph);
     this.model.set('layout', mapping);
+    this.touch();
+  }
+
+  resetLayout() {
+    this.model.set('layout', this.originalLayoutPositions);
     this.touch();
   }
 
@@ -1014,6 +1034,8 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindLayoutHandlers() {
+    hide(this.resetLayoutButton);
+
     const stopLayout = () => {
       if (this.layoutSpinner) {
         this.layoutControls.removeChild(this.layoutSpinner[0]);
@@ -1024,6 +1046,7 @@ export class SigmaView extends DOMWidgetView {
       this.layoutButton.setAttribute('title', 'start layout');
       this.layout.stop();
       this.saveLayout();
+      show(this.resetLayoutButton);
     };
 
     const startLayout = () => {
@@ -1032,6 +1055,20 @@ export class SigmaView extends DOMWidgetView {
       this.layoutControls.appendChild(this.layoutSpinner[0]);
       this.layoutButton.setAttribute('title', 'stop layout');
       this.layout.start();
+      hide(this.resetLayoutButton);
+    };
+
+    const resetLayout = () => {
+      hide(this.resetLayoutButton);
+      this.resetLayout();
+      this.graph.updateEachNodeAttributes((node, attr) => {
+        const pos = this.originalLayoutPositions[node];
+
+        attr.x = pos.x;
+        attr.y = pos.y;
+
+        return attr;
+      });
     };
 
     if (this.model.get('start_layout')) startLayout();
@@ -1042,6 +1079,10 @@ export class SigmaView extends DOMWidgetView {
       } else {
         startLayout();
       }
+    };
+
+    this.resetLayoutButton.onclick = () => {
+      resetLayout();
     };
   }
 
