@@ -68,6 +68,50 @@ def resolve_variable_kwarg(items, variable, name, target, allow_arbitrary_data=T
         raise TypeError('%s should be a string, an iterable or a mapping' % name)
 
 
+def process_node_gexf_viz(attr):
+    if 'viz' not in attr:
+        return
+
+    viz = attr['viz']
+
+    # Size
+    if 'size' in viz and 'size' not in attr:
+        attr['size'] = viz['size']
+
+    # Position
+    if 'position' in viz and 'x' not in attr and 'y' not in attr:
+        pos = viz['position']
+
+        if 'x' in pos:
+            attr['x'] = pos['x']
+
+        if 'y' in pos:
+            attr['y'] = pos['y']
+
+    # Color
+    if 'color' in viz and 'color' not in attr:
+        attr['color'] = extract_rgba_from_viz(viz['color'])
+
+    del attr['viz']
+
+
+def process_edge_gexf_viz(attr):
+    if 'viz' not in attr:
+        return
+
+    viz = attr['viz']
+
+    # Thickness
+    if 'thickness' in viz and 'size' not in attr:
+        attr['size'] = viz['thickness']
+
+    # Color
+    if 'color' in viz and 'color' not in attr:
+        attr['color'] = extract_rgba_from_viz(viz['color'])
+
+    del attr['viz']
+
+
 # =============================================================================
 # Widget definition
 # =============================================================================
@@ -113,6 +157,9 @@ class Sigma(DOMWidget):
         clickable_edges (bool, optional): whether to enable edge events so you can
             click on them to get information. This can be costly on large graphs.
             Defaults to False.
+        process_gexf_viz (bool, optional): whether to process "viz" data typically
+            found in gexf files so they can be displayed correctly.
+            Defaults to True.
     """
 
     _model_name = Unicode('SigmaModel').tag(sync=True)
@@ -159,7 +206,7 @@ class Sigma(DOMWidget):
                  node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE,
                  node_label='label', edge_color=None, edge_size='size',
                  edge_size_range=DEFAULT_EDGE_SIZE_RANGE, edge_label=None,
-                 clickable_edges=False,
+                 clickable_edges=False, process_gexf_viz=True,
                  **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
@@ -182,18 +229,28 @@ class Sigma(DOMWidget):
         nodes = []
 
         for node, attr in graph.nodes(data=True):
+            attr = attr.copy()
+
+            if process_gexf_viz:
+                process_node_gexf_viz(attr)
+
             nodes.append({
                 'key': node,
-                'attributes': attr.copy()
+                'attributes': attr
             })
 
         edges = []
 
         for source, target, attr in graph.edges(data=True):
+            attr = attr.copy()
+
+            if process_gexf_viz:
+                process_edge_gexf_viz(attr)
+
             edges.append({
                 'source': source,
                 'target': target,
-                'attributes': attr.copy(),
+                'attributes': attr,
                 'undirected': not is_directed
             })
 
@@ -368,69 +425,3 @@ class Sigma(DOMWidget):
         self.send({'msg': 'render_snapshot'})
 
         return html
-
-    @staticmethod
-    def from_gexf(path_or_file, *args, **kwargs):
-        """
-        Function returning a Sigma widget directly from a gexf file.
-
-        This function reads the gexf file using nx.read_graph then processes
-        its data to conform to the format the widget expects regarding
-        visualisation information.
-
-        Args:
-            path_or_file (str or Path or buffer): path or file buffer of target
-                gexf file.
-            **kwargs: any kwarg that you can pass to ipysigma.Sigma.
-
-        Returns:
-            Sigma: a Sigma widget.
-        """
-
-        g = nx.read_gexf(path_or_file)
-
-        # Mangling nodes
-        for _, attr in g.nodes(data=True):
-            if 'viz' not in attr:
-                continue
-
-            viz = attr['viz']
-
-            # Size
-            if 'size' in viz:
-                attr['size'] = viz['size']
-
-            # Position
-            if 'position' in viz:
-                pos = viz['position']
-
-                if 'x' in pos:
-                    attr['x'] = pos['x']
-
-                if 'y' in pos:
-                    attr['y'] = pos['y']
-
-            # Color
-            if 'color' in viz:
-                attr['color'] = extract_rgba_from_viz(viz['color'])
-
-            del attr['viz']
-
-        # Mangling edges
-        for _, _, attr in g.edges(data=True):
-            if 'viz' not in attr:
-                continue
-
-            viz = attr['viz']
-
-            # Thickness
-            if 'thickness' in viz:
-                attr['size'] = viz['thickness']
-
-            # Color
-            if 'color' in viz:
-                attr['color'] = extract_rgba_from_viz(viz['color'])
-
-            del attr['viz']
-
-        return Sigma(g, *args, **kwargs)

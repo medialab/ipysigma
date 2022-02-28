@@ -51,7 +51,8 @@ Sigma(g, height=300)
 Sigma(g, start_layout=True)
 
 # Displaying a gexf file
-Sigma.from_gexf('./path/to/file.gexf')
+g = nx.read_gexf('./path/to/file.gexf')
+Sigma(g)
 ```
 
 ## Development Installation
