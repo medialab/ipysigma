@@ -1,10 +1,15 @@
+# Functions
+define clean
+	rm -rf *.egg-info
+	rm -rf dist
+endef
+
 # Commands
 all: test
 test: unit
 
 clean:
-	rm -rf *.egg-info
-	rm -rf dist
+	$(call clean)
 
 deps:
 	pip3 install build twine jupyter_packaging
@@ -24,6 +29,7 @@ unit:
 	@echo
 
 release:
+	$(call clean)
 	@echo Publishing on npm...
 	npm publish .
 	@echo Publishing on pypi...
@@ -31,6 +37,7 @@ release:
 	twine check dist/ipysigma-*
 	twine upload dist/ipysigma-*
 	@echo
+	$(call clean)
 
 watch:
 	@echo Watching js files...
