@@ -228,6 +228,19 @@ function renderTypedValue(value: any): string {
   return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;
 }
 
+function applyLayout(graph: Graph, mapping: LayoutMapping): void {
+  graph.updateEachNodeAttributes((node, attr) => {
+    const pos = mapping[node];
+
+    if (!pos) return attr;
+
+    attr.x = pos.x;
+    attr.y = pos.y;
+
+    return attr;
+  });
+}
+
 function collectLayout(graph: Graph): LayoutMapping {
   const mapping: LayoutMapping = {};
 
@@ -388,8 +401,14 @@ export class SigmaView extends DOMWidgetView {
 
     const graph = buildGraph(data, this.rng);
     this.graph = graph;
-    this.saveLayout();
 
+    const preexistingLayout = this.model.get('layout');
+
+    if (preexistingLayout) {
+      applyLayout(graph, preexistingLayout);
+    } else {
+      this.saveLayout();
+    }
     this.originalLayoutPositions = collectLayout(graph);
     this.layout = new LayoutSupervisor(graph, {
       settings: forceAtlas2.inferSettings(graph),
