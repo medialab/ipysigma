@@ -15,7 +15,7 @@ from ._frontend import module_name, module_version
 # =============================================================================
 MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
-DEFAULT_NODE_SIZE_RANGE = [2, 12]
+DEFAULT_NODE_SIZE_RANGE = (2, 12)
 
 
 # =============================================================================
@@ -45,6 +45,32 @@ def extract_rgba_from_viz(viz_color):
 # Widget definition
 # =============================================================================
 class Sigma(DOMWidget):
+    """
+    Jupyter widget displaying an interactive interface that can be used to
+    explore the given networkx graph using sigma.js.
+
+    Args:
+        graph (nx.Graph or nx.DiGraph or nx.MultiGraph or nx.MultiDiGraph):
+            networkx graph to explore.
+        height (int, optional): height of the widget in pixels. Cannot be less
+            than 250px. Defaults to 500.
+        start_layout (bool, optional): whether to automatically start the
+            provided ForceAtlas2 layout when the widget is displayed.
+            Defaults to False.
+        node_color (str, optional): name of the node attribute that should
+            be interpreted as a category to be used for node color. Note that
+            a suitable color palette will be automatically generated for you.
+            Defaults to None.
+        node_size (str, optional): name of the node attribute that should be
+            used for node size. Note the provided size is scaled using
+            the range provided by the `node_size_range` kwarg.
+            Defaults to "size".
+        node_size_range ((number, number), optional): range for node size
+            interpolation. Defaults to (2, 12).
+        node_label: name of the node attribute that will be used as node
+            label. Defaults to "label".
+    """
+
     _model_name = Unicode('SigmaModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
@@ -153,9 +179,30 @@ class Sigma(DOMWidget):
         )
 
     def retrieve_layout(self):
+        """
+        Method returning the layout computed by ForceAtlas2 in the widget.
+
+        Note that if the layout was never displayed, this method will return None.
+
+        Also note that if you never ran the layout this method will return the
+        initial layout that will be random in the [0, 1) range if you did not
+        provide starting positions yourself.
+
+        Returns:
+            dict: a dictionary mapping node keys to {x, y} positions.
+        """
         return self.layout
 
     def persist_layout(self):
+        """
+        Method applying the layout computed by ForceAtlas2 in the widget to
+        the networkx graph passed as input to the widget.
+
+        Note that it therefores mutates the networkx graph.
+
+        Note that this method will raise an error if the widget was never displayed.
+        """
+
         if self.layout is None:
             raise TypeError('Widget did not compute any layout yet. Are you sure you displayed it?')
 
@@ -165,6 +212,17 @@ class Sigma(DOMWidget):
             attr['y'] = pos['y']
 
     def render_snasphot(self):
+        """
+        Method rendering and displaying a snasphot of the widget.
+
+        This can be useful to save a version of the widget that can actually
+        be seen in a static rendition of your notebook (when using nbconvert,
+        for instance, or when reading the notebook on GitHub).
+
+        Returns:
+            Ipython.display.HTML: the snasphot as a data url in an img tag.
+        """
+
         if not self.singleton_lock:
             raise TypeError('Widget needs to be displayed on screen to render a snapshot. Maybe you reinstantiated it and forgot to display the new instance?')
 
@@ -183,6 +241,22 @@ class Sigma(DOMWidget):
 
     @staticmethod
     def from_gexf(path_or_file, *args, **kwargs):
+        """
+        Function returning a Sigma widget directly from a gexf file.
+
+        This function reads the gexf file using nx.read_graph then processes
+        its data to conform to the format the widget expects regarding
+        visualisation information.
+
+        Args:
+            path_or_file (str or Path or buffer): path or file buffer of target
+                gexf file.
+            **kwargs: any kwarg that you can pass to ipysigma.Sigma.
+
+        Returns:
+            Sigma: a Sigma widget.
+        """
+
         g = nx.read_gexf(path_or_file)
 
         # Mangling nodes
