@@ -30,6 +30,7 @@ unit:
 
 release:
 	$(call clean)
+	yarn run build
 	@echo Publishing on npm...
 	npm publish .
 	@echo Publishing on pypi...
