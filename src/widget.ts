@@ -91,6 +91,7 @@ type VisualVariables = {
   node_label: RawVisualVariable;
   edge_color: VisualVariable;
   edge_size: VisualVariable;
+  edge_label: VisualVariable | null;
 };
 
 /**
@@ -130,7 +131,7 @@ const TEMPLATE = `
     <div id="ipysigma-information-display-tabs">
       <em id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</em>
       &middot;
-      <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">node info</em>
+      <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">info</em>
     </div>
     <hr>
     <div id="ipysigma-legend"></div>
@@ -171,6 +172,7 @@ export class SigmaModel extends DOMWidgetModel {
       start_layout: false,
       snapshot: null,
       layout: null,
+      clickableEdges: false,
       visual_variables: {},
     };
   }
@@ -418,11 +420,25 @@ export class SigmaView extends DOMWidgetView {
       '#ipysigma-search'
     ) as HTMLElement;
 
+    const nodeLabelAttribute =
+      this.model.get('visual_variables').node_label.attribute;
+
     const options = graph.mapNodes((key, attr) => {
-      return { value: key, label: attr.label };
+      let labelParts = [escapeHtml(key)];
+
+      const label = attr[nodeLabelAttribute];
+
+      if (label && label !== key) {
+        labelParts.push(
+          ` <small style="font-size: 75%;">${escapeHtml(label)}</small>`
+        );
+      }
+
+      return { value: key, label: labelParts.join(' ') };
     });
 
     this.choices = new Choices(searchContainer, {
+      allowHTML: true,
       removeItemButton: true,
       renderChoiceLimit: 10,
       choices: options,
@@ -462,9 +478,13 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
+      const clickableEdges: boolean = this.model.get('clickable_edges');
+
       const rendererSettings: Partial<SigmaSettings> = {
         zIndex: true,
         defaultEdgeType: graph.type !== 'undirected' ? 'arrow' : 'line',
+        enableEdgeClickEvents: clickableEdges,
+        enableEdgeHoverEvents: clickableEdges,
       };
 
       // Gathering info about the graph to build reducers correctly
@@ -555,6 +575,12 @@ export class SigmaView extends DOMWidgetView {
 
       let minEdgeSize = Infinity;
       let maxEdgeSize = -Infinity;
+
+      let edgeLabelAttribute = visualVariables.edge_label?.attribute;
+
+      if (edgeLabelAttribute) {
+        rendererSettings.renderEdgeLabels = true;
+      }
 
       graph.forEachEdge((edge, attr) => {
         if (edgeColorCategory) {
@@ -657,6 +683,10 @@ export class SigmaView extends DOMWidgetView {
           displayData.size = DEFAULT_CONSTANT_EDGE_SIZE;
         } else if (edgeSizeScale) {
           displayData.size = edgeSizeScale(data[edgeSizeAttribute] || 1);
+        }
+
+        if (edgeLabelAttribute) {
+          displayData.label = data[edgeLabelAttribute] || edge;
         }
 
         // Transient state
@@ -773,14 +803,24 @@ export class SigmaView extends DOMWidgetView {
       renderLegend('Edge sizes', variables.edge_size),
     ];
 
+    if (variables.edge_label) {
+      items.push(renderLegend('Edge labels', variables.edge_label));
+    }
+
     this.legendElement.innerHTML = items.join('<hr>');
   }
 
   clearSelectedNode() {
     this.selectedNode = null;
     this.focusedNodes = null;
-    this.nodeInfoElement.innerHTML =
-      '<i>Click on a node or search a node to display information about it...</i>';
+
+    if (this.model.get('clickable_edges')) {
+      this.nodeInfoElement.innerHTML =
+        '<i>Click on a node/edge or search a node to display information about it...</i>';
+    } else {
+      this.nodeInfoElement.innerHTML =
+        '<i>Click on a node or search a node to display information about it...</i>';
+    }
 
     this.changeInformationDisplayTab('legend');
 
@@ -867,6 +907,16 @@ export class SigmaView extends DOMWidgetView {
       this.clearSelectedNode();
       this.choices.setChoiceByValue('');
     });
+
+    if (this.model.get('clickable_edges')) {
+      this.renderer.on('enterEdge', () => {
+        this.container.style.cursor = 'pointer';
+      });
+
+      this.renderer.on('leaveEdge', () => {
+        this.container.style.cursor = 'default';
+      });
+    }
   }
 
   bindChoicesHandlers() {

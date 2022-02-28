@@ -69,8 +69,24 @@ class Sigma(DOMWidget):
             Defaults to "size".
         node_size_range ((number, number), optional): range for node size
             interpolation. Defaults to (2, 12).
-        node_label: name of the node attribute that will be used as node
-            label. Defaults to "label".
+        node_label (str, optional): name of the node attribute that will be used
+            as node label. Defaults to "label".
+        edge_color (str, optional): name of the edge attribute that should
+            be interpreted as a category to be used for edge color. Note that
+            a suitable color palette will be automatically generated for you.
+            Defaults to None, i.e. will read the "color" attribute of edges
+            directly or use a light grey color if none is to be found.
+        edge_size (str, optional): name of the edge attribute that should be
+            used for edge size. Note the provided size is scaled using
+            the range provided by the `edge_size_range` kwarg.
+            Defaults to "size".
+        edge_size_range ((number, number), optional): range for edge size
+            interpolation. Defaults to (0.5, 10).
+        edge_label (str, optional): name of the edge attribute that will be used
+            as edge label. Defaults to None, i.e. no label.
+        clickable_edges (bool, optional): whether to enable edge events so you can
+            click on them to get information. This can be costly on large graphs.
+            Defaults to False.
     """
 
     _model_name = Unicode('SigmaModel').tag(sync=True)
@@ -84,6 +100,7 @@ class Sigma(DOMWidget):
     data = Dict({'nodes': [], 'edges': []}).tag(sync=True)
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
+    clickable_edges = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
     visual_variables = Dict({
@@ -100,6 +117,7 @@ class Sigma(DOMWidget):
             'attribute': 'size',
             'range': DEFAULT_NODE_SIZE_RANGE
         },
+        'edge_label': None,
         'edge_color': {
             'type': 'raw',
             'attribute': 'color'
@@ -114,7 +132,8 @@ class Sigma(DOMWidget):
     def __init__(self, graph, height=500, start_layout=False, node_color=None,
                  node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE,
                  node_label='label', edge_color=None, edge_size='size',
-                 edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
+                 edge_size_range=DEFAULT_EDGE_SIZE_RANGE, edge_label=None,
+                 clickable_edges=False,
                  **kwargs):
         super(Sigma, self).__init__(**kwargs)
 
@@ -129,12 +148,14 @@ class Sigma(DOMWidget):
         self.start_layout = start_layout
         self.snapshot = None
         self.layout = None
+        self.clickable_edges = clickable_edges
 
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
 
         # Serializing visual variables
         visual_variables = self.visual_variables.copy()
 
+        # Nodes
         if node_color is not None:
             visual_variables['node_color'] = {
                 'type': 'category',
@@ -154,6 +175,7 @@ class Sigma(DOMWidget):
                 'attribute': node_label
             }
 
+        # Edges
         if edge_color is not None:
             visual_variables['edge_color'] = {
                 'type': 'category',
@@ -165,6 +187,12 @@ class Sigma(DOMWidget):
                 'type': 'continuous',
                 'attribute': edge_size,
                 'range': edge_size_range
+            }
+
+        if edge_label is not None:
+            visual_variables['edge_label'] = {
+                'type': 'raw',
+                'attribute': edge_label
             }
 
         self.visual_variables = visual_variables
