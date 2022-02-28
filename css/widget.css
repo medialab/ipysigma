@@ -125,7 +125,7 @@
   padding: 10px;
 }
 
-.ipysigma-widget #ipysigma-node-information,
+.ipysigma-widget #ipysigma-information-contents,
 .ipysigma-widget #ipysigma-legend {
   font-family: monospace;
 }

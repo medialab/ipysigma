@@ -47,6 +47,7 @@ import '../css/widget.css';
  */
 const CAMERA_OFFSET = 0.65;
 const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
+const EDGE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color']);
 const CATEGORY_MAX_COUNT = 10;
 const DEFAULT_CONSTANT_NODE_SIZE = 5;
 const DEFAULT_CONSTANT_EDGE_SIZE = 0.5;
@@ -55,8 +56,9 @@ const PALETTE_OVERFLOW = Symbol();
 /**
  * Types.
  */
+type ItemType = 'node' | 'edge';
 type RNGFunction = () => number;
-type InformationDisplayTab = 'legend' | 'node-info';
+type InformationDisplayTab = 'legend' | 'info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
 type Range = [number, number];
@@ -135,11 +137,11 @@ const TEMPLATE = `
     <div id="ipysigma-information-display-tabs">
       <em id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</em>
       &middot;
-      <em id="ipysigma-information-node-info-button" class="ipysigma-tab-button">info</em>
+      <em id="ipysigma-information-info-button" class="ipysigma-tab-button">info</em>
     </div>
     <hr>
     <div id="ipysigma-legend"></div>
-    <div id="ipysigma-node-information"></div>
+    <div id="ipysigma-information-contents"></div>
   </div>
   <div id="ipysigma-download-controls">
     <button id="ipysigma-download-png-button" class="ipysigma-button">
@@ -210,7 +212,7 @@ function escapeHtml(unsafe: string): string {
     .replace(/'/g, '&#039;');
 }
 
-function renderAttributeValue(value: any): string {
+function renderTypedValue(value: any): string {
   const safe = escapeHtml('' + value);
 
   let type = 'unknown';
@@ -347,11 +349,12 @@ export class SigmaView extends DOMWidgetView {
 
   choices: Choices;
   currentTab: InformationDisplayTab = 'legend';
-  nodeInfoElement: HTMLElement;
+  infoElement: HTMLElement;
   legendElement: HTMLElement;
   legendButton: HTMLElement;
   nodeInfoButton: HTMLElement;
   selectedNode: string | null = null;
+  selectedEdge: string | null = null;
   focusedNodes: Set<string> | null = null;
 
   downloadPNGButton: HTMLElement;
@@ -466,15 +469,15 @@ export class SigmaView extends DOMWidgetView {
       position: 'bottom',
     });
 
-    this.nodeInfoElement = this.el.querySelector(
-      '#ipysigma-node-information'
+    this.infoElement = this.el.querySelector(
+      '#ipysigma-information-contents'
     ) as HTMLElement;
     this.legendElement = this.el.querySelector(
       '#ipysigma-legend'
     ) as HTMLElement;
 
     this.nodeInfoButton = this.el.querySelector(
-      '#ipysigma-information-node-info-button'
+      '#ipysigma-information-info-button'
     ) as HTMLElement;
     this.legendButton = this.el.querySelector(
       '#ipysigma-information-legend-button'
@@ -710,12 +713,14 @@ export class SigmaView extends DOMWidgetView {
         }
 
         // Transient state
-        if (this.focusedNodes) {
+        if (this.selectedNode && this.focusedNodes) {
           const [source, target] = graph.extremities(edge);
 
           if (source !== this.selectedNode && target !== this.selectedNode) {
             displayData.hidden = true;
           }
+        } else if (this.selectedEdge) {
+          displayData.hidden = edge !== this.selectedEdge;
         }
 
         return displayData;
@@ -724,7 +729,7 @@ export class SigmaView extends DOMWidgetView {
       this.renderer = new Sigma(graph, this.container, rendererSettings);
       this.renderer.getCamera().setState({ x: CAMERA_OFFSET });
 
-      this.clearSelectedNode();
+      this.clearSelectedItem();
 
       this.bindMessageHandlers();
       this.bindRendererHandlers();
@@ -755,13 +760,13 @@ export class SigmaView extends DOMWidgetView {
 
   changeInformationDisplayTab(tab: InformationDisplayTab) {
     if (tab === 'legend') {
-      hide(this.nodeInfoElement);
+      hide(this.infoElement);
       show(this.legendElement);
       this.legendButton.classList.remove('selectable');
       this.nodeInfoButton.classList.add('selectable');
     } else {
       hide(this.legendElement);
-      show(this.nodeInfoElement);
+      show(this.infoElement);
       this.legendButton.classList.add('selectable');
       this.nodeInfoButton.classList.remove('selectable');
     }
@@ -837,15 +842,16 @@ export class SigmaView extends DOMWidgetView {
     this.legendElement.innerHTML = items.join('<hr>');
   }
 
-  clearSelectedNode() {
+  clearSelectedItem() {
+    this.selectedEdge = null;
     this.selectedNode = null;
     this.focusedNodes = null;
 
     if (this.model.get('clickable_edges')) {
-      this.nodeInfoElement.innerHTML =
+      this.infoElement.innerHTML =
         '<i>Click on a node/edge or search a node to display information about it...</i>';
     } else {
-      this.nodeInfoElement.innerHTML =
+      this.infoElement.innerHTML =
         '<i>Click on a node or search a node to display information about it...</i>';
     }
 
@@ -854,36 +860,58 @@ export class SigmaView extends DOMWidgetView {
     this.renderer.refresh();
   }
 
-  selectNode(key: string) {
+  selectItem(type: ItemType, key: string) {
     const graph = this.graph;
 
-    this.selectedNode = key;
-    const focusedNodes: Set<string> = new Set();
+    if (type === 'node') {
+      this.selectedEdge = null;
+      this.selectedNode = key;
+      const focusedNodes: Set<string> = new Set();
 
-    focusedNodes.add(this.selectedNode);
+      focusedNodes.add(this.selectedNode);
 
-    graph.forEachNeighbor(key, (neighbor) => {
-      focusedNodes.add(neighbor);
-    });
+      graph.forEachNeighbor(key, (neighbor) => {
+        focusedNodes.add(neighbor);
+      });
 
-    this.focusedNodes = focusedNodes;
+      this.focusedNodes = focusedNodes;
+    } else {
+      this.selectedEdge = key;
+      this.selectedNode = null;
+      this.focusedNodes = new Set(this.graph.extremities(key));
+    }
 
-    const attr = graph.getNodeAttributes(key);
+    const attr =
+      type === 'node'
+        ? graph.getNodeAttributes(key)
+        : graph.getEdgeAttributes(key);
 
-    let innerHTML = `<b>key</b> <i>${escapeHtml(key)}</i>`;
+    let innerHTML = '';
+
+    if (type === 'node') {
+      innerHTML += `<b>Node</b> <i>${renderTypedValue(key)}</i>`;
+    } else {
+      const [source, target] = this.graph.extremities(key);
+      innerHTML += `<b>Edge</b><br>from ${renderTypedValue(
+        source
+      )} to ${renderTypedValue(target)}`;
+    }
 
     const kwargInfo: string[] = [];
     const vizInfo: string[] = [];
     const info: string[] = [];
 
+    const vizAttributes =
+      type === 'node' ? NODE_VIZ_ATTRIBUTES : EDGE_VIZ_ATTRIBUTES;
+
     for (let k in attr) {
       let target = info;
 
-      if (NODE_VIZ_ATTRIBUTES.has(k)) target = vizInfo;
+      if (vizAttributes.has(k)) target = vizInfo;
       else if (k.startsWith('$$')) target = kwargInfo;
 
       target.push(
-        `<b>${k.startsWith('$$') ? k.slice(2) : k}</b> ${renderAttributeValue(
+        `<b>${k.startsWith('$$') ? k.slice(2) : k}</b> ${renderTypedValue(
           attr[k]
         )}`
       );
@@ -892,25 +920,27 @@ export class SigmaView extends DOMWidgetView {
     if (kwargInfo.length !== 0)
       innerHTML += '<hr>From kwargs:<br>' + kwargInfo.join('<br>');
     if (info.length !== 0)
-      innerHTML += '<hr>Node attributes:<br>' + info.join('<br>');
+      innerHTML += `<hr>Attributes:<br>` + info.join('<br>');
     if (vizInfo.length !== 0)
       innerHTML += '<hr>Known viz data:<br>' + vizInfo.join('<br>');
 
-    innerHTML += '<hr>Computed metrics:<br>';
-    innerHTML += `<b>degree</b> ${renderAttributeValue(graph.degree(key))}<br>`;
+    if (type === 'node') {
+      innerHTML += '<hr>Computed metrics:<br>';
+      innerHTML += `<b>degree</b> ${renderTypedValue(graph.degree(key))}<br>`;
 
-    if (graph.directedSize !== 0) {
-      innerHTML += `<b>indegree</b> ${renderAttributeValue(
-        graph.inDegree(key)
-      )}<br>`;
-      innerHTML += `<b>outdegree</b> ${renderAttributeValue(
-        graph.outDegree(key)
-      )}<br>`;
+      if (graph.directedSize !== 0) {
+        innerHTML += `<b>indegree</b> ${renderTypedValue(
+          graph.inDegree(key)
+        )}<br>`;
+        innerHTML += `<b>outdegree</b> ${renderTypedValue(
+          graph.outDegree(key)
+        )}<br>`;
+      }
     }
 
-    this.nodeInfoElement.innerHTML = innerHTML;
+    this.infoElement.innerHTML = innerHTML;
 
-    this.changeInformationDisplayTab('node-info');
+    this.changeInformationDisplayTab('info');
 
     this.renderer.refresh();
   }
@@ -935,14 +965,14 @@ export class SigmaView extends DOMWidgetView {
     this.renderer.on('clickNode', ({ node }) => {
       if (node === this.selectedNode) return;
 
-      this.selectNode(node);
+      this.selectItem('node', node);
       this.choices.setChoiceByValue(node);
     });
 
     this.renderer.on('clickStage', () => {
       if (!this.selectedNode) return;
 
-      this.clearSelectedNode();
+      this.clearSelectedItem();
       this.choices.setChoiceByValue('');
     });
 
@@ -953,6 +983,12 @@ export class SigmaView extends DOMWidgetView {
 
       this.renderer.on('leaveEdge', () => {
         this.container.style.cursor = 'default';
+      });
+
+      this.renderer.on('clickEdge', ({ edge }) => {
+        if (edge === this.selectedEdge) return;
+
+        this.selectItem('edge', edge);
       });
     }
   }
@@ -965,9 +1001,9 @@ export class SigmaView extends DOMWidgetView {
 
         if (node === this.selectedNode) return;
 
-        if (!node) return this.clearSelectedNode();
+        if (!node) return this.clearSelectedItem();
 
-        this.selectNode(node);
+        this.selectItem('node', node);
       }
     );
   }
@@ -982,7 +1018,7 @@ export class SigmaView extends DOMWidgetView {
     this.nodeInfoButton.onclick = () => {
       if (!this.nodeInfoButton.classList.contains('selectable')) return;
 
-      this.changeInformationDisplayTab('node-info');
+      this.changeInformationDisplayTab('info');
     };
   }
 
