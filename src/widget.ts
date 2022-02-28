@@ -42,6 +42,15 @@ import 'choices.js/public/assets/styles/choices.min.css';
 import '../css/widget.css';
 
 /**
+ * Constants.
+ */
+const CAMERA_OFFSET = 0.65;
+const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
+const CATEGORY_MAX_COUNT = 10;
+const DEFAULT_CONSTANT_NODE_SIZE = 5;
+const PALETTE_OVERFLOW = Symbol();
+
+/**
  * Types.
  */
 type RNGFunction = () => number;
@@ -49,7 +58,10 @@ type InformationDisplayTab = 'legend' | 'node-info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
 type Range = [number, number];
-type Palette = Record<string, string>;
+type Palette = {
+  [value: string]: string;
+  [PALETTE_OVERFLOW]: boolean;
+};
 
 type RawVisualVariable = {
   type: 'raw';
@@ -77,14 +89,6 @@ type VisualVariables = {
   node_size: VisualVariable;
   node_label: RawVisualVariable;
 };
-
-/**
- * Constants.
- */
-const CAMERA_OFFSET = 0.65;
-const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
-const CATEGORY_MAX_COUNT = 10;
-const DEFAULT_CONSTANT_NODE_SIZE = 5;
 
 /**
  * Template.
@@ -497,13 +501,16 @@ export class SigmaView extends DOMWidgetView {
       });
 
       if (nodeColorCategory) {
-        const count = Math.max(
+        const count = Math.min(
           nodeCategoryFrequencies.dimension,
           CATEGORY_MAX_COUNT
         );
+
         const colors = generatePalette(nodeColorCategory, count);
 
-        nodeColorPalette = {};
+        nodeColorPalette = {
+          [PALETTE_OVERFLOW]: count < nodeCategoryFrequencies.dimension,
+        };
 
         nodeCategoryFrequencies.top(count).forEach(([value], i) => {
           (<Palette>nodeColorPalette)[value] = colors[i];
@@ -658,6 +665,10 @@ export class SigmaView extends DOMWidgetView {
             paletteItems.push(
               `<span style="color: ${palette[k]}">■</span> ${k}`
             );
+          }
+
+          if (palette[PALETTE_OVERFLOW]) {
+            paletteItems.push('<span style="color: #999">■</span> ...');
           }
         } else {
           paletteItems.push('<span style="color: #999">■</span> default');
