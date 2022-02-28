@@ -1,6 +1,6 @@
 {
   "name": "ipysigma",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A custom Jupyter widget library to display graphs using sigma.js.",
   "keywords": [
     "sigma",
