@@ -57,6 +57,8 @@ Sigma(g)
 
 ## Development Installation
 
+Be sure to have a working installation of Node.js >= 14.
+
 Create a dev environment using conda or pyenv:
 
 ```bash
