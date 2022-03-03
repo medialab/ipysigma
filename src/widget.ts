@@ -911,7 +911,11 @@ export class SigmaView extends DOMWidgetView {
       innerHTML += `<b>Node</b> <i>${renderTypedValue(key)}</i>`;
     } else {
       const [source, target] = this.graph.extremities(key);
-      innerHTML += `<b>Edge</b><br>from ${renderTypedValue(
+      innerHTML += '<b>Edge</b>'
+
+      if (!key.startsWith('geid_')) innerHTML += ` <i>${renderTypedValue(key)}</i>`;
+
+      innerHTML += `<br>from ${renderTypedValue(
         source
       )} to ${renderTypedValue(target)}`;
     }

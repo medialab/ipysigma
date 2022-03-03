@@ -224,11 +224,12 @@ class Sigma(DOMWidget):
         self.clickable_edges = clickable_edges
 
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
+        is_multi = isinstance(graph, MULTI_GRAPHS)
 
         # Serializing graph as per graphology's JSON format
         nodes = []
 
-        for node, attr in graph.nodes(data=True):
+        for node, attr in graph.nodes.data():
             attr = attr.copy()
 
             if process_gexf_viz:
@@ -243,12 +244,15 @@ class Sigma(DOMWidget):
 
         edges = []
 
-        for source, target, attr in graph.edges(data=True):
+        for source, target, attr in graph.edges.data():
             attr = attr.copy()
 
             if process_gexf_viz:
                 process_edge_gexf_viz(attr)
 
+            # NOTE: networkx multigraph can have keys on edges, but they
+            # are not required to be unique across the graph, which makes
+            # them pointless for graphology, gexf etc.
             serialized_edge = {
                 'source': source,
                 'target': target,
@@ -360,7 +364,7 @@ class Sigma(DOMWidget):
             'edges': edges,
             'options': {
                 'type': 'directed' if is_directed else 'undirected',
-                'multi': isinstance(graph, MULTI_GRAPHS),
+                'multi': is_multi,
             }
         }
 
