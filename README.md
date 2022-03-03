@@ -1,6 +1,6 @@
 # ipysigma
 
-A custom Jupyter widget library to display graphs using sigma.js.
+A custom Jupyter widget library to display graphs using [sigma.js](https://github.com/jacomyal/sigma.js).
 
 ## Summary
 
@@ -34,6 +34,8 @@ jupyter nbextension enable --py --system ipysigma
 
 ## Usage
 
+ipysigma works with the library [networkx](https://networkx.org/). It must be imported.
+
 ```python
 import networkx as nx
 from ipysigma import Sigma
@@ -50,8 +52,39 @@ Sigma(g, height=300)
 # Starting layout automatically
 Sigma(g, start_layout=True)
 
-# Displaying a gexf file
-g = nx.read_gexf('./path/to/file.gexf')
+# Or write
+Sigma(g, height=300, start_layout=True)
+```
+
+You can customize the appearance of the graph based on certain characteristics of your nodes and links. These are types, occurrences, and labels.
+
+```python
+Sigma(g, node_color='type', node_size=g.degree, edge_size='weight', node_label='title')
+```
+
+You can apply these visual characteristics directly to the node record.
+
+```python
+G = nx.Graph()
+G.add_nodes_from([
+    ('Beth Bailey', {"color": "rgb(255,204,102)", "size": 3, "label": "District Directives Coordinator"}),
+    ('Dana Rowe', {"color": "rgb(255,255,51)", "size": 30, "label": "Future Group Supervisor"})
+])
+G.add_edges_from([
+    ('Beth Bailey', 'Dana Rowe')
+])
+
+Sigma(G)
+```
+
+Load GEXF file
+
+```
+curl -o arctic.gexf "https://raw.githubusercontent.com/Yomguithereal/ipysigma/master/notebooks/data/arctic.gexf"
+```
+
+```python
+g = nx.read_gexf('arctic.gexf')
 Sigma(g)
 ```
 
