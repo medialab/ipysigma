@@ -18,98 +18,99 @@ MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
 DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 DEFAULT_NODE_SIZE_RANGE = (2, 12)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
+SUPPORTED_NODE_TYPES = (int, str, float)
 
 
 # =============================================================================
 # Helpers
 # =============================================================================
 def pretty_print_int(v):
-    return '{:,}'.format(int(v))
+    return "{:,}".format(int(v))
 
 
 def extract_rgba_from_viz(viz_color):
-    if 'a' in viz_color:
-        return 'rgba(%s, %s, %s, %s)' % (
-            viz_color['r'],
-            viz_color['g'],
-            viz_color['b'],
-            viz_color['a'],
+    if "a" in viz_color:
+        return "rgba(%s, %s, %s, %s)" % (
+            viz_color["r"],
+            viz_color["g"],
+            viz_color["b"],
+            viz_color["a"],
         )
 
-    return 'rgba(%s, %s, %s)' % (
-            viz_color['r'],
-            viz_color['g'],
-            viz_color['b'],
-        )
+    return "rgba(%s, %s, %s)" % (
+        viz_color["r"],
+        viz_color["g"],
+        viz_color["b"],
+    )
 
 
 def resolve_variable_kwarg(items, variable, name, target, allow_arbitrary_data=True):
     if isinstance(target, str):
-        variable['attribute'] = target
+        variable["attribute"] = target
 
     elif isinstance(target, (Iterable, Mapping)):
         if not allow_arbitrary_data:
-            raise TypeError('%s should be a string' % name)
+            raise TypeError("%s should be a string" % name)
 
         mapping = dict(target)
-        target = '$$%s' % name
+        target = "$$%s" % name
 
         for node in items:
-            v = mapping.get(node['key'])
+            v = mapping.get(node["key"])
 
             if v is None:
                 continue
 
-            node['attributes'][target] = v
+            node["attributes"][target] = v
 
-        variable['attribute'] = target
+        variable["attribute"] = target
 
     else:
-        raise TypeError('%s should be a string, an iterable or a mapping' % name)
+        raise TypeError("%s should be a string, an iterable or a mapping" % name)
 
 
 def process_node_gexf_viz(attr):
-    if 'viz' not in attr:
+    if "viz" not in attr:
         return
 
-    viz = attr['viz']
+    viz = attr["viz"]
 
     # Size
-    if 'size' in viz and 'size' not in attr:
-        attr['size'] = viz['size']
+    if "size" in viz and "size" not in attr:
+        attr["size"] = viz["size"]
 
     # Position
-    if 'position' in viz and 'x' not in attr and 'y' not in attr:
-        pos = viz['position']
+    if "position" in viz and "x" not in attr and "y" not in attr:
+        pos = viz["position"]
 
-        if 'x' in pos:
-            attr['x'] = pos['x']
+        if "x" in pos:
+            attr["x"] = pos["x"]
 
-        if 'y' in pos:
-            attr['y'] = pos['y']
+        if "y" in pos:
+            attr["y"] = pos["y"]
 
     # Color
-    if 'color' in viz and 'color' not in attr:
-        attr['color'] = extract_rgba_from_viz(viz['color'])
+    if "color" in viz and "color" not in attr:
+        attr["color"] = extract_rgba_from_viz(viz["color"])
 
-    del attr['viz']
+    del attr["viz"]
 
 
 def process_edge_gexf_viz(attr):
-    if 'viz' not in attr:
+    if "viz" not in attr:
         return
 
-    viz = attr['viz']
+    viz = attr["viz"]
 
     # Thickness
-    if 'thickness' in viz and 'size' not in attr:
-        attr['size'] = viz['thickness']
+    if "thickness" in viz and "size" not in attr:
+        attr["size"] = viz["thickness"]
 
     # Color
-    if 'color' in viz and 'color' not in attr:
-        attr['color'] = extract_rgba_from_viz(viz['color'])
+    if "color" in viz and "color" not in attr:
+        attr["color"] = extract_rgba_from_viz(viz["color"])
 
-    del attr['viz']
+    del attr["viz"]
 
 
 # =============================================================================
@@ -162,56 +163,60 @@ class Sigma(DOMWidget):
             Defaults to True.
     """
 
-    _model_name = Unicode('SigmaModel').tag(sync=True)
+    _model_name = Unicode("SigmaModel").tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
-    _view_name = Unicode('SigmaView').tag(sync=True)
+    _view_name = Unicode("SigmaView").tag(sync=True)
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     singleton_lock = Bool(False).tag(sync=True)
-    data = Dict({'nodes': [], 'edges': []}).tag(sync=True)
+    data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     clickable_edges = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
-    visual_variables = Dict({
-        'node_label': {
-            'type': 'raw',
-            'attribute': 'label'
-        },
-        'node_color': {
-            'type': 'raw',
-            'attribute': 'color'
-        },
-        'node_size': {
-            'type': 'continuous',
-            'attribute': 'size',
-            'range': DEFAULT_NODE_SIZE_RANGE
-        },
-        'edge_label': None,
-        'edge_color': {
-            'type': 'raw',
-            'attribute': 'color'
-        },
-        'edge_size': {
-            'type': 'continuous',
-            'attribute': 'size',
-            'range': DEFAULT_EDGE_SIZE_RANGE
+    visual_variables = Dict(
+        {
+            "node_label": {"type": "raw", "attribute": "label"},
+            "node_color": {"type": "raw", "attribute": "color"},
+            "node_size": {
+                "type": "continuous",
+                "attribute": "size",
+                "range": DEFAULT_NODE_SIZE_RANGE,
+            },
+            "edge_label": None,
+            "edge_color": {"type": "raw", "attribute": "color"},
+            "edge_size": {
+                "type": "continuous",
+                "attribute": "size",
+                "range": DEFAULT_EDGE_SIZE_RANGE,
+            },
         }
-    }).tag(sync=True)
+    ).tag(sync=True)
 
-    def __init__(self, graph, height=500, start_layout=False, node_color=None,
-                 node_size='size', node_size_range=DEFAULT_NODE_SIZE_RANGE,
-                 node_label='label', edge_color=None, edge_size='size',
-                 edge_size_range=DEFAULT_EDGE_SIZE_RANGE, edge_label=None,
-                 clickable_edges=False, process_gexf_viz=True,
-                 **kwargs):
+    def __init__(
+        self,
+        graph,
+        height=500,
+        start_layout=False,
+        node_color=None,
+        node_size="size",
+        node_size_range=DEFAULT_NODE_SIZE_RANGE,
+        node_label="label",
+        edge_color=None,
+        edge_size="size",
+        edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
+        edge_label=None,
+        clickable_edges=False,
+        process_gexf_viz=True,
+        **kwargs
+    ):
         super(Sigma, self).__init__(**kwargs)
 
         if height < 250:
-            raise TypeError('Sigma widget cannot have a height < 250 px')
+            raise TypeError("Sigma widget cannot have a height < 250 px")
 
         # Own
         self.graph = graph
@@ -228,17 +233,29 @@ class Sigma(DOMWidget):
 
         # Serializing graph as per graphology's JSON format
         nodes = []
+        node_type = None
 
         for node, attr in graph.nodes.data():
+            if node_type is None:
+                node_type = type(node)
+
+                if not isinstance(node, SUPPORTED_NODE_TYPES):
+                    raise TypeError(
+                        "ipysigma does not support graph with node keys which are not str, int or float (found a %s key)"
+                        % node_type.__name__
+                    )
+            elif type(node) is not node_type:
+                raise TypeError(
+                    "ipysigma does not support mixed types for node keys (found %s and %s)"
+                    % (node_type.__name__, type(node).__name__)
+                )
+
             attr = attr.copy()
 
             if process_gexf_viz:
                 process_node_gexf_viz(attr)
 
-            serialized_node = {
-                'key': node,
-                'attributes': attr
-            }
+            serialized_node = {"key": node, "attributes": attr}
 
             nodes.append(serialized_node)
 
@@ -253,14 +270,10 @@ class Sigma(DOMWidget):
             # NOTE: networkx multigraph can have keys on edges, but they
             # are not required to be unique across the graph, which makes
             # them pointless for graphology, gexf etc.
-            serialized_edge = {
-                'source': source,
-                'target': target,
-                'attributes': attr
-            }
+            serialized_edge = {"source": source, "target": target, "attributes": attr}
 
             if not is_directed:
-                serialized_edge['undirected'] = True
+                serialized_edge["undirected"] = True
 
             edges.append(serialized_edge)
 
@@ -269,110 +282,69 @@ class Sigma(DOMWidget):
 
         # Nodes
         if node_color is not None:
-            variable = {
-                'type': 'category'
-            }
+            variable = {"type": "category"}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                'node_color',
-                node_color
-            )
+            resolve_variable_kwarg(nodes, variable, "node_color", node_color)
 
-            visual_variables['node_color'] = variable
+            visual_variables["node_color"] = variable
 
         if node_size is not None:
-            variable = {
-                'type': 'continuous',
-                'range': node_size_range
-            }
+            variable = {"type": "continuous", "range": node_size_range}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                'node_size',
-                node_size
-            )
+            resolve_variable_kwarg(nodes, variable, "node_size", node_size)
 
-            visual_variables['node_size'] = variable
+            visual_variables["node_size"] = variable
 
         if node_label is not None:
-            variable = {
-                'type': 'raw'
-            }
+            variable = {"type": "raw"}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                'node_label',
-                node_label
-            )
+            resolve_variable_kwarg(nodes, variable, "node_label", node_label)
 
-            visual_variables['node_label'] = variable
+            visual_variables["node_label"] = variable
 
         # Edges
         if edge_color is not None:
-            variable = {
-                'type': 'category'
-            }
+            variable = {"type": "category"}
 
             resolve_variable_kwarg(
-                edges,
-                variable,
-                'edge_color',
-                edge_color,
-                allow_arbitrary_data=False
+                edges, variable, "edge_color", edge_color, allow_arbitrary_data=False
             )
 
-            visual_variables['edge_color'] = variable
+            visual_variables["edge_color"] = variable
 
         if edge_size is not None:
-            variable = {
-                'type': 'continuous',
-                'range': edge_size_range
-            }
+            variable = {"type": "continuous", "range": edge_size_range}
 
             resolve_variable_kwarg(
-                edges,
-                variable,
-                'edge_size',
-                edge_size,
-                allow_arbitrary_data=False
+                edges, variable, "edge_size", edge_size, allow_arbitrary_data=False
             )
 
-            visual_variables['edge_size'] = variable
+            visual_variables["edge_size"] = variable
 
         if edge_label is not None:
-            variable = {
-                'type': 'raw'
-            }
+            variable = {"type": "raw"}
 
             resolve_variable_kwarg(
-                edges,
-                variable,
-                'edge_label',
-                edge_label,
-                allow_arbitrary_data=False
+                edges, variable, "edge_label", edge_label, allow_arbitrary_data=False
             )
 
-            visual_variables['edge_label'] = variable
+            visual_variables["edge_label"] = variable
 
         self.visual_variables = visual_variables
         self.data = {
-            'nodes': nodes,
-            'edges': edges,
-            'options': {
-                'type': 'directed' if is_directed else 'undirected',
-                'multi': is_multi,
-            }
+            "nodes": nodes,
+            "edges": edges,
+            "options": {
+                "type": "directed" if is_directed else "undirected",
+                "multi": is_multi,
+            },
         }
 
     def __repr__(self):
-        return 'Sigma(nx.%s with %s nodes and %s edges)' % (
+        return "Sigma(nx.%s with %s nodes and %s edges)" % (
             self.graph.__class__.__name__,
             pretty_print_int(self.graph.order()),
-            pretty_print_int(self.graph.size())
+            pretty_print_int(self.graph.size()),
         )
 
     def retrieve_layout(self):
@@ -401,12 +373,14 @@ class Sigma(DOMWidget):
         """
 
         if self.layout is None:
-            raise TypeError('Widget did not compute any layout yet. Are you sure you displayed it?')
+            raise TypeError(
+                "Widget did not compute any layout yet. Are you sure you displayed it?"
+            )
 
         for node, attr in self.graph.nodes(data=True):
             pos = self.layout[node]
-            attr['x'] = pos['x']
-            attr['y'] = pos['y']
+            attr["x"] = pos["x"]
+            attr["y"] = pos["y"]
 
     def render_snasphot(self):
         """
@@ -421,17 +395,21 @@ class Sigma(DOMWidget):
         """
 
         if not self.singleton_lock:
-            raise TypeError('Widget needs to be displayed on screen to render a snapshot. Maybe you reinstantiated it and forgot to display the new instance?')
+            raise TypeError(
+                "Widget needs to be displayed on screen to render a snapshot. Maybe you reinstantiated it and forgot to display the new instance?"
+            )
 
         self.snapshot = None
 
-        html = HTML('<i>rendering snapshot...</i>')
+        html = HTML("<i>rendering snapshot...</i>")
 
         def update(change):
-            html.value = '<img src="{}" style="max-width: 100%; height: auto; border: 1px solid #e0e0e0;">'.format(change.new)
-            self.unobserve(update, 'snapshot')
+            html.value = '<img src="{}" style="max-width: 100%; height: auto; border: 1px solid #e0e0e0;">'.format(
+                change.new
+            )
+            self.unobserve(update, "snapshot")
 
-        self.observe(update, 'snapshot')
-        self.send({'msg': 'render_snapshot'})
+        self.observe(update, "snapshot")
+        self.send({"msg": "render_snapshot"})
 
         return html

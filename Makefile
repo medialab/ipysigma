@@ -14,13 +14,16 @@ clean:
 deps:
 	npm i -g yarn
 	pip3 install -U pip
-	pip3 install build twine jupyter_packaging
+	pip3 install build twine jupyter_packaging black
 	pip3 install jupyterlab
 	pip3 install -e ".[test, examples]"
 	yarn run build
 	jupyter labextension develop --overwrite .
 	jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
 	jupyter nbextension enable --sys-prefix --py ipysigma
+
+format:
+	black ipysigma
 
 unit:
 	@echo Running python tests...
