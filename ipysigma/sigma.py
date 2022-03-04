@@ -233,21 +233,21 @@ class Sigma(DOMWidget):
 
         # Serializing graph as per graphology's JSON format
         nodes = []
-        node_type = None
+        self.node_type = None
 
         for node, attr in graph.nodes.data():
-            if node_type is None:
-                node_type = type(node)
+            if self.node_type is None:
+                self.node_type = type(node)
 
                 if not isinstance(node, SUPPORTED_NODE_TYPES):
                     raise TypeError(
                         "ipysigma does not support graph with node keys which are not str, int or float (found a %s key)"
-                        % node_type.__name__
+                        % self.node_type.__name__
                     )
-            elif type(node) is not node_type:
+            elif type(node) is not self.node_type:
                 raise TypeError(
                     "ipysigma does not support mixed types for node keys (found %s and %s)"
-                    % (node_type.__name__, type(node).__name__)
+                    % (self.node_type.__name__, type(node).__name__)
                 )
 
             attr = attr.copy()
@@ -347,7 +347,7 @@ class Sigma(DOMWidget):
             pretty_print_int(self.graph.size()),
         )
 
-    def retrieve_layout(self):
+    def get_layout(self):
         """
         Method returning the layout computed by ForceAtlas2 in the widget.
 
@@ -360,7 +360,10 @@ class Sigma(DOMWidget):
         Returns:
             dict: a dictionary mapping node keys to {x, y} positions.
         """
-        return self.layout
+        if self.layout is None:
+            return None
+
+        return {self.node_type(n): p for n, p in self.layout.items()}
 
     def persist_layout(self):
         """
@@ -378,7 +381,7 @@ class Sigma(DOMWidget):
             )
 
         for node, attr in self.graph.nodes(data=True):
-            pos = self.layout[node]
+            pos = self.layout[str(node)]
             attr["x"] = pos["x"]
             attr["y"] = pos["y"]
 
