@@ -866,6 +866,8 @@ export class SigmaView extends DOMWidgetView {
     this.selectedNode = null;
     this.focusedNodes = null;
 
+    this.choices.setChoiceByValue('');
+
     if (this.model.get('clickable_edges')) {
       this.infoElement.innerHTML =
         '<i>Click on a node/edge or search a node to display information about it...</i>';
@@ -894,10 +896,12 @@ export class SigmaView extends DOMWidgetView {
       });
 
       this.focusedNodes = focusedNodes;
+      this.choices.setChoiceByValue(key);
     } else {
       this.selectedEdge = key;
       this.selectedNode = null;
       this.focusedNodes = new Set(this.graph.extremities(key));
+      this.choices.setChoiceByValue('');
     }
 
     const attr =
@@ -989,14 +993,12 @@ export class SigmaView extends DOMWidgetView {
       if (node === this.selectedNode) return;
 
       this.selectItem('node', node);
-      this.choices.setChoiceByValue(node);
     });
 
     this.renderer.on('clickStage', () => {
-      if (!this.selectedNode) return;
+      if (!this.selectedNode && !this.selectedEdge) return;
 
       this.clearSelectedItem();
-      this.choices.setChoiceByValue('');
     });
 
     if (this.model.get('clickable_edges')) {
