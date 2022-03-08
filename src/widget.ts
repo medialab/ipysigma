@@ -972,6 +972,14 @@ export class SigmaView extends DOMWidgetView {
     this.renderer.refresh();
   }
 
+  moveCameraToNode(node: string): void {
+    const pos = this.renderer.getNodeDisplayData(node);
+
+    if (!pos) return;
+
+    this.renderer.getCamera().animate(pos, {duration: 500});
+  }
+
   bindMessageHandlers() {
     this.model.on('msg:custom', (content) => {
       if (content.msg === 'render_snapshot') {
@@ -1029,6 +1037,10 @@ export class SigmaView extends DOMWidgetView {
         if (!node) return this.clearSelectedItem();
 
         this.selectItem('node', node);
+
+        // We don't need to move the camera if we are fully unzoomed
+        if (this.renderer.getCamera().getState().ratio >= 1) return;
+        this.moveCameraToNode(node);
       }
     );
   }
