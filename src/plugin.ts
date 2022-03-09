@@ -1,6 +1,3 @@
-// Copyright (c) Yomguithereal
-// Distributed under the terms of the Modified BSD License.
-
 import { Application, IPlugin } from '@phosphor/application';
 
 import { Widget } from '@phosphor/widgets';

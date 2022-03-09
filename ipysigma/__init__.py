@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Copyright (c) Yomguithereal.
-# Distributed under the terms of the Modified BSD License.
-
 from .sigma import Sigma
 from ._version import __version__, version_info
 

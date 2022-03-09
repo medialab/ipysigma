@@ -15,9 +15,9 @@
     "dist/*.js",
     "css/*.css"
   ],
-  "homepage": "https://github.com/Yomguithereal/ipysigma",
+  "homepage": "https://github.com/medialab/ipysigma",
   "bugs": {
-    "url": "https://github.com/Yomguithereal/ipysigma/issues"
+    "url": "https://github.com/medialab/ipysigma/issues"
   },
   "license": "MIT",
   "author": {
@@ -28,7 +28,7 @@
   "types": "./lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Yomguithereal/ipysigma"
+    "url": "https://github.com/medialab/ipysigma"
   },
   "scripts": {
     "build": "yarn run build:lib && yarn run build:nbextension && yarn run build:labextension:dev",

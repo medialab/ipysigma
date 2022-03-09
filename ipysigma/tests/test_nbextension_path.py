@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Copyright (c) Yomguithereal.
-# Distributed under the terms of the Modified BSD License.
-
 
 def test_nbextension_path():
     # Check that magic function can be imported from package root:
