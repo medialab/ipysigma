@@ -1,6 +1,6 @@
 # ipysigma
 
-A custom Jupyter widget library to display graphs using sigma.js.
+A Jupyter widget using sigma.js to render interactive networks.
 
 ## Summary
 

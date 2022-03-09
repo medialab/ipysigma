@@ -66,7 +66,7 @@ cmdclass['jsdeps'] = skip_if_exists(jstargets, npm_install)
 
 setup_args = dict(
     name            = name,
-    description     = 'A custom Jupyter widget library to display graphs using sigma.js.',
+    description     = 'A Jupyter widget using sigma.js to render interactive networks.',
     version         = version,
     scripts         = glob(pjoin('scripts', '*')),
     cmdclass        = cmdclass,
