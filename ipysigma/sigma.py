@@ -210,10 +210,9 @@ class Sigma(DOMWidget):
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         clickable_edges=False,
-        process_gexf_viz=True,
-        **kwargs
+        process_gexf_viz=True
     ):
-        super(Sigma, self).__init__(**kwargs)
+        super(Sigma, self).__init__()
 
         if height < 250:
             raise TypeError("Sigma widget cannot have a height < 250 px")
