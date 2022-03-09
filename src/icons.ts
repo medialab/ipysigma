@@ -13,3 +13,5 @@ export const pauseIcon = `<svg width="20" height="20" focusable="false" viewBox=
 export const fullscreenEnterIcon = `<svg width="20" height="20" focusable="false" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>`;
 
 export const fullscreenExitIcon = `<svg width="20" height="20" focusable="false" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>`;
+
+export const scatterIcon = `<svg width="20" height="20" focusable="false" viewBox="0 0 24 24"><circle cx="7" cy="14" r="3"></circle><circle cx="11" cy="6" r="3"></circle><circle cx="16.6" cy="17.6" r="3"></circle></svg>`;

@@ -7,8 +7,10 @@ import {
 import Graph from 'graphology';
 import { SerializedGraph } from 'graphology-types';
 import LayoutSupervisor from 'graphology-layout-forceatlas2/worker';
+import NoverlapSupervisor from 'graphology-layout-noverlap/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import Sigma from 'sigma';
+import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
@@ -37,6 +39,7 @@ import {
   resetLayoutIcon,
   fullscreenEnterIcon,
   fullscreenExitIcon,
+  scatterIcon,
 } from './icons';
 
 import 'choices.js/public/assets/styles/choices.min.css';
@@ -123,6 +126,9 @@ const TEMPLATE = `
   <div id="ipysigma-layout-controls">
     <button id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
       ${playIcon}
+    </button>
+    <button id="ipysigma-noverlap-button" class="ipysigma-button ipysigma-svg-icon" title="spread nodes">
+      ${scatterIcon}
     </button>
     <button id="ipysigma-reset-layout-button" class="ipysigma-button ipysigma-svg-icon" title="reset layout">
       ${resetLayoutIcon}
@@ -300,6 +306,16 @@ function show(el: HTMLElement): void {
   el.style.display = 'block';
 }
 
+function disable(el: HTMLButtonElement): void {
+  el.classList.add('disabled');
+  el.disabled = true;
+}
+
+function enable(el: HTMLButtonElement): void {
+  el.classList.remove('disabled');
+  el.disabled = false;
+}
+
 const SPINNER_STATES = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
 function createSpinner(): [HTMLElement, () => void] {
@@ -349,8 +365,10 @@ export class SigmaView extends DOMWidgetView {
 
   originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
-  layoutButton: HTMLElement;
-  resetLayoutButton: HTMLElement;
+  noverlap: NoverlapSupervisor;
+  layoutButton: HTMLButtonElement;
+  noverlapButton: HTMLButtonElement;
+  resetLayoutButton: HTMLButtonElement;
   layoutSpinner: [HTMLElement, () => void] | null = null;
   layoutControls: HTMLElement;
 
@@ -410,9 +428,6 @@ export class SigmaView extends DOMWidgetView {
       this.saveLayout();
     }
     this.originalLayoutPositions = collectLayout(graph);
-    this.layout = new LayoutSupervisor(graph, {
-      settings: forceAtlas2.inferSettings(graph),
-    });
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     this.el.style.width = '100%';
@@ -452,10 +467,13 @@ export class SigmaView extends DOMWidgetView {
     ) as HTMLElement;
     this.layoutButton = this.el.querySelector(
       '#ipysigma-layout-button'
-    ) as HTMLElement;
+    ) as HTMLButtonElement;
+    this.noverlapButton = this.el.querySelector(
+      '#ipysigma-noverlap-button'
+    ) as HTMLButtonElement;
     this.resetLayoutButton = this.el.querySelector(
       '#ipysigma-reset-layout-button'
-    ) as HTMLElement;
+    ) as HTMLButtonElement;
 
     // Search
     var searchContainer = this.el.querySelector(
@@ -527,7 +545,7 @@ export class SigmaView extends DOMWidgetView {
         defaultEdgeType: graph.type !== 'undirected' ? 'arrow' : 'line',
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
-        labelGridCellSize: 250
+        labelGridCellSize: 250,
       };
 
       // Gathering info about the graph to build reducers correctly
@@ -916,13 +934,14 @@ export class SigmaView extends DOMWidgetView {
       innerHTML += `<b>Node</b> <i>${renderTypedValue(key)}</i>`;
     } else {
       const [source, target] = this.graph.extremities(key);
-      innerHTML += '<b>Edge</b>'
+      innerHTML += '<b>Edge</b>';
 
-      if (!key.startsWith('geid_')) innerHTML += ` <i>${renderTypedValue(key)}</i>`;
+      if (!key.startsWith('geid_'))
+        innerHTML += ` <i>${renderTypedValue(key)}</i>`;
 
-      innerHTML += `<br>from ${renderTypedValue(
-        source
-      )} to ${renderTypedValue(target)}`;
+      innerHTML += `<br>from ${renderTypedValue(source)} to ${renderTypedValue(
+        target
+      )}`;
     }
 
     const kwargInfo: string[] = [];
@@ -978,7 +997,7 @@ export class SigmaView extends DOMWidgetView {
 
     if (!pos) return;
 
-    this.renderer.getCamera().animate(pos, {duration: 500});
+    this.renderer.getCamera().animate(pos, { duration: 500 });
   }
 
   bindMessageHandlers() {
@@ -1108,6 +1127,32 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindLayoutHandlers() {
+    const graph = this.graph;
+    const renderer = this.renderer;
+
+    this.layout = new LayoutSupervisor(graph, {
+      settings: forceAtlas2.inferSettings(graph),
+    });
+
+    this.noverlap = new NoverlapSupervisor(graph, {
+      inputReducer(key, attr) {
+        const pos = renderer.graphToViewport(attr);
+
+        return {
+          x: pos.x,
+          y: pos.y,
+          size: renderer.getNodeDisplayData(key)?.size,
+        };
+      },
+      outputReducer(key, attr) {
+        return renderer.viewportToGraph(attr);
+      },
+      onConverged() {
+        stopNoverlap();
+      },
+      settings: { ratio: 1, margin: 3 },
+    });
+
     hide(this.resetLayoutButton);
 
     const stopLayout = () => {
@@ -1120,6 +1165,7 @@ export class SigmaView extends DOMWidgetView {
       this.layoutButton.setAttribute('title', 'start layout');
       this.layout.stop();
       this.saveLayout();
+      enable(this.noverlapButton);
       show(this.resetLayoutButton);
     };
 
@@ -1129,20 +1175,38 @@ export class SigmaView extends DOMWidgetView {
       this.layoutControls.appendChild(this.layoutSpinner[0]);
       this.layoutButton.setAttribute('title', 'stop layout');
       this.layout.start();
+      disable(this.noverlapButton);
+      hide(this.resetLayoutButton);
+    };
+
+    const stopNoverlap = () => {
+      if (this.layoutSpinner) {
+        this.layoutControls.removeChild(this.layoutSpinner[0]);
+        this.layoutSpinner[1]();
+        this.layoutSpinner = null;
+      }
+      this.noverlapButton.innerHTML = scatterIcon;
+      this.noverlapButton.setAttribute('title', 'spread nodes');
+      this.noverlap.stop();
+      this.saveLayout();
+      enable(this.layoutButton);
+      show(this.resetLayoutButton);
+    };
+
+    const startNoverlap = () => {
+      this.layoutSpinner = createSpinner();
+      this.noverlapButton.innerHTML = pauseIcon;
+      this.layoutControls.appendChild(this.layoutSpinner[0]);
+      this.noverlapButton.setAttribute('title', 'stop');
+      this.noverlap.start();
+      disable(this.layoutButton);
       hide(this.resetLayoutButton);
     };
 
     const resetLayout = () => {
       hide(this.resetLayoutButton);
       this.resetLayout();
-      this.graph.updateEachNodeAttributes((node, attr) => {
-        const pos = this.originalLayoutPositions[node];
-
-        attr.x = pos.x;
-        attr.y = pos.y;
-
-        return attr;
-      });
+      animateNodes(graph, this.originalLayoutPositions, { duration: 250 });
     };
 
     if (this.model.get('start_layout')) startLayout();
@@ -1152,6 +1216,14 @@ export class SigmaView extends DOMWidgetView {
         stopLayout();
       } else {
         startLayout();
+      }
+    };
+
+    this.noverlapButton.onclick = () => {
+      if (this.noverlap.isRunning()) {
+        stopNoverlap();
+      } else {
+        startNoverlap();
       }
     };
 

@@ -62,6 +62,15 @@
   user-select: none;
 }
 
+.ipysigma-widget .ipysigma-button.disabled {
+  border: none;
+  cursor: default;
+}
+
+.ipysigma-widget .ipysigma-button.disabled svg {
+  fill: #efefef;
+}
+
 .ipysigma-widget .ipysigma-button:hover {
   border-color: grey;
 }
@@ -96,7 +105,8 @@
   display: flex;
 }
 
-.ipysigma-widget #ipysigma-reset-layout-button {
+.ipysigma-widget #ipysigma-reset-layout-button,
+.ipysigma-widget #ipysigma-noverlap-button {
   margin-left: 4px;
 }
 
