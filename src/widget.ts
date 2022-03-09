@@ -527,6 +527,7 @@ export class SigmaView extends DOMWidgetView {
         defaultEdgeType: graph.type !== 'undirected' ? 'arrow' : 'line',
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
+        labelGridCellSize: 250
       };
 
       // Gathering info about the graph to build reducers correctly
