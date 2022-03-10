@@ -169,6 +169,8 @@ class Sigma(DOMWidget):
         camera_state (dict, optional): camera state of the widget, which is a dict
             of shape {x, y, ratio, angle}. Can be retrieved using the `get_camera_state`
             method. Defaults to {x: 0.65, y: 0.5, ratio: 1, angle: 0}.
+        layout (dict, optional): dict mapping nodes to {x, y} positions.
+            Defaults to None.
         clickable_edges (bool, optional): whether to enable edge events so you can
             click on them to get information. This can be costly on large graphs.
             Defaults to False.
@@ -225,6 +227,7 @@ class Sigma(DOMWidget):
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         camera_state=DEFAULT_CAMERA_STATE,
+        layout=None,
         clickable_edges=False,
         process_gexf_viz=True,
     ):
@@ -243,6 +246,14 @@ class Sigma(DOMWidget):
         self.layout = None
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
+
+        if layout is not None:
+            if not isinstance(layout, dict):
+                raise TypeError(
+                    "layout should be a dict from nodes to {x, y} positions"
+                )
+
+            self.layout = layout
 
         is_directed = isinstance(graph, DIRECTED_GRAPHS)
         is_multi = isinstance(graph, MULTI_GRAPHS)
