@@ -14,8 +14,6 @@ from ._frontend import module_name, module_version
 # =============================================================================
 # Constants
 # =============================================================================
-MULTI_GRAPHS = (nx.MultiGraph, nx.MultiDiGraph)
-DIRECTED_GRAPHS = (nx.DiGraph, nx.MultiDiGraph)
 DEFAULT_NODE_SIZE_RANGE = (2, 12)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
@@ -78,7 +76,10 @@ def resolve_metrics(name, target, supported):
 
     for k in metrics:
         if k not in supported:
-            raise TypeError('unknown %s "%s", expecting one of %s' % (name, k, ", ".join('"%s"' % m for m in supported)))
+            raise TypeError(
+                'unknown %s "%s", expecting one of %s'
+                % (name, k, ", ".join('"%s"' % m for m in supported))
+            )
 
     return metrics
 
@@ -162,6 +163,42 @@ def process_edge_gexf_viz(attr):
     del attr["viz"]
 
 
+def largest_connected_component(graph):
+    """
+    Function returning the largest connected component of given networkx graph
+    as a set of nodes.
+
+    Note: taken from pelote, maybe we can depend on pelote directly instead?
+
+    Args:
+        graph (nx.AnyGraph): target graph.
+
+    Returns:
+        set: set of nodes representing the largest connected component.
+    """
+
+    largest = None
+    remaining_nodes = graph.order()
+
+    components = (
+        nx.connected_components
+        if not graph.is_directed()
+        else nx.weakly_connected_components
+    )
+
+    for component in components(graph):
+        if largest is None or len(component) > len(largest):
+            largest = component
+
+        # Early exit
+        remaining_nodes -= len(largest)
+
+        if len(largest) > remaining_nodes:
+            break
+
+    return largest
+
+
 # =============================================================================
 # Widget definition
 # =============================================================================
@@ -217,6 +254,9 @@ class Sigma(DOMWidget):
         process_gexf_viz (bool, optional): whether to process "viz" data typically
             found in gexf files so they can be displayed correctly.
             Defaults to True.
+        only_largest_component (bool, optional): whether to only display the graph's
+            largest connected component.
+            Defaults to False.
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
@@ -276,6 +316,7 @@ class Sigma(DOMWidget):
         layout_settings=None,
         clickable_edges=False,
         process_gexf_viz=True,
+        only_largest_component=False,
     ):
         super(Sigma, self).__init__()
 
@@ -293,7 +334,9 @@ class Sigma(DOMWidget):
         self.layout_settings = layout_settings
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
-        self.node_metrics = resolve_metrics("node_metrics", node_metrics, SUPPORTED_NODE_METRICS)
+        self.node_metrics = resolve_metrics(
+            "node_metrics", node_metrics, SUPPORTED_NODE_METRICS
+        )
 
         if layout is not None:
             if not isinstance(layout, dict):
@@ -303,14 +346,22 @@ class Sigma(DOMWidget):
 
             self.layout = layout
 
-        is_directed = isinstance(graph, DIRECTED_GRAPHS)
-        is_multi = isinstance(graph, MULTI_GRAPHS)
+        is_directed = graph.is_directed()
+        is_multi = graph.is_multigraph()
 
         # Serializing graph as per graphology's JSON format
+        principal_component = None
+
+        if only_largest_component:
+            principal_component = largest_connected_component(graph)
+
         nodes = []
         self.node_type = None
 
         for node, attr in graph.nodes.data():
+            if principal_component and node not in principal_component:
+                continue
+
             if self.node_type is None:
                 self.node_type = type(node)
 
@@ -337,6 +388,9 @@ class Sigma(DOMWidget):
         edges = []
 
         for source, target, attr in graph.edges.data():
+            if principal_component and source not in principal_component:
+                continue
+
             attr = attr.copy()
 
             if process_gexf_viz:
