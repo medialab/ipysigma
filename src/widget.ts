@@ -806,7 +806,20 @@ export class SigmaView extends DOMWidgetView {
       const initialCameraState = this.model.get('camera_state') as CameraState;
       this.renderer.getCamera().setState(initialCameraState);
 
-      this.clearSelectedItem();
+      const selectedNode = this.model.get('selected_node') as
+        | string
+        | undefined;
+      const selectedEdge = this.model.get('selected_edge') as
+        | string
+        | undefined;
+
+      if (selectedNode) this.selectItem('node', selectedNode);
+      else if (selectedEdge)
+        this.selectItem(
+          'edge',
+          graph.edge(selectedEdge[0], selectedEdge[1]) as string
+        );
+      else this.clearSelectedItem();
 
       this.bindMessageHandlers();
       this.bindRendererHandlers();
@@ -941,6 +954,10 @@ export class SigmaView extends DOMWidgetView {
 
     this.changeInformationDisplayTab('legend');
 
+    this.model.set('selected_node', null);
+    this.model.set('selected_edge', null);
+    this.touch();
+
     this.renderer.refresh();
   }
 
@@ -960,12 +977,19 @@ export class SigmaView extends DOMWidgetView {
 
       this.focusedNodes = focusedNodes;
       this.choices.setChoiceByValue(key);
+      this.model.set('selected_node', key);
+      this.model.set('selected_edge', null);
     } else {
+      const extremities = graph.extremities(key);
       this.selectedEdge = key;
       this.selectedNode = null;
-      this.focusedNodes = new Set(this.graph.extremities(key));
+      this.focusedNodes = new Set(extremities);
       this.choices.setChoiceByValue('');
+      this.model.set('selected_edge', extremities);
+      this.model.set('selected_node', null);
     }
+
+    this.touch();
 
     const attr =
       type === 'node'

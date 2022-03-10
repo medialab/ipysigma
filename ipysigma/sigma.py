@@ -6,7 +6,7 @@
 #
 #
 from ipywidgets import DOMWidget, HTML
-from traitlets import Unicode, Dict, Int, Bool
+from traitlets import Unicode, Dict, Int, Bool, Tuple
 from collections.abc import Sequence, Mapping
 import networkx as nx
 from ._frontend import module_name, module_version
@@ -276,6 +276,8 @@ class Sigma(DOMWidget):
     camera_state = Dict(DEFAULT_CAMERA_STATE).tag(sync=True)
     layout_settings = Dict(allow_none=True).tag(sync=True)
     node_metrics = Dict({}).tag(sync=True)
+    selected_node = Unicode(allow_none=True).tag(sync=True)
+    selected_edge = Tuple(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -312,6 +314,8 @@ class Sigma(DOMWidget):
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         camera_state=DEFAULT_CAMERA_STATE,
+        selected_node=None,
+        selected_edge=None,
         layout=None,
         layout_settings=None,
         clickable_edges=False,
@@ -320,8 +324,33 @@ class Sigma(DOMWidget):
     ):
         super(Sigma, self).__init__()
 
+        # Validation
         if height < 250:
             raise TypeError("Sigma widget cannot have a height < 250 px")
+
+        if selected_node is not None and selected_edge is not None:
+            raise TypeError(
+                "selected_node and selected_edge cannot be given at the same time"
+            )
+
+        if selected_node is not None:
+            if not isinstance(selected_node, SUPPORTED_NODE_TYPES):
+                raise TypeError("selected_node should be str, int or float")
+
+            if selected_node not in graph:
+                raise KeyError("selected_node does not exist in the graph")
+
+        if selected_edge is not None:
+            if (
+                not isinstance(selected_edge, tuple)
+                or len(selected_edge) != 2
+                or not isinstance(selected_edge[0], SUPPORTED_NODE_TYPES)
+                or not isinstance(selected_edge[1], SUPPORTED_NODE_TYPES)
+            ):
+                raise TypeError("selected_edge should be a (source, target) tuple")
+
+            if not graph.has_edge(*selected_edge):
+                raise KeyError("selected_edge does not exist in the graph")
 
         # Own
         self.graph = graph
@@ -334,6 +363,10 @@ class Sigma(DOMWidget):
         self.layout_settings = layout_settings
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
+        self.selected_node = str(selected_node) if selected_node else None
+        self.selected_edge = (
+            (str(selected_edge[0]), str(selected_edge[1])) if selected_edge else None
+        )
         self.node_metrics = resolve_metrics(
             "node_metrics", node_metrics, SUPPORTED_NODE_METRICS
         )
@@ -529,6 +562,17 @@ class Sigma(DOMWidget):
         Method returning the current camera state of the widget.
         """
         return self.camera_state
+
+    def get_selected_node(self):
+        if self.selected_node is not None:
+            return self.node_type(self.selected_node)
+
+    def get_selected_edge(self):
+        if self.selected_edge is not None:
+            return (
+                self.node_type(self.selected_edge[0]),
+                self.node_type(self.selected_edge[1]),
+            )
 
     def render_snasphot(self):
         """
