@@ -12,6 +12,7 @@ import forceAtlas2 from 'graphology-layout-forceatlas2';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
+import { CameraState } from 'sigma/types';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
@@ -19,6 +20,7 @@ import Choices from 'choices.js';
 import screenfull from 'screenfull';
 import MultiSet from 'mnemonist/multi-set';
 import { scaleLinear, ScaleLinear } from 'd3-scale';
+import debounce from 'debounce';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import drawHover from './custom-hover';
@@ -769,7 +771,9 @@ export class SigmaView extends DOMWidgetView {
       };
 
       this.renderer = new Sigma(graph, this.container, rendererSettings);
-      this.renderer.getCamera().setState({ x: CAMERA_OFFSET });
+
+      const initialCameraState = this.model.get('camera_state') as CameraState;
+      this.renderer.getCamera().setState(initialCameraState);
 
       this.clearSelectedItem();
 
@@ -786,6 +790,11 @@ export class SigmaView extends DOMWidgetView {
 
   renderSnapshot() {
     this.model.set('snapshot', renderAsDataURL(this.renderer));
+    this.touch();
+  }
+
+  saveCameraState(state: CameraState) {
+    this.model.set('camera_state', state);
     this.touch();
   }
 
@@ -1013,6 +1022,15 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindRendererHandlers() {
+    const debouncedSaveCameraState = debounce(
+      this.saveCameraState.bind(this),
+      500
+    );
+
+    this.renderer.getCamera().on('updated', (state) => {
+      debouncedSaveCameraState(state);
+    });
+
     this.renderer.on('enterNode', () => {
       this.container.style.cursor = 'pointer';
     });
