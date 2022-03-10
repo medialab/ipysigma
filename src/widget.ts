@@ -564,6 +564,7 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.node_color.type === 'category'
           ? visualVariables.node_color.attribute
           : null;
+      const nodeColorAttribute = visualVariables.node_color.attribute;
 
       const nodeCategoryFrequencies = new MultiSet<string>();
 
@@ -631,6 +632,7 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.edge_color.type === 'category'
           ? visualVariables.edge_color.attribute
           : null;
+      const edgeColorAttribute = visualVariables.edge_color.attribute;
 
       const edgeCategoryFrequencies = new MultiSet<string>();
 
@@ -709,6 +711,8 @@ export class SigmaView extends DOMWidgetView {
         if (nodeColorCategory && nodeColorPalette) {
           displayData.color =
             nodeColorPalette[data[nodeColorCategory]] || '#999';
+        } else if (nodeColorAttribute !== 'color') {
+          displayData.color = data[nodeColorAttribute];
         }
 
         if (hasConstantNodeSizes) {
@@ -745,6 +749,8 @@ export class SigmaView extends DOMWidgetView {
         if (edgeColorCategory && edgeColorPalette) {
           displayData.color =
             edgeColorPalette[data[edgeColorCategory]] || '#ccc';
+        } else if (edgeColorAttribute !== 'color') {
+          displayData.color = data[edgeColorAttribute];
         }
 
         if (hasConstantEdgeSizes) {

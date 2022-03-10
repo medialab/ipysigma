@@ -221,10 +221,12 @@ class Sigma(DOMWidget):
         height=500,
         start_layout=False,
         node_color=None,
+        node_raw_color="color",
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
         edge_color=None,
+        edge_raw_color="color",
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
@@ -320,6 +322,8 @@ class Sigma(DOMWidget):
             )
 
             visual_variables["node_color"] = variable
+        elif node_raw_color is not None:
+            visual_variables["node_color"]["attribute"] = node_raw_color
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
@@ -348,6 +352,8 @@ class Sigma(DOMWidget):
             )
 
             visual_variables["edge_color"] = variable
+        elif edge_raw_color is not None:
+            visual_variables["edge_color"]["attribute"] = edge_raw_color
 
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
