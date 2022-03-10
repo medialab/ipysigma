@@ -310,6 +310,7 @@ class Sigma(DOMWidget):
         node_metrics=None,
         edge_color=None,
         edge_raw_color="color",
+        edge_color_from=None,
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
@@ -481,6 +482,19 @@ class Sigma(DOMWidget):
             )
 
             visual_variables["edge_color"] = variable
+
+        elif edge_color_from is not None:
+            if not graph.is_directed():
+                raise TypeError("edge_color_from only works with directed graphs")
+
+            if edge_color_from not in ["source", "target"]:
+                raise TypeError('edge_color_from should be "source" or "target"')
+
+            visual_variables["edge_color"] = {
+                "type": "dependent",
+                "value": edge_color_from,
+            }
+
         elif edge_raw_color is not None:
             visual_variables["edge_color"]["attribute"] = edge_raw_color
 

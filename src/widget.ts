@@ -69,6 +69,7 @@ type RNGFunction = () => number;
 type InformationDisplayTab = 'legend' | 'info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
+type EdgeColorDependency = 'source' | 'target';
 type Range = [number, number];
 type Palette = {
   [value: string]: string;
@@ -91,10 +92,16 @@ type ContinuousVisualVariable = {
   range: Range;
 };
 
+type DependentVisualVariable = {
+  type: 'dependent';
+  value: EdgeColorDependency;
+};
+
 type VisualVariable =
   | RawVisualVariable
   | CategoryVisualVariable
-  | ContinuousVisualVariable;
+  | ContinuousVisualVariable
+  | DependentVisualVariable;
 
 type VisualVariables = {
   node_color: VisualVariable;
@@ -102,7 +109,7 @@ type VisualVariables = {
   node_label: RawVisualVariable;
   edge_color: VisualVariable;
   edge_size: VisualVariable;
-  edge_label: VisualVariable | null;
+  edge_label: RawVisualVariable | null;
 };
 
 /**
@@ -588,7 +595,8 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.node_color.type === 'category'
           ? visualVariables.node_color.attribute
           : null;
-      const nodeColorAttribute = visualVariables.node_color.attribute;
+      const nodeColorAttribute =
+        (<any>visualVariables.node_color).attribute || 'color';
 
       const nodeCategoryFrequencies = new MultiSet<string>();
 
@@ -656,7 +664,14 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.edge_color.type === 'category'
           ? visualVariables.edge_color.attribute
           : null;
-      const edgeColorAttribute = visualVariables.edge_color.attribute;
+      const edgeColorAttribute =
+        (<any>visualVariables.edge_color).attribute || 'color';
+      const edgeColorFrom =
+        visualVariables.edge_color.type === 'dependent'
+          ? visualVariables.edge_color.value
+          : null;
+
+      let edgeColorDependency: Record<string, string> = {};
 
       const edgeCategoryFrequencies = new MultiSet<string>();
 
@@ -762,6 +777,10 @@ export class SigmaView extends DOMWidgetView {
           displayData.zIndex = 1;
         }
 
+        if (edgeColorFrom) {
+          edgeColorDependency[node] = displayData.color;
+        }
+
         return displayData;
       };
 
@@ -769,10 +788,16 @@ export class SigmaView extends DOMWidgetView {
       rendererSettings.edgeReducer = (edge, data) => {
         const displayData = { ...data };
 
+        const [source, target] = graph.extremities(edge);
+
         // Visual variables
         if (edgeColorCategory && edgeColorPalette) {
           displayData.color =
             edgeColorPalette[data[edgeColorCategory]] || '#ccc';
+        } else if (edgeColorFrom) {
+          displayData.color =
+            edgeColorDependency[edgeColorFrom === 'source' ? source : target] ||
+            data[edgeColorAttribute];
         } else if (edgeColorAttribute !== 'color') {
           displayData.color = data[edgeColorAttribute];
         }
@@ -789,8 +814,6 @@ export class SigmaView extends DOMWidgetView {
 
         // Transient state
         if (this.selectedNode && this.focusedNodes) {
-          const [source, target] = graph.extremities(edge);
-
           if (source !== this.selectedNode && target !== this.selectedNode) {
             displayData.hidden = true;
           }
@@ -878,45 +901,51 @@ export class SigmaView extends DOMWidgetView {
     ) {
       let html = `<b>${title}</b><br>`;
 
-      const source = variable.attribute.startsWith('$$')
-        ? 'kwarg'
-        : 'attribute';
-      const name = variable.attribute.startsWith('$$')
-        ? variable.attribute.slice(2)
-        : variable.attribute;
+      if (variable.type === 'dependent') {
+        html += `based on <span class="ipysigma-keyword">${variable.value}</span> color`;
+      } else {
+        const source = variable.attribute.startsWith('$$')
+          ? 'kwarg'
+          : 'attribute';
+        const name = variable.attribute.startsWith('$$')
+          ? variable.attribute.slice(2)
+          : variable.attribute;
 
-      if (variable.type === 'raw') {
-        html += `<span class="ipysigma-keyword">${escapeHtml(
-          name
-        )}</span> ${source}`;
-      } else if (variable.type === 'continuous') {
-        html += `<span class="ipysigma-keyword">${escapeHtml(
-          name
-        )}</span> ${source} (scaled to <span class="ipysigma-number">${
-          variable.range[0]
-        }</span>-<span class="ipysigma-number">${variable.range[1]}</span> px)`;
-      } else if (variable.type === 'category') {
-        html += `<span class="ipysigma-keyword">${escapeHtml(
-          name
-        )}</span> ${source} as a category:`;
+        if (variable.type === 'raw') {
+          html += `<span class="ipysigma-keyword">${escapeHtml(
+            name
+          )}</span> ${source}`;
+        } else if (variable.type === 'continuous') {
+          html += `<span class="ipysigma-keyword">${escapeHtml(
+            name
+          )}</span> ${source} (scaled to <span class="ipysigma-number">${
+            variable.range[0]
+          }</span>-<span class="ipysigma-number">${
+            variable.range[1]
+          }</span> px)`;
+        } else if (variable.type === 'category') {
+          html += `<span class="ipysigma-keyword">${escapeHtml(
+            name
+          )}</span> ${source} as a category:`;
 
-        const paletteItems: string[] = [];
+          const paletteItems: string[] = [];
 
-        if (palette) {
-          for (const k in palette) {
-            paletteItems.push(
-              `<span style="color: ${palette[k]}">■</span> ${k}`
-            );
+          if (palette) {
+            for (const k in palette) {
+              paletteItems.push(
+                `<span style="color: ${palette[k]}">■</span> ${k}`
+              );
+            }
+
+            if (palette[PALETTE_OVERFLOW]) {
+              paletteItems.push('<span style="color: #999">■</span> ...');
+            }
+          } else {
+            paletteItems.push('<span style="color: #999">■</span> default');
           }
 
-          if (palette[PALETTE_OVERFLOW]) {
-            paletteItems.push('<span style="color: #999">■</span> ...');
-          }
-        } else {
-          paletteItems.push('<span style="color: #999">■</span> default');
+          html += '<br>' + paletteItems.join('<br>');
         }
-
-        html += '<br>' + paletteItems.join('<br>');
       }
 
       return html;
