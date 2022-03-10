@@ -1148,7 +1148,7 @@ export class SigmaView extends DOMWidgetView {
         return renderer.viewportToGraph(attr);
       },
       onConverged() {
-        stopNoverlap();
+        stopNoverlap(true);
       },
       settings: { ratio: 1, margin: 3 },
     });
@@ -1179,7 +1179,7 @@ export class SigmaView extends DOMWidgetView {
       hide(this.resetLayoutButton);
     };
 
-    const stopNoverlap = () => {
+    const stopNoverlap = (disableButton: boolean = false) => {
       if (this.layoutSpinner) {
         this.layoutControls.removeChild(this.layoutSpinner[0]);
         this.layoutSpinner[1]();
@@ -1191,6 +1191,8 @@ export class SigmaView extends DOMWidgetView {
       this.saveLayout();
       enable(this.layoutButton);
       show(this.resetLayoutButton);
+
+      if (disableButton) disable(this.noverlapButton);
     };
 
     const startNoverlap = () => {
@@ -1204,6 +1206,7 @@ export class SigmaView extends DOMWidgetView {
     };
 
     const resetLayout = () => {
+      enable(this.noverlapButton);
       hide(this.resetLayoutButton);
       this.resetLayout();
       animateNodes(graph, this.originalLayoutPositions, { duration: 250 });
