@@ -21,6 +21,7 @@ import MultiSet from 'mnemonist/multi-set';
 import { scaleLinear, ScaleLinear } from 'd3-scale';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
+import drawHover from './custom-hover';
 import {
   renderAsDataURL,
   saveAsPNG,
@@ -546,6 +547,7 @@ export class SigmaView extends DOMWidgetView {
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
         labelGridCellSize: 250,
+        hoverRenderer: drawHover,
       };
 
       // Gathering info about the graph to build reducers correctly
@@ -723,6 +725,8 @@ export class SigmaView extends DOMWidgetView {
           displayData.color = 'lightgray';
           displayData.zIndex = 0;
           displayData.size = displayData.size ? displayData.size / 2 : 1;
+          displayData.hoverLabel = displayData.label;
+          displayData.label = '';
         } else {
           displayData.zIndex = 1;
         }
