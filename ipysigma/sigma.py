@@ -45,29 +45,39 @@ def extract_rgba_from_viz(viz_color):
     )
 
 
-def resolve_variable_kwarg(items, variable, name, target, allow_arbitrary_data=True):
+def is_indexable(value):
+    return (
+        not isinstance(value, (str, bytes))
+        and hasattr(value, "__getitem__")
+        and callable(value.__getitem__)
+    )
+
+
+def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
     if isinstance(target, str):
         variable["attribute"] = target
 
-    elif isinstance(target, (Iterable, Mapping)):
-        if not allow_arbitrary_data:
-            raise TypeError("%s should be a string" % name)
-
-        mapping = dict(target)
+    elif is_indexable(target):
+        mapping = target
         target = "$$%s" % name
 
-        for node in items:
-            v = mapping.get(node["key"])
+        for item in items:
+            k = item["key"] if item_type == "node" else (item["source"], item["target"])
+
+            try:
+                v = mapping[k]
+            except (IndexError, KeyError):
+                v = None
 
             if v is None:
                 continue
 
-            node["attributes"][target] = v
+            item["attributes"][target] = v
 
         variable["attribute"] = target
 
     else:
-        raise TypeError("%s should be a string, an iterable or a mapping" % name)
+        raise TypeError("%s should be a string or a mapping" % name)
 
 
 def process_node_gexf_viz(attr):
@@ -290,21 +300,27 @@ class Sigma(DOMWidget):
         if node_color is not None:
             variable = {"type": "category"}
 
-            resolve_variable_kwarg(nodes, variable, "node_color", node_color)
+            resolve_variable_kwarg(
+                nodes, variable, "node_color", node_color, item_type="node"
+            )
 
             visual_variables["node_color"] = variable
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
 
-            resolve_variable_kwarg(nodes, variable, "node_size", node_size)
+            resolve_variable_kwarg(
+                nodes, variable, "node_size", node_size, item_type="node"
+            )
 
             visual_variables["node_size"] = variable
 
         if node_label is not None:
             variable = {"type": "raw"}
 
-            resolve_variable_kwarg(nodes, variable, "node_label", node_label)
+            resolve_variable_kwarg(
+                nodes, variable, "node_label", node_label, item_type="node"
+            )
 
             visual_variables["node_label"] = variable
 
@@ -313,7 +329,7 @@ class Sigma(DOMWidget):
             variable = {"type": "category"}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_color", edge_color, allow_arbitrary_data=False
+                edges, variable, "edge_color", edge_color, item_type="edge"
             )
 
             visual_variables["edge_color"] = variable
@@ -322,7 +338,7 @@ class Sigma(DOMWidget):
             variable = {"type": "continuous", "range": edge_size_range}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_size", edge_size, allow_arbitrary_data=False
+                edges, variable, "edge_size", edge_size, item_type="edge"
             )
 
             visual_variables["edge_size"] = variable
@@ -331,7 +347,7 @@ class Sigma(DOMWidget):
             variable = {"type": "raw"}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_label", edge_label, allow_arbitrary_data=False
+                edges, variable, "edge_label", edge_label, item_type="edge"
             )
 
             visual_variables["edge_label"] = variable
