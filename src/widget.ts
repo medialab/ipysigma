@@ -210,7 +210,7 @@ function isValidNumber(value: any): boolean {
 }
 
 function escapeHtml(unsafe: string): string {
-  return unsafe
+  return ('' + unsafe)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
