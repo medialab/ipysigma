@@ -7,6 +7,7 @@
 #
 from ipywidgets import DOMWidget, HTML
 from traitlets import Unicode, Dict, Int, Bool
+from collections.abc import Sequence, Mapping
 import networkx as nx
 from ._frontend import module_name, module_version
 
@@ -19,6 +20,7 @@ DEFAULT_NODE_SIZE_RANGE = (2, 12)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
+SUPPORTED_NODE_METRICS = {"louvain"}
 
 
 # =============================================================================
@@ -58,6 +60,27 @@ def is_partition(value):
         and value
         and isinstance(value[0], (set, frozenset, list))
     )
+
+
+def resolve_metrics(name, target, supported):
+    if not target:
+        return {}
+
+    if isinstance(target, Sequence) and not isinstance(target, (str, bytes)):
+        metrics = {k: k for k in target}
+    elif isinstance(target, Mapping):
+        metrics = dict(target)
+    else:
+        raise TypeError(
+            name
+            + " should be a list of metrics to compute or a dict mapping metric names to attribute names"
+        )
+
+    for k in metrics:
+        if k not in supported:
+            raise TypeError('unknown %s "%s", expecting one of %s' % (name, k, ", ".join('"%s"' % m for m in supported)))
+
+    return metrics
 
 
 def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
@@ -212,6 +235,7 @@ class Sigma(DOMWidget):
     layout = Dict(allow_none=True).tag(sync=True)
     camera_state = Dict(DEFAULT_CAMERA_STATE).tag(sync=True)
     layout_settings = Dict(allow_none=True).tag(sync=True)
+    node_metrics = Dict({}).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -241,6 +265,7 @@ class Sigma(DOMWidget):
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
+        node_metrics=None,
         edge_color=None,
         edge_raw_color="color",
         edge_size="size",
@@ -268,6 +293,7 @@ class Sigma(DOMWidget):
         self.layout_settings = layout_settings
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
+        self.node_metrics = resolve_metrics("node_metrics", node_metrics, SUPPORTED_NODE_METRICS)
 
         if layout is not None:
             if not isinstance(layout, dict):

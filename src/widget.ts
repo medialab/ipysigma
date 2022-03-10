@@ -10,6 +10,7 @@ import LayoutSupervisor from 'graphology-layout-forceatlas2/worker';
 import NoverlapSupervisor from 'graphology-layout-noverlap/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import type { ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
+import louvain from 'graphology-communities-louvain';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
@@ -366,6 +367,9 @@ export class SigmaView extends DOMWidgetView {
   container: HTMLElement;
   renderer: Sigma;
   graph: Graph;
+  metrics: {
+    node: Record<string, string>;
+  };
 
   originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
@@ -424,6 +428,7 @@ export class SigmaView extends DOMWidgetView {
     const graph = buildGraph(data, this.rng);
     this.graph = graph;
 
+    // Preexisting layout?
     const preexistingLayout = this.model.get('layout');
 
     if (preexistingLayout) {
@@ -432,6 +437,25 @@ export class SigmaView extends DOMWidgetView {
       this.saveLayout();
     }
     this.originalLayoutPositions = collectLayout(graph);
+
+    // Widget-side metrics
+    const nodeMetrics = this.model.get('node_metrics') as
+      | Record<string, string>
+      | undefined;
+
+    if (nodeMetrics) {
+      for (const metric in nodeMetrics) {
+        if (metric === 'louvain') {
+          louvain.assign(graph, {
+            nodeCommunityAttribute: nodeMetrics[metric],
+          });
+        } else {
+          throw new Error('unkown metric ' + metric);
+        }
+      }
+    }
+
+    this.metrics = { node: nodeMetrics || {} };
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     this.el.style.width = '100%';

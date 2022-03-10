@@ -58,6 +58,7 @@
     "debounce": "^1.2.1",
     "file-saver": "^2.0.5",
     "graphology": "^0.24.1",
+    "graphology-communities-louvain": "^2.0.0",
     "graphology-gexf": "^0.10.1",
     "graphology-layout-forceatlas2": "^0.8.2",
     "graphology-layout-noverlap": "^0.4.2",
