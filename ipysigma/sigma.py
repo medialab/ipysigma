@@ -5,7 +5,6 @@
 # =============================================================================
 #
 #
-from collections.abc import Iterable, Mapping
 from ipywidgets import DOMWidget, HTML
 from traitlets import Unicode, Dict, Int, Bool
 import networkx as nx
@@ -171,6 +170,8 @@ class Sigma(DOMWidget):
             method. Defaults to {x: 0.65, y: 0.5, ratio: 1, angle: 0}.
         layout (dict, optional): dict mapping nodes to {x, y} positions.
             Defaults to None.
+        layout_settings (dict, optional): settings for ForceAtlas2 layout.
+            Defaults to None, i.e. using default settings.
         clickable_edges (bool, optional): whether to enable edge events so you can
             click on them to get information. This can be costly on large graphs.
             Defaults to False.
@@ -194,6 +195,7 @@ class Sigma(DOMWidget):
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
     camera_state = Dict(DEFAULT_CAMERA_STATE).tag(sync=True)
+    layout_settings = Dict(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -228,6 +230,7 @@ class Sigma(DOMWidget):
         edge_label=None,
         camera_state=DEFAULT_CAMERA_STATE,
         layout=None,
+        layout_settings=None,
         clickable_edges=False,
         process_gexf_viz=True,
     ):
@@ -244,6 +247,7 @@ class Sigma(DOMWidget):
         self.start_layout = start_layout
         self.snapshot = None
         self.layout = None
+        self.layout_settings = layout_settings
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
 

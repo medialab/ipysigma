@@ -9,6 +9,7 @@ import { SerializedGraph } from 'graphology-types';
 import LayoutSupervisor from 'graphology-layout-forceatlas2/worker';
 import NoverlapSupervisor from 'graphology-layout-noverlap/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
+import type { ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
@@ -1152,8 +1153,12 @@ export class SigmaView extends DOMWidgetView {
     const graph = this.graph;
     const renderer = this.renderer;
 
+    const settings = this.model.get('layout_settings') as
+      | ForceAtlas2Settings
+      | undefined;
+
     this.layout = new LayoutSupervisor(graph, {
-      settings: forceAtlas2.inferSettings(graph),
+      settings: settings ? settings : forceAtlas2.inferSettings(graph),
     });
 
     this.noverlap = new NoverlapSupervisor(graph, {
