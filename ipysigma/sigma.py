@@ -52,7 +52,23 @@ def is_indexable(value):
     )
 
 
+def is_partition(value):
+    return (
+        isinstance(value, list)
+        and value
+        and isinstance(value[0], (set, frozenset, list))
+    )
+
+
 def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
+    if is_partition(target):
+        partition = target
+        target = {}
+
+        for i, group in enumerate(partition):
+            for item in group:
+                target[item] = i
+
     if isinstance(target, str):
         variable["attribute"] = target
 
