@@ -14,14 +14,14 @@ import louvain from 'graphology-communities-louvain';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
-import { CameraState } from 'sigma/types';
+import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
 import Choices from 'choices.js';
 import screenfull from 'screenfull';
 import MultiSet from 'mnemonist/multi-set';
-import { scaleLinear, ScaleLinear } from 'd3-scale';
+import { scaleLinear } from 'd3-scale';
 import debounce from 'debounce';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
@@ -57,8 +57,6 @@ const CAMERA_OFFSET = 0.65;
 const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
 const EDGE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color']);
 const CATEGORY_MAX_COUNT = 10;
-const DEFAULT_CONSTANT_NODE_SIZE = 5;
-const DEFAULT_CONSTANT_EDGE_SIZE = 0.5;
 const PALETTE_OVERFLOW = Symbol();
 
 /**
@@ -70,7 +68,9 @@ type InformationDisplayTab = 'legend' | 'info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
 type EdgeColorDependency = 'source' | 'target';
-type Range = [number, number];
+type Bound = number | string;
+type Range = [Bound, Bound];
+type Scale<T> = (value: T) => T;
 type Palette = {
   [value: string]: string;
   [PALETTE_OVERFLOW]: boolean;
@@ -105,12 +105,16 @@ type VisualVariable =
 
 type VisualVariables = {
   node_color: VisualVariable;
-  node_size: VisualVariable;
+  node_size: ContinuousVisualVariable;
   node_label: RawVisualVariable;
   edge_color: VisualVariable;
-  edge_size: VisualVariable;
+  edge_size: ContinuousVisualVariable;
   edge_label: RawVisualVariable | null;
 };
+
+interface CustomNodeDisplayData extends NodeDisplayData {
+  hoverLabel?: string | null;
+}
 
 /**
  * Template.
@@ -219,6 +223,21 @@ export class SigmaModel extends DOMWidgetModel {
  */
 function isValidNumber(value: any): boolean {
   return typeof value === 'number' && !isNaN(value);
+}
+
+function coerceNumericalValue(value: any): number {
+  if (isValidNumber(value)) return value;
+  return 1;
+}
+
+function createScale<T>(min: number, max: number, range: Range): Scale<T> {
+  if (min === Infinity || min === max) {
+    return () => range[0] as unknown as T;
+  }
+
+  return scaleLinear()
+    .domain([min as number, max as number])
+    .range(range as [number, number]) as unknown as Scale<T>;
 }
 
 function escapeHtml(unsafe: string): string {
@@ -582,6 +601,8 @@ export class SigmaView extends DOMWidgetView {
         enableEdgeHoverEvents: clickableEdges,
         labelGridCellSize: 250,
         hoverRenderer: drawHover,
+        defaultNodeColor: '#999',
+        defaultEdgeColor: '#ccc',
       };
 
       // Gathering info about the graph to build reducers correctly
@@ -590,11 +611,9 @@ export class SigmaView extends DOMWidgetView {
       ) as VisualVariables;
 
       // Nodes
+      const needToComputeNodePalette =
+        visualVariables.node_color.type === 'category';
       let nodeColorPalette: Palette | null = null;
-      let nodeColorCategory =
-        visualVariables.node_color.type === 'category'
-          ? visualVariables.node_color.attribute
-          : null;
       const nodeColorAttribute =
         (<any>visualVariables.node_color).attribute || 'color';
 
@@ -607,29 +626,29 @@ export class SigmaView extends DOMWidgetView {
 
       let minNodeSize = Infinity;
       let maxNodeSize = -Infinity;
+      // let minNodeColor = Infinity;
+      // let maxNodeColor = -Infinity;
 
       let nodeLabelAttribute = visualVariables.node_label.attribute;
 
       graph.forEachNode((node, attr) => {
-        if (nodeColorCategory) {
-          nodeCategoryFrequencies.add(attr[nodeColorCategory]);
+        if (needToComputeNodePalette) {
+          nodeCategoryFrequencies.add(attr[nodeColorAttribute]);
         }
 
-        const size = attr[nodeSizeAttribute];
+        const size = coerceNumericalValue(attr[nodeSizeAttribute]);
 
-        if (typeof size === 'number') {
-          if (size < minNodeSize) minNodeSize = size;
-          if (size > maxNodeSize) maxNodeSize = size;
-        }
+        if (size < minNodeSize) minNodeSize = size;
+        if (size > maxNodeSize) maxNodeSize = size;
       });
 
-      if (nodeColorCategory) {
+      if (needToComputeNodePalette) {
         const count = Math.min(
           nodeCategoryFrequencies.dimension,
           CATEGORY_MAX_COUNT
         );
 
-        const colors = generatePalette(nodeColorCategory, count);
+        const colors = generatePalette(nodeColorAttribute, count);
 
         nodeColorPalette = {
           [PALETTE_OVERFLOW]: count < nodeCategoryFrequencies.dimension,
@@ -640,30 +659,18 @@ export class SigmaView extends DOMWidgetView {
         });
       }
 
-      const hasConstantNodeSizes =
-        minNodeSize === Infinity || minNodeSize === maxNodeSize;
+      rendererSettings.labelRenderedSizeThreshold = Math.min(maxNodeSize, 6);
 
-      rendererSettings.labelRenderedSizeThreshold = hasConstantNodeSizes
-        ? DEFAULT_CONSTANT_NODE_SIZE
-        : Math.min(maxNodeSize, 6);
-
-      let nodeSizeScale: ScaleLinear<number, number> | null = null;
-
-      if (
-        !hasConstantNodeSizes &&
-        visualVariables.node_size.type === 'continuous'
-      ) {
-        nodeSizeScale = scaleLinear()
-          .domain([minNodeSize, maxNodeSize])
-          .range(visualVariables.node_size.range);
-      }
+      let nodeSizeScale = createScale<number>(
+        minNodeSize,
+        maxNodeSize,
+        visualVariables.node_size.range
+      );
 
       // Edges
+      const needToComputeEdgePalette =
+        visualVariables.edge_color.type === 'category';
       let edgeColorPalette: Palette | null = null;
-      let edgeColorCategory =
-        visualVariables.edge_color.type === 'category'
-          ? visualVariables.edge_color.attribute
-          : null;
       const edgeColorAttribute =
         (<any>visualVariables.edge_color).attribute || 'color';
       const edgeColorFrom =
@@ -690,25 +697,23 @@ export class SigmaView extends DOMWidgetView {
       }
 
       graph.forEachEdge((edge, attr) => {
-        if (edgeColorCategory) {
-          edgeCategoryFrequencies.add(attr[edgeColorCategory]);
+        if (needToComputeEdgePalette) {
+          edgeCategoryFrequencies.add(attr[edgeColorAttribute]);
         }
 
-        const size = attr[edgeSizeAttribute];
+        const size = coerceNumericalValue(attr[edgeSizeAttribute]);
 
-        if (typeof size === 'number') {
-          if (size < minEdgeSize) minEdgeSize = size;
-          if (size > maxEdgeSize) maxEdgeSize = size;
-        }
+        if (size < minEdgeSize) minEdgeSize = size;
+        if (size > maxEdgeSize) maxEdgeSize = size;
       });
 
-      if (edgeColorCategory) {
+      if (needToComputeEdgePalette) {
         const count = Math.min(
           edgeCategoryFrequencies.dimension,
           CATEGORY_MAX_COUNT
         );
 
-        const colors = generatePalette(edgeColorCategory, count);
+        const colors = generatePalette(edgeColorAttribute, count);
 
         edgeColorPalette = {
           [PALETTE_OVERFLOW]: count < edgeCategoryFrequencies.dimension,
@@ -719,23 +724,11 @@ export class SigmaView extends DOMWidgetView {
         });
       }
 
-      const hasConstantEdgeSizes =
-        minEdgeSize === Infinity || minEdgeSize === maxEdgeSize;
-
-      rendererSettings.labelRenderedSizeThreshold = hasConstantEdgeSizes
-        ? DEFAULT_CONSTANT_EDGE_SIZE
-        : Math.min(maxEdgeSize, 6);
-
-      let edgeSizeScale: ScaleLinear<number, number> | null = null;
-
-      if (
-        !hasConstantEdgeSizes &&
-        visualVariables.edge_size.type === 'continuous'
-      ) {
-        edgeSizeScale = scaleLinear()
-          .domain([minEdgeSize, maxEdgeSize])
-          .range(visualVariables.edge_size.range);
-      }
+      let edgeSizeScale = createScale<number>(
+        minEdgeSize,
+        maxEdgeSize,
+        visualVariables.edge_size.range
+      );
 
       this.updateLegend(visualVariables, {
         nodeColor: nodeColorPalette,
@@ -744,20 +737,24 @@ export class SigmaView extends DOMWidgetView {
 
       // Node reducer
       rendererSettings.nodeReducer = (node, data) => {
-        const displayData = { ...data };
+        const displayData: Partial<CustomNodeDisplayData> = {
+          x: data.x,
+          y: data.y,
+        };
 
         // Visual variables
-        if (nodeColorCategory && nodeColorPalette) {
+        if (nodeColorPalette) {
           displayData.color =
-            nodeColorPalette[data[nodeColorCategory]] || '#999';
-        } else if (nodeColorAttribute !== 'color') {
+            nodeColorPalette[data[nodeColorAttribute]] ||
+            rendererSettings.defaultNodeColor;
+        } else {
           displayData.color = data[nodeColorAttribute];
         }
 
-        if (hasConstantNodeSizes) {
-          displayData.size = DEFAULT_CONSTANT_NODE_SIZE;
-        } else if (nodeSizeScale) {
-          displayData.size = nodeSizeScale(data[nodeSizeAttribute] || 1);
+        if (nodeSizeScale) {
+          displayData.size = nodeSizeScale(
+            coerceNumericalValue(data[nodeSizeAttribute])
+          );
         }
 
         displayData.label = data[nodeLabelAttribute] || node;
@@ -777,7 +774,7 @@ export class SigmaView extends DOMWidgetView {
           displayData.zIndex = 1;
         }
 
-        if (edgeColorFrom) {
+        if (edgeColorFrom && displayData.color) {
           edgeColorDependency[node] = displayData.color;
         }
 
@@ -786,26 +783,27 @@ export class SigmaView extends DOMWidgetView {
 
       // Edge reducer
       rendererSettings.edgeReducer = (edge, data) => {
-        const displayData = { ...data };
+        const displayData: Partial<EdgeDisplayData> = {};
 
         const [source, target] = graph.extremities(edge);
 
         // Visual variables
-        if (edgeColorCategory && edgeColorPalette) {
+        if (edgeColorPalette) {
           displayData.color =
-            edgeColorPalette[data[edgeColorCategory]] || '#ccc';
+            edgeColorPalette[data[edgeColorAttribute]] ||
+            rendererSettings.defaultEdgeColor;
         } else if (edgeColorFrom) {
           displayData.color =
             edgeColorDependency[edgeColorFrom === 'source' ? source : target] ||
-            data[edgeColorAttribute];
-        } else if (edgeColorAttribute !== 'color') {
+            rendererSettings.defaultNodeColor;
+        } else {
           displayData.color = data[edgeColorAttribute];
         }
 
-        if (hasConstantEdgeSizes) {
-          displayData.size = DEFAULT_CONSTANT_EDGE_SIZE;
-        } else if (edgeSizeScale) {
-          displayData.size = edgeSizeScale(data[edgeSizeAttribute] || 1);
+        if (edgeSizeScale) {
+          displayData.size = edgeSizeScale(
+            coerceNumericalValue(data[edgeSizeAttribute])
+          );
         }
 
         if (edgeLabelAttribute) {

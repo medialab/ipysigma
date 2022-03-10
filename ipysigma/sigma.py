@@ -14,10 +14,11 @@ from ._frontend import module_name, module_version
 # =============================================================================
 # Constants
 # =============================================================================
-DEFAULT_NODE_SIZE_RANGE = (2, 12)
+DEFAULT_NODE_SIZE_RANGE = (3, 15)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
+SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain"}
 
 
@@ -82,6 +83,29 @@ def resolve_metrics(name, target, supported):
             )
 
     return metrics
+
+
+def resolve_range(name, target):
+    if target is None:
+        return
+
+    if isinstance(target, SUPPORTED_RANGE_BOUNDS):
+        return (target, target)
+
+    if (
+        isinstance(target, Sequence)
+        and len(target) == 2
+        and isinstance(target[0], SUPPORTED_RANGE_BOUNDS)
+        and isinstance(target[1], SUPPORTED_RANGE_BOUNDS)
+    ):
+        if isinstance(target[0], str) and not isinstance(target[1], str):
+            raise TypeError(name + " contain mixed type (min, max) info")
+
+        return target
+
+    raise TypeError(
+        name + " should be a single value or a (min, max) sequence (list, tuple etc.)"
+    )
 
 
 def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
@@ -304,6 +328,7 @@ class Sigma(DOMWidget):
         start_layout=False,
         node_color=None,
         node_raw_color="color",
+        node_color_gradient=None,
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
@@ -352,6 +377,10 @@ class Sigma(DOMWidget):
 
             if not graph.has_edge(*selected_edge):
                 raise KeyError("selected_edge does not exist in the graph")
+
+        node_size_range = resolve_range("node_size_range", node_size_range)
+        node_color_gradient = resolve_range("node_color_gradient", node_color_gradient)
+        edge_color = resolve_range("edge_color", edge_color)
 
         # Own
         self.graph = graph
@@ -454,6 +483,10 @@ class Sigma(DOMWidget):
             visual_variables["node_color"] = variable
         elif node_raw_color is not None:
             visual_variables["node_color"]["attribute"] = node_raw_color
+
+        if node_color_gradient is not None:
+            visual_variables["node_color"]["type"] = "continuous"
+            visual_variables["node_color"]["range"] = node_color_gradient
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
