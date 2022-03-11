@@ -20,7 +20,7 @@
   margin: 0;
   padding: 0;
   border: 1px solid #e0e0e0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
 }
 
 .ipysigma-widget hr {
@@ -50,7 +50,7 @@
   border: 1px solid #e0e0e0;
   padding: 5px 10px;
   font-size: 12px;
-  font-style: italic;
+  /* font-style: italic; */
   line-height: 16px;
 }
 
@@ -124,13 +124,13 @@
 
 .ipysigma-widget #ipysigma-information-display {
   width: 100%;
-  height: calc(100% - 45px - 5px - 30px);
+  height: calc(100% - 45px - 5px - 20px);
   overflow-y: auto;
   background-color: white;
   border: 1px solid #e0e0e0;
   box-sizing: border-box;
   font-size: 12px;
-  font-style: italic;
+  /* font-style: italic; */
   line-height: 16px;
   padding: 10px;
 }

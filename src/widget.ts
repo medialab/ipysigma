@@ -154,9 +154,9 @@ const TEMPLATE = `
   </select>
   <div id="ipysigma-information-display">
     <div id="ipysigma-information-display-tabs">
-      <em id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</em>
+      <span id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</span>
       &middot;
-      <em id="ipysigma-information-info-button" class="ipysigma-tab-button">info</em>
+      <span id="ipysigma-information-info-button" class="ipysigma-tab-button">info</span>
     </div>
     <hr>
     <div id="ipysigma-legend"></div>
