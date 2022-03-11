@@ -418,8 +418,8 @@ export class SigmaView extends DOMWidgetView {
   selectedNode: string | null = null;
   selectedEdge: string | null = null;
   focusedNodes: Set<string> | null = null;
-  selectedNodeCategories: Set<string> | null = null;
-  selectedEdgeCategories: Set<string> | null = null;
+  selectedNodeCategoryValues: Set<string> | null = null;
+  selectedEdgeCategoryValues: Set<string> | null = null;
 
   downloadPNGButton: HTMLElement;
   downloadGEXFButton: HTMLElement;
@@ -462,6 +462,19 @@ export class SigmaView extends DOMWidgetView {
       this.saveLayout();
     }
     this.originalLayoutPositions = collectLayout(graph);
+
+    // Selection state
+    const selectedNodeCategoryValues = this.model.get(
+      'selected_node_category_values'
+    ) as Array<string> | undefined;
+    const selectedEdgeCategoryValues = this.model.get(
+      'selected_edge_category_values'
+    ) as Array<string> | undefined;
+
+    if (selectedNodeCategoryValues)
+      this.selectedNodeCategoryValues = new Set(selectedNodeCategoryValues);
+    if (selectedEdgeCategoryValues)
+      this.selectedEdgeCategoryValues = new Set(selectedEdgeCategoryValues);
 
     // Widget-side metrics
     const nodeMetrics = this.model.get('node_metrics') as
@@ -785,8 +798,8 @@ export class SigmaView extends DOMWidgetView {
 
         if (
           (this.focusedNodes && !this.focusedNodes.has(node)) ||
-          (this.selectedNodeCategories &&
-            !this.selectedNodeCategories.has(colorValue))
+          (this.selectedNodeCategoryValues &&
+            !this.selectedNodeCategoryValues.has(colorValue))
         ) {
           displayData.color = MUTED_NODE_COLOR;
           displayData.zIndex = 0;
@@ -841,12 +854,12 @@ export class SigmaView extends DOMWidgetView {
           }
         }
 
-        if (this.selectedNodeCategories) {
+        if (this.selectedNodeCategoryValues) {
           if (
-            !this.selectedNodeCategories.has(
+            !this.selectedNodeCategoryValues.has(
               nodeDisplayDataRegister[source]?.categoryValue as string
             ) &&
-            !this.selectedNodeCategories.has(
+            !this.selectedNodeCategoryValues.has(
               nodeDisplayDataRegister[target]?.categoryValue as string
             )
           ) {
@@ -854,8 +867,8 @@ export class SigmaView extends DOMWidgetView {
           }
         }
 
-        if (this.selectedEdgeCategories) {
-          if (!this.selectedEdgeCategories.has(colorValue)) {
+        if (this.selectedEdgeCategoryValues) {
+          if (!this.selectedEdgeCategoryValues.has(colorValue)) {
             displayData.hidden = true;
           }
         }
@@ -1065,8 +1078,8 @@ export class SigmaView extends DOMWidgetView {
 
         if (type === 'node') {
           if (
-            !this.selectedNodeCategories ||
-            this.selectedNodeCategories.has(value)
+            !this.selectedNodeCategoryValues ||
+            this.selectedNodeCategoryValues.has(value)
           ) {
             span.classList.remove('evicted');
           } else {
@@ -1074,8 +1087,8 @@ export class SigmaView extends DOMWidgetView {
           }
         } else if (type === 'edge') {
           if (
-            !this.selectedEdgeCategories ||
-            this.selectedEdgeCategories.has(value)
+            !this.selectedEdgeCategoryValues ||
+            this.selectedEdgeCategoryValues.has(value)
           ) {
             span.classList.remove('evicted');
           } else {
@@ -1098,6 +1111,8 @@ export class SigmaView extends DOMWidgetView {
         this.renderer.refresh();
       };
     });
+
+    updateSpans();
   }
 
   clearSelectedItem() {
@@ -1127,8 +1142,8 @@ export class SigmaView extends DOMWidgetView {
   toggleCategoryValue(type: ItemType, max: number, value: string) {
     let target =
       type === 'node'
-        ? this.selectedNodeCategories
-        : this.selectedEdgeCategories;
+        ? this.selectedNodeCategoryValues
+        : this.selectedEdgeCategoryValues;
 
     if (!target) {
       target = new Set([value]);
@@ -1144,8 +1159,17 @@ export class SigmaView extends DOMWidgetView {
       target.add(value);
     }
 
-    if (type === 'node') this.selectedNodeCategories = target;
-    else this.selectedEdgeCategories = target;
+    const update = target ? Array.from(target) : null;
+
+    if (type === 'node') {
+      this.selectedNodeCategoryValues = target;
+      this.model.set('selected_node_category_values', update);
+    } else {
+      this.selectedEdgeCategoryValues = target;
+      this.model.set('selected_edge_category_values', update);
+    }
+
+    this.touch();
   }
 
   selectItem(type: ItemType, key: string) {

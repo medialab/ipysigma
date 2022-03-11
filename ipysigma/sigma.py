@@ -6,8 +6,8 @@
 #
 #
 from ipywidgets import DOMWidget, HTML
-from traitlets import Unicode, Dict, Int, Bool, Tuple
-from collections.abc import Sequence, Mapping
+from traitlets import Unicode, Dict, Int, Bool, Tuple, Set
+from collections.abc import Sequence, Mapping, Iterable
 import networkx as nx
 from ._frontend import module_name, module_version
 
@@ -302,6 +302,8 @@ class Sigma(DOMWidget):
     node_metrics = Dict({}).tag(sync=True)
     selected_node = Unicode(allow_none=True).tag(sync=True)
     selected_edge = Tuple(allow_none=True).tag(sync=True)
+    selected_node_category_values = Set(allow_none=True).tag(sync=True)
+    selected_edge_category_values = Set(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -343,6 +345,8 @@ class Sigma(DOMWidget):
         camera_state=DEFAULT_CAMERA_STATE,
         selected_node=None,
         selected_edge=None,
+        selected_node_category_values=None,
+        selected_edge_category_values=None,
         layout=None,
         layout_settings=None,
         clickable_edges=False,
@@ -379,6 +383,20 @@ class Sigma(DOMWidget):
             if not graph.has_edge(*selected_edge):
                 raise KeyError("selected_edge does not exist in the graph")
 
+        if selected_node_category_values is not None and not isinstance(
+            selected_node_category_values, Iterable
+        ):
+            raise TypeError(
+                "selected_node_category_values should be an iterable of node keys"
+            )
+
+        if selected_edge_category_values is not None and not isinstance(
+            selected_edge_category_values, Iterable
+        ):
+            raise TypeError(
+                "selected_edge_category_values should be an iterable of edge keys"
+            )
+
         node_size_range = resolve_range("node_size_range", node_size_range)
         node_color_gradient = resolve_range("node_color_gradient", node_color_gradient)
         edge_size_range = resolve_range("edge_size_range", edge_size_range)
@@ -398,6 +416,16 @@ class Sigma(DOMWidget):
         self.selected_node = str(selected_node) if selected_node else None
         self.selected_edge = (
             (str(selected_edge[0]), str(selected_edge[1])) if selected_edge else None
+        )
+        self.selected_node_category_values = (
+            set(selected_node_category_values)
+            if selected_node_category_values
+            else None
+        )
+        self.selected_edge_category_values = (
+            set(selected_edge_category_values)
+            if selected_edge_category_values
+            else None
         )
         self.node_metrics = resolve_metrics(
             "node_metrics", node_metrics, SUPPORTED_NODE_METRICS
@@ -626,6 +654,12 @@ class Sigma(DOMWidget):
                 self.node_type(self.selected_edge[0]),
                 self.node_type(self.selected_edge[1]),
             )
+
+    def get_selected_node_category_values(self):
+        return self.selected_node_category_values
+
+    def get_selected_edge_category_values(self):
+        return self.selected_edge_category_values
 
     def render_snasphot(self):
         """
