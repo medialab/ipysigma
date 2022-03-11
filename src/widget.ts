@@ -1089,7 +1089,11 @@ export class SigmaView extends DOMWidgetView {
       span.onclick = () => {
         const { type, value } = getSpanInfo(span);
 
-        this.toggleCategoryValue(type, value);
+        const relatedPaletteCount = (
+          type === 'node' ? palettes.nodeColor : palettes.edgeColor
+        ) as Palette<string>;
+
+        this.toggleCategoryValue(type, relatedPaletteCount.size, value);
         updateSpans();
         this.renderer.refresh();
       };
@@ -1120,7 +1124,7 @@ export class SigmaView extends DOMWidgetView {
     this.renderer.refresh();
   }
 
-  toggleCategoryValue(type: ItemType, value: string) {
+  toggleCategoryValue(type: ItemType, max: number, value: string) {
     let target =
       type === 'node'
         ? this.selectedNodeCategories
@@ -1128,6 +1132,8 @@ export class SigmaView extends DOMWidgetView {
 
     if (!target) {
       target = new Set([value]);
+    } else if (target.size === max - 1) {
+      target = null;
     } else if (target.has(value)) {
       if (target.size === 1) {
         target = null;
