@@ -164,3 +164,11 @@
 .ipysigma-widget #ipysigma-download-gexf-button {
   margin-right: 3px;
 }
+
+.ipysigma-widget .category {
+  cursor: pointer;
+}
+.ipysigma-widget .category.evicted .category-value {
+  color: gray;
+  text-decoration: line-through;
+}

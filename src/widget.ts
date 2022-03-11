@@ -110,6 +110,7 @@ type VisualVariables = {
 
 interface CustomNodeDisplayData extends NodeDisplayData {
   hoverLabel?: string | null;
+  categoryValue?: string;
 }
 
 /**
@@ -417,6 +418,8 @@ export class SigmaView extends DOMWidgetView {
   selectedNode: string | null = null;
   selectedEdge: string | null = null;
   focusedNodes: Set<string> | null = null;
+  selectedNodeCategories: Set<string> | null = null;
+  selectedEdgeCategories: Set<string> | null = null;
 
   downloadPNGButton: HTMLElement;
   downloadGEXFButton: HTMLElement;
@@ -607,6 +610,11 @@ export class SigmaView extends DOMWidgetView {
       ) as VisualVariables;
 
       // Nodes
+      const nodeDisplayDataRegister: Record<
+        string,
+        Partial<CustomNodeDisplayData>
+      > = {};
+
       const nodeColorAttribute =
         (<any>visualVariables.node_color).attribute || 'color';
 
@@ -674,8 +682,6 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.edge_color.type === 'dependent'
           ? visualVariables.edge_color.value
           : null;
-
-      const edgeColorDependency: Record<string, string> = {};
 
       const edgePaletteBuilder: PaletteBuilder<string> | null =
         visualVariables.edge_color.type === 'category'
@@ -753,12 +759,15 @@ export class SigmaView extends DOMWidgetView {
         };
 
         // Visual variables
+        const colorValue = data[nodeColorAttribute];
+        displayData.categoryValue = colorValue;
+
         if (nodePalette) {
-          displayData.color = nodePalette.get(data[nodeColorAttribute]);
+          displayData.color = nodePalette.get(colorValue);
         } else if (nodeColorScale) {
-          displayData.color = nodeColorScale(data[nodeColorAttribute]);
+          displayData.color = nodeColorScale(colorValue);
         } else {
-          displayData.color = data[nodeColorAttribute];
+          displayData.color = colorValue;
         }
 
         if (nodeSizeScale) {
@@ -774,7 +783,11 @@ export class SigmaView extends DOMWidgetView {
           displayData.highlighted = true;
         }
 
-        if (this.focusedNodes && !this.focusedNodes.has(node)) {
+        if (
+          (this.focusedNodes && !this.focusedNodes.has(node)) ||
+          (this.selectedNodeCategories &&
+            !this.selectedNodeCategories.has(colorValue))
+        ) {
           displayData.color = MUTED_NODE_COLOR;
           displayData.zIndex = 0;
           displayData.size = displayData.size ? displayData.size / 2 : 1;
@@ -784,9 +797,7 @@ export class SigmaView extends DOMWidgetView {
           displayData.zIndex = 1;
         }
 
-        if (edgeColorFrom && displayData.color) {
-          edgeColorDependency[node] = displayData.color;
-        }
+        nodeDisplayDataRegister[node] = displayData;
 
         return displayData;
       };
@@ -798,16 +809,19 @@ export class SigmaView extends DOMWidgetView {
         const [source, target] = graph.extremities(edge);
 
         // Visual variables
+        const colorValue = data[edgeColorAttribute];
+
         if (edgePalette) {
-          displayData.color = edgePalette.get(data[edgeColorAttribute]);
+          displayData.color = edgePalette.get(colorValue);
         } else if (edgeColorScale) {
-          displayData.color = edgeColorScale(data[edgeColorAttribute]);
+          displayData.color = edgeColorScale(colorValue);
         } else if (edgeColorFrom) {
           displayData.color =
-            edgeColorDependency[edgeColorFrom === 'source' ? source : target] ||
-            rendererSettings.defaultNodeColor;
+            nodeDisplayDataRegister[
+              edgeColorFrom === 'source' ? source : target
+            ]?.color || rendererSettings.defaultNodeColor;
         } else {
-          displayData.color = data[edgeColorAttribute];
+          displayData.color = colorValue;
         }
 
         if (edgeSizeScale) {
@@ -825,7 +839,28 @@ export class SigmaView extends DOMWidgetView {
           if (source !== this.selectedNode && target !== this.selectedNode) {
             displayData.hidden = true;
           }
-        } else if (this.selectedEdge) {
+        }
+
+        if (this.selectedNodeCategories) {
+          if (
+            !this.selectedNodeCategories.has(
+              nodeDisplayDataRegister[source]?.categoryValue as string
+            ) &&
+            !this.selectedNodeCategories.has(
+              nodeDisplayDataRegister[target]?.categoryValue as string
+            )
+          ) {
+            displayData.hidden = true;
+          }
+        }
+
+        if (this.selectedEdgeCategories) {
+          if (!this.selectedEdgeCategories.has(colorValue)) {
+            displayData.hidden = true;
+          }
+        }
+
+        if (this.selectedEdge) {
           displayData.hidden = edge !== this.selectedEdge;
         }
 
@@ -903,7 +938,14 @@ export class SigmaView extends DOMWidgetView {
     palettes: { nodeColor?: Palette<string>; edgeColor?: Palette<string> },
     rendererSettings: Partial<SigmaSettings>
   ) {
+    type ItemType = 'node' | 'edge';
+
+    const categoryMap: Map<number, { type: ItemType; values: Array<string> }> =
+      new Map();
+    let dataId = 0;
+
     function renderLegend(
+      type: ItemType,
       title: string,
       variable: VisualVariable,
       palette?: Palette<string>,
@@ -943,11 +985,18 @@ export class SigmaView extends DOMWidgetView {
           const paletteItems: string[] = [];
 
           if (palette) {
+            const values: string[] = [];
+            categoryMap.set(dataId, { type, values });
+            let i = 0;
+
             palette.forEach((color, value) => {
+              values.push(value);
               paletteItems.push(
-                `<span style="color: ${color}">■</span> ${value}`
+                `<span title="click to filter" class="category" data-key="${dataId}" data-index="${i++}"><span style="color: ${color}">■</span> <span class="category-value">${value}</span></span>`
               );
             });
+
+            dataId++;
 
             if (palette.overflowing) {
               paletteItems.push(
@@ -968,28 +1017,83 @@ export class SigmaView extends DOMWidgetView {
     }
 
     const items = [
-      renderLegend('Node labels', variables.node_label),
+      renderLegend('node', 'Node labels', variables.node_label),
       renderLegend(
+        'node',
         'Node colors',
         variables.node_color,
         palettes.nodeColor,
         rendererSettings.defaultNodeColor
       ),
-      renderLegend('Node sizes', variables.node_size),
+      renderLegend('node', 'Node sizes', variables.node_size),
       renderLegend(
+        'edge',
         'Edge colors',
         variables.edge_color,
         palettes.edgeColor,
         rendererSettings.defaultEdgeColor
       ),
-      renderLegend('Edge sizes', variables.edge_size),
+      renderLegend('edge', 'Edge sizes', variables.edge_size),
     ];
 
     if (variables.edge_label) {
-      items.push(renderLegend('Edge labels', variables.edge_label));
+      items.push(renderLegend('edge', 'Edge labels', variables.edge_label));
     }
 
     this.legendElement.innerHTML = items.join('<hr>');
+
+    // Binding category span events
+    function getSpanInfo(span: HTMLElement): { type: ItemType; value: string } {
+      const key = +(span.getAttribute('data-key') as string);
+      const index = +(span.getAttribute('data-index') as string);
+
+      const record = categoryMap.get(key);
+
+      if (!record)
+        throw new Error('error registering category span click event handlers');
+
+      return { type: record.type, value: record.values[index] };
+    }
+
+    const categorySpans = this.legendElement.querySelectorAll(
+      '.category'
+    ) as NodeListOf<HTMLElement>;
+
+    const updateSpans = () => {
+      categorySpans.forEach((span) => {
+        const { type, value } = getSpanInfo(span);
+
+        if (type === 'node') {
+          if (
+            !this.selectedNodeCategories ||
+            this.selectedNodeCategories.has(value)
+          ) {
+            span.classList.remove('evicted');
+          } else {
+            span.classList.add('evicted');
+          }
+        } else if (type === 'edge') {
+          if (
+            !this.selectedEdgeCategories ||
+            this.selectedEdgeCategories.has(value)
+          ) {
+            span.classList.remove('evicted');
+          } else {
+            span.classList.add('evicted');
+          }
+        }
+      });
+    };
+
+    categorySpans.forEach((span) => {
+      span.onclick = () => {
+        const { type, value } = getSpanInfo(span);
+
+        this.toggleCategoryValue(type, value);
+        updateSpans();
+        this.renderer.refresh();
+      };
+    });
   }
 
   clearSelectedItem() {
@@ -1014,6 +1118,28 @@ export class SigmaView extends DOMWidgetView {
     this.touch();
 
     this.renderer.refresh();
+  }
+
+  toggleCategoryValue(type: ItemType, value: string) {
+    let target =
+      type === 'node'
+        ? this.selectedNodeCategories
+        : this.selectedEdgeCategories;
+
+    if (!target) {
+      target = new Set([value]);
+    } else if (target.has(value)) {
+      if (target.size === 1) {
+        target = null;
+      } else {
+        target.delete(value);
+      }
+    } else {
+      target.add(value);
+    }
+
+    if (type === 'node') this.selectedNodeCategories = target;
+    else this.selectedEdgeCategories = target;
   }
 
   selectItem(type: ItemType, key: string) {
