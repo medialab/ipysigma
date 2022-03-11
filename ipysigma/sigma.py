@@ -335,6 +335,7 @@ class Sigma(DOMWidget):
         node_metrics=None,
         edge_color=None,
         edge_raw_color="color",
+        edge_color_gradient=None,
         edge_color_from=None,
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
@@ -380,7 +381,8 @@ class Sigma(DOMWidget):
 
         node_size_range = resolve_range("node_size_range", node_size_range)
         node_color_gradient = resolve_range("node_color_gradient", node_color_gradient)
-        edge_color = resolve_range("edge_color", edge_color)
+        edge_size_range = resolve_range("edge_size_range", edge_size_range)
+        edge_color_gradient = resolve_range("edge_color_gradient", edge_color_gradient)
 
         # Own
         self.graph = graph
@@ -530,6 +532,10 @@ class Sigma(DOMWidget):
 
         elif edge_raw_color is not None:
             visual_variables["edge_color"]["attribute"] = edge_raw_color
+
+        if edge_color_gradient is not None:
+            visual_variables["edge_color"]["type"] = "continuous"
+            visual_variables["edge_color"]["range"] = edge_color_gradient
 
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
