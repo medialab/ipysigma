@@ -426,23 +426,8 @@ export class SigmaView extends DOMWidgetView {
   downloadSVGButton: HTMLElement;
   downloadJSONButton: HTMLElement;
 
-  renderSingletonError() {
-    this.el.innerHTML =
-      '<i>You cannot render two independent views of the same Sigma widget, sorry...</i>';
-  }
-
   render() {
     super.render();
-
-    // Lock management
-    if (this.model.get('singleton_lock')) {
-      this.renderSingletonError();
-      this.singleton = false;
-      return;
-    }
-
-    this.model.set('singleton_lock', true);
-    this.touch();
 
     this.rng = seedrandom('ipysigma');
     this.el.classList.add('ipysigma-widget');
@@ -1293,9 +1278,21 @@ export class SigmaView extends DOMWidgetView {
       500
     );
 
+    const debouncedRenderSnapshot = debounce(
+      this.renderSnapshot.bind(this),
+      2000
+    );
+
     this.renderer.getCamera().on('updated', (state) => {
       debouncedSaveCameraState(state);
     });
+
+    this.renderer.on('afterRender', () => {
+      debouncedRenderSnapshot();
+    });
+
+    // We render the snapshot at least once
+    this.renderSnapshot();
 
     this.renderer.on('enterNode', () => {
       this.container.style.cursor = 'pointer';
@@ -1530,12 +1527,6 @@ export class SigmaView extends DOMWidgetView {
   remove() {
     // Cleanup to avoid leaks and free GPU slots
     if (this.renderer) this.renderer.kill();
-
-    if (this.singleton) {
-      this.model.set('singleton_lock', false);
-      this.touch();
-    }
-
     super.remove();
   }
 }

@@ -5,8 +5,9 @@
 # =============================================================================
 #
 #
-from ipywidgets import DOMWidget, HTML
+from ipywidgets import DOMWidget
 from ipywidgets.embed import embed_minimal_html
+from IPython.display import Image
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Sequence, Mapping, Iterable
 import networkx as nx
@@ -291,7 +292,6 @@ class Sigma(DOMWidget):
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
 
-    singleton_lock = Bool(False).tag(sync=True)
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(500).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
@@ -675,29 +675,13 @@ class Sigma(DOMWidget):
             Ipython.display.HTML: the snasphot as a data url in an img tag.
         """
 
-        if not self.singleton_lock:
+        if self.snapshot is None:
             raise TypeError(
-                "Widget needs to be displayed on screen to render a snapshot. Maybe you reinstantiated it and forgot to display the new instance?"
+                "Widget needs to have been displayed on screen at least once to render a snapshot"
             )
 
-        self.snapshot = None
-
-        html = HTML("<i>rendering snapshot...</i>")
-
-        def update(change):
-            html.value = '<img src="{}" style="max-width: 100%; height: auto; border: 1px solid #e0e0e0;">'.format(
-                change.new
-            )
-            self.unobserve(update, "snapshot")
-
-        self.observe(update, "snapshot")
-        self.send({"msg": "render_snapshot"})
-
-        return html
+        return Image(url=self.snapshot)
 
     def save_as_html(self, path, **kwargs):
-        embed_minimal_html(
-            path,
-            views=[self],
-            **kwargs
-        )
+        # TODO: maybe clear snasphot to avoid large dumps
+        embed_minimal_html(path, views=[self], **kwargs)
