@@ -113,6 +113,21 @@ export function saveAsGEXF(renderer: Sigma): void {
 }
 
 export function saveAsSVG(renderer: Sigma): void {
-  const data = renderAsSVG(renderer.getGraph(), SVG_DEFAULTS);
+  const rendererSettings = renderer.getSettings();
+
+  const settings = Object.assign({}, SVG_DEFAULTS);
+
+  settings.nodes = {
+    // @ts-ignore
+    reducer: (_, n, a) => rendererSettings.nodeReducer(n, a),
+    defaultColor: rendererSettings.defaultNodeColor,
+  };
+  settings.edges = {
+    // @ts-ignore
+    reducer: (_, e, a) => rendererSettings.edgeReducer(e, a),
+    defaultColor: rendererSettings.defaultEdgeColor,
+  };
+
+  const data = renderAsSVG(renderer.getGraph(), settings);
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
 }
