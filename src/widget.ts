@@ -1278,21 +1278,9 @@ export class SigmaView extends DOMWidgetView {
       500
     );
 
-    const debouncedRenderSnapshot = debounce(
-      this.renderSnapshot.bind(this),
-      2000
-    );
-
     this.renderer.getCamera().on('updated', (state) => {
       debouncedSaveCameraState(state);
     });
-
-    this.renderer.on('afterRender', () => {
-      debouncedRenderSnapshot();
-    });
-
-    // We render the snapshot at least once
-    this.renderSnapshot();
 
     this.renderer.on('enterNode', () => {
       this.container.style.cursor = 'pointer';

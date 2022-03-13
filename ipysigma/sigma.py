@@ -5,9 +5,9 @@
 # =============================================================================
 #
 #
-from ipywidgets import DOMWidget
+from ipywidgets import DOMWidget, Output
 from ipywidgets.embed import embed_minimal_html
-from IPython.display import Image
+from IPython.display import Image, display
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Sequence, Mapping, Iterable
 import networkx as nx
@@ -663,7 +663,7 @@ class Sigma(DOMWidget):
     def get_selected_edge_category_values(self):
         return self.selected_edge_category_values
 
-    def render_snasphot(self):
+    def render_snapshot(self):
         """
         Method rendering and displaying a snasphot of the widget.
 
@@ -675,13 +675,33 @@ class Sigma(DOMWidget):
             Ipython.display.HTML: the snasphot as a data url in an img tag.
         """
 
-        if self.snapshot is None:
-            raise TypeError(
-                "Widget needs to have been displayed on screen at least once to render a snapshot"
-            )
+        out = Output()
+        out.append_stdout(
+            "Rendering snapshot from widget (are you sure the widget is currently displayed?)..."
+        )
 
-        return Image(url=self.snapshot)
+        def on_update(change):
+            if change.new is None:
+                return
+
+            out.clear_output()
+
+            with out:
+                display(Image(url=change.new))
+
+            self.unobserve(on_update, "snapshot")
+
+        self.observe(on_update, "snapshot")
+        self.send({"msg": "render_snapshot"})
+
+        return out
 
     def save_as_html(self, path, **kwargs):
-        # TODO: maybe clear snasphot to avoid large dumps
+
+        # Snapshot data unnecessarily adds weight here, let's drop it
+        current_snapshot = self.snapshot
+        self.snapshot = None
+
         embed_minimal_html(path, views=[self], **kwargs)
+
+        self.snapshot = current_snapshot
