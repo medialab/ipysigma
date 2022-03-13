@@ -6,7 +6,8 @@
 #
 #
 from ipywidgets import DOMWidget, HTML
-from traitlets import Unicode, Dict, Int, Bool, Tuple, Set
+from ipywidgets.embed import embed_minimal_html
+from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Sequence, Mapping, Iterable
 import networkx as nx
 from ._frontend import module_name, module_version
@@ -302,8 +303,8 @@ class Sigma(DOMWidget):
     node_metrics = Dict({}).tag(sync=True)
     selected_node = Unicode(allow_none=True).tag(sync=True)
     selected_edge = Tuple(allow_none=True).tag(sync=True)
-    selected_node_category_values = Set(allow_none=True).tag(sync=True)
-    selected_edge_category_values = Set(allow_none=True).tag(sync=True)
+    selected_node_category_values = List(allow_none=True).tag(sync=True)
+    selected_edge_category_values = List(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -326,6 +327,7 @@ class Sigma(DOMWidget):
     def __init__(
         self,
         graph,
+        *,
         height=500,
         start_layout=False,
         node_color=None,
@@ -418,12 +420,12 @@ class Sigma(DOMWidget):
             (str(selected_edge[0]), str(selected_edge[1])) if selected_edge else None
         )
         self.selected_node_category_values = (
-            set(selected_node_category_values)
+            list(selected_node_category_values)
             if selected_node_category_values
             else None
         )
         self.selected_edge_category_values = (
-            set(selected_edge_category_values)
+            list(selected_edge_category_values)
             if selected_edge_category_values
             else None
         )
@@ -692,3 +694,10 @@ class Sigma(DOMWidget):
         self.send({"msg": "render_snapshot"})
 
         return html
+
+    def save_as_html(self, path, **kwargs):
+        embed_minimal_html(
+            path,
+            views=[self],
+            **kwargs
+        )
