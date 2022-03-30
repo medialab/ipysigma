@@ -593,6 +593,11 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
+      // console.log(
+      //   this.model.get('node_color_palette'),
+      //   this.model.get('edge_color_palette')
+      // );
+
       const clickableEdges: boolean = this.model.get('clickable_edges');
 
       const rendererSettings: Partial<SigmaSettings> = {

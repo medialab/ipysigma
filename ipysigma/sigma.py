@@ -308,6 +308,8 @@ class Sigma(DOMWidget):
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
     default_node_color = Unicode("#999").tag(sync=True)
     default_edge_color = Unicode("#ccc").tag(sync=True)
+    node_color_palette = List(allow_none=True).tag(sync=True)
+    edge_color_palette = List(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -336,6 +338,7 @@ class Sigma(DOMWidget):
         node_color=None,
         node_raw_color="color",
         node_color_gradient=None,
+        node_color_palette=None,
         default_node_color="#999",
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
@@ -345,6 +348,7 @@ class Sigma(DOMWidget):
         edge_raw_color="color",
         edge_color_gradient=None,
         edge_color_from=None,
+        edge_color_palette=None,
         default_edge_color="#ccc",
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
@@ -601,6 +605,21 @@ class Sigma(DOMWidget):
             self.edge_weight = variable["attribute"]
         else:
             self.edge_weight = None
+
+        # Palettes
+        self.node_color_palette = None
+        if node_color_palette is not None:
+            if not isinstance(node_color_palette, Mapping):
+                raise TypeError("node_color_palette should be a mapping (i.e. a dict)")
+
+            self.node_color_palette = list(node_color_palette.items())
+
+        self.edge_color_palette = None
+        if edge_color_palette is not None:
+            if not isinstance(edge_color_palette, Mapping):
+                raise TypeError("edge_color_palette should be a mapping (i.e. a dict)")
+
+            self.edge_color_palette = list(edge_color_palette.items())
 
         self.visual_variables = visual_variables
         self.default_node_color = default_node_color
