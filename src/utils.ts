@@ -131,3 +131,26 @@ export function saveAsSVG(renderer: Sigma): void {
   const data = renderAsSVG(renderer.getGraph(), settings);
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
 }
+
+export type ColorEntries<T> = Array<[key: T, value: string]>;
+
+export class RawPalette<T> {
+  map: Map<T, string>;
+  defaultColor: string;
+  overflowing = true;
+  size: number;
+
+  constructor(entries: ColorEntries<T>, defaultColor: string) {
+    this.map = new Map(entries);
+    this.size = this.map.size;
+    this.defaultColor = defaultColor;
+  }
+
+  get(value: T): string {
+    return this.map.get(value) || this.defaultColor;
+  }
+
+  forEach(callback: (value: string, key: T) => void): void {
+    this.map.forEach(callback);
+  }
+}

@@ -33,6 +33,8 @@ import {
   saveAsGEXF,
   saveAsJSON,
   saveAsSVG,
+  RawPalette,
+  ColorEntries,
 } from './utils';
 
 import {
@@ -71,6 +73,7 @@ type EdgeColorDependency = 'source' | 'target';
 type Bound = number | string;
 type Range = [Bound, Bound];
 type Scale<T> = (value: number) => T;
+type AnyPalette<T> = Palette<T> | RawPalette<T>;
 
 type RawVisualVariable = {
   type: 'raw';
@@ -593,10 +596,12 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      // console.log(
-      //   this.model.get('node_color_palette'),
-      //   this.model.get('edge_color_palette')
-      // );
+      const nodeColorPaletteEntries = this.model.get(
+        'node_color_palette'
+      ) as ColorEntries<string> | null;
+      const edgeColorPaletteEntries = this.model.get(
+        'edge_color_palette'
+      ) as ColorEntries<string> | null;
 
       const clickableEdges: boolean = this.model.get('clickable_edges');
 
@@ -626,7 +631,8 @@ export class SigmaView extends DOMWidgetView {
         (<any>visualVariables.node_color).attribute || 'color';
 
       const nodePaletteBuilder: PaletteBuilder<string> | null =
-        visualVariables.node_color.type === 'category'
+        visualVariables.node_color.type === 'category' &&
+        !nodeColorPaletteEntries
           ? new PaletteBuilder(nodeColorAttribute, CATEGORY_MAX_COUNT, {
               defaultColor: rendererSettings.defaultNodeColor,
             })
@@ -663,8 +669,16 @@ export class SigmaView extends DOMWidgetView {
         if (size > maxNodeSize) maxNodeSize = size;
       });
 
-      const nodePalette: Palette<string> | undefined =
-        nodePaletteBuilder?.build();
+      let nodePalette: AnyPalette<string> | undefined = undefined;
+
+      if (nodePaletteBuilder) {
+        nodePalette = nodePaletteBuilder.build();
+      } else if (nodeColorPaletteEntries) {
+        nodePalette = new RawPalette(
+          nodeColorPaletteEntries,
+          rendererSettings.defaultNodeColor as string
+        );
+      }
 
       rendererSettings.labelRenderedSizeThreshold = Math.min(maxNodeSize, 6);
 
@@ -691,7 +705,8 @@ export class SigmaView extends DOMWidgetView {
           : null;
 
       const edgePaletteBuilder: PaletteBuilder<string> | null =
-        visualVariables.edge_color.type === 'category'
+        visualVariables.edge_color.type === 'category' &&
+        !edgeColorPaletteEntries
           ? new PaletteBuilder(edgeColorAttribute, CATEGORY_MAX_COUNT, {
               defaultColor: rendererSettings.defaultEdgeColor,
             })
@@ -732,8 +747,16 @@ export class SigmaView extends DOMWidgetView {
         if (size > maxEdgeSize) maxEdgeSize = size;
       });
 
-      const edgePalette: Palette<string> | undefined =
-        edgePaletteBuilder?.build();
+      let edgePalette: AnyPalette<string> | undefined = undefined;
+
+      if (edgePaletteBuilder) {
+        edgePalette = edgePaletteBuilder.build();
+      } else if (edgeColorPaletteEntries) {
+        edgePalette = new RawPalette(
+          edgeColorPaletteEntries,
+          rendererSettings.defaultEdgeColor as string
+        );
+      }
 
       const edgeSizeScale = createScale<number>(
         minEdgeSize,
@@ -942,7 +965,10 @@ export class SigmaView extends DOMWidgetView {
 
   updateLegend(
     variables: VisualVariables,
-    palettes: { nodeColor?: Palette<string>; edgeColor?: Palette<string> },
+    palettes: {
+      nodeColor?: AnyPalette<string>;
+      edgeColor?: AnyPalette<string>;
+    },
     rendererSettings: Partial<SigmaSettings>
   ) {
     type ItemType = 'node' | 'edge';
@@ -955,7 +981,7 @@ export class SigmaView extends DOMWidgetView {
       type: ItemType,
       title: string,
       variable: VisualVariable,
-      palette?: Palette<string>,
+      palette?: AnyPalette<string>,
       defaultColor?: string
     ) {
       let html = `<b>${title}</b><br>`;
@@ -1098,7 +1124,7 @@ export class SigmaView extends DOMWidgetView {
 
         const relatedPaletteCount = (
           type === 'node' ? palettes.nodeColor : palettes.edgeColor
-        ) as Palette<string>;
+        ) as AnyPalette<string>;
 
         this.toggleCategoryValue(type, relatedPaletteCount.size, value);
         updateSpans();
