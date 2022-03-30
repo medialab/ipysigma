@@ -390,6 +390,7 @@ export class SigmaView extends DOMWidgetView {
   container: HTMLElement;
   renderer: Sigma;
   graph: Graph;
+  edgeWeightAttribute: string | null = null;
   metrics: {
     node: Record<string, string>;
   };
@@ -462,6 +463,8 @@ export class SigmaView extends DOMWidgetView {
       this.selectedEdgeCategoryValues = new Set(selectedEdgeCategoryValues);
 
     // Widget-side metrics
+    this.edgeWeightAttribute = this.model.get('edge_weight') as string | null;
+
     const nodeMetrics = this.model.get('node_metrics') as
       | Record<string, string>
       | undefined;
@@ -471,6 +474,7 @@ export class SigmaView extends DOMWidgetView {
         if (metric === 'louvain') {
           louvain.assign(graph, {
             nodeCommunityAttribute: nodeMetrics[metric],
+            getEdgeWeight: this.edgeWeightAttribute,
           });
         } else {
           throw new Error('unkown metric ' + metric);
@@ -1409,6 +1413,7 @@ export class SigmaView extends DOMWidgetView {
 
     this.layout = new LayoutSupervisor(graph, {
       settings: settings ? settings : forceAtlas2.inferSettings(graph),
+      getEdgeWeight: this.edgeWeightAttribute,
     });
 
     this.noverlap = new NoverlapSupervisor(graph, {

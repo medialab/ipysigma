@@ -301,6 +301,7 @@ class Sigma(DOMWidget):
     camera_state = Dict(DEFAULT_CAMERA_STATE).tag(sync=True)
     layout_settings = Dict(allow_none=True).tag(sync=True)
     node_metrics = Dict({}).tag(sync=True)
+    edge_weight = Unicode(allow_none=True).tag(sync=True)
     selected_node = Unicode(allow_none=True).tag(sync=True)
     selected_edge = Tuple(allow_none=True).tag(sync=True)
     selected_node_category_values = List(allow_none=True).tag(sync=True)
@@ -344,6 +345,7 @@ class Sigma(DOMWidget):
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
+        edge_weight="weight",
         camera_state=DEFAULT_CAMERA_STATE,
         selected_node=None,
         selected_edge=None,
@@ -584,6 +586,17 @@ class Sigma(DOMWidget):
             )
 
             visual_variables["edge_label"] = variable
+
+        if edge_weight is not None:
+            variable = {"type": "raw"}
+
+            resolve_variable_kwarg(
+                edges, variable, "edge_weight", edge_weight, item_type="edge"
+            )
+
+            self.edge_weight = variable["attribute"]
+        else:
+            self.edge_weight = None
 
         self.visual_variables = visual_variables
         self.data = {
