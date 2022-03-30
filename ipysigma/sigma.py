@@ -306,6 +306,8 @@ class Sigma(DOMWidget):
     selected_edge = Tuple(allow_none=True).tag(sync=True)
     selected_node_category_values = List(allow_none=True).tag(sync=True)
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
+    default_node_color = Unicode("#999").tag(sync=True)
+    default_edge_color = Unicode("#ccc").tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -334,6 +336,7 @@ class Sigma(DOMWidget):
         node_color=None,
         node_raw_color="color",
         node_color_gradient=None,
+        default_node_color="#999",
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
@@ -342,6 +345,7 @@ class Sigma(DOMWidget):
         edge_raw_color="color",
         edge_color_gradient=None,
         edge_color_from=None,
+        default_edge_color="#ccc",
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
@@ -599,6 +603,8 @@ class Sigma(DOMWidget):
             self.edge_weight = None
 
         self.visual_variables = visual_variables
+        self.default_node_color = default_node_color
+        self.default_edge_color = default_edge_color
         self.data = {
             "nodes": nodes,
             "edges": edges,

@@ -602,8 +602,8 @@ export class SigmaView extends DOMWidgetView {
         enableEdgeHoverEvents: clickableEdges,
         labelGridCellSize: 250,
         hoverRenderer: drawHover,
-        defaultNodeColor: '#999',
-        defaultEdgeColor: '#ccc',
+        defaultNodeColor: this.model.get('default_node_color') || '#999',
+        defaultEdgeColor: this.model.get('default_edge_color') || '#ccc',
       };
 
       // Gathering info about the graph to build reducers correctly
