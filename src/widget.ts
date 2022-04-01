@@ -1572,6 +1572,9 @@ export class SigmaView extends DOMWidgetView {
   remove() {
     // Cleanup to avoid leaks and free GPU slots
     if (this.renderer) this.renderer.kill();
+    if (this.layout) this.layout.kill();
+    if (this.noverlap) this.noverlap.kill();
+
     super.remove();
   }
 }
