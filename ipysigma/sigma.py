@@ -22,6 +22,8 @@ DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain"}
+SUPPORTED_UNDIRECTED_EDGE_TYPES = {"line", "slim"}
+SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
 
 
 # =============================================================================
@@ -308,6 +310,7 @@ class Sigma(DOMWidget):
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
     default_node_color = Unicode("#999").tag(sync=True)
     default_edge_color = Unicode("#ccc").tag(sync=True)
+    default_edge_type = Unicode(allow_none=True).tag(sync=True)
     node_color_palette = List(allow_none=True).tag(sync=True)
     edge_color_palette = List(allow_none=True).tag(sync=True)
     visual_variables = Dict(
@@ -350,6 +353,7 @@ class Sigma(DOMWidget):
         edge_color_from=None,
         edge_color_palette=None,
         default_edge_color="#ccc",
+        default_edge_type=None,
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
@@ -605,6 +609,24 @@ class Sigma(DOMWidget):
             self.edge_weight = variable["attribute"]
         else:
             self.edge_weight = None
+
+        self.default_edge_type = None
+        if default_edge_type is not None:
+            if is_directed and default_edge_type not in SUPPORTED_DIRECTED_EDGE_TYPES:
+                raise TypeError(
+                    'unsupported edge type "%s" for directed graphs' % default_edge_type
+                )
+
+            if (
+                not is_directed
+                and default_edge_type not in SUPPORTED_UNDIRECTED_EDGE_TYPES
+            ):
+                raise TypeError(
+                    'unsupported edge type "%s" for undirected graphs'
+                    % default_edge_type
+                )
+
+            self.default_edge_type = default_edge_type
 
         # Palettes
         self.node_color_palette = None

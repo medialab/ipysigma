@@ -11,10 +11,17 @@ import NoverlapSupervisor from 'graphology-layout-noverlap/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import type { ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
 import louvain from 'graphology-communities-louvain';
+
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
-import { Settings as SigmaSettings } from 'sigma/settings';
+import {
+  Settings as SigmaSettings,
+  DEFAULT_SETTINGS as DEFAULT_SIGMA_SETTINGS,
+} from 'sigma/settings';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
+import EdgeFastProgram from 'sigma/rendering/webgl/programs/edge.fast';
+import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
+
 import type Palette from 'iwanthue/palette';
 import PaletteBuilder from 'iwanthue/palette-builder';
 import seedrandom from 'seedrandom';
@@ -605,15 +612,29 @@ export class SigmaView extends DOMWidgetView {
 
       const clickableEdges: boolean = this.model.get('clickable_edges');
 
+      let defaultEdgeType = this.model.get('default_edge_type') as
+        | string
+        | null;
+
+      if (!defaultEdgeType)
+        defaultEdgeType = graph.type !== 'undirected' ? 'arrow' : 'line';
+
+      const edgeProgramClasses = {
+        ...DEFAULT_SIGMA_SETTINGS.edgeProgramClasses,
+        slim: EdgeFastProgram,
+        triangle: EdgeTriangleProgram,
+      };
+
       const rendererSettings: Partial<SigmaSettings> = {
         zIndex: true,
-        defaultEdgeType: graph.type !== 'undirected' ? 'arrow' : 'line',
+        defaultEdgeType,
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
         labelGridCellSize: 250,
         hoverRenderer: drawHover,
         defaultNodeColor: this.model.get('default_node_color') || '#999',
         defaultEdgeColor: this.model.get('default_edge_color') || '#ccc',
+        edgeProgramClasses,
       };
 
       // Gathering info about the graph to build reducers correctly
