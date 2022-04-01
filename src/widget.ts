@@ -228,6 +228,10 @@ export class SigmaModel extends DOMWidgetModel {
 /**
  * Helper functions.
  */
+function createRng(): RNGFunction {
+  return seedrandom('ipysigma');
+}
+
 function isValidNumber(value: any): boolean {
   return typeof value === 'number' && !isNaN(value);
 }
@@ -394,9 +398,6 @@ function getGraphDescription(graph: Graph): string {
  * View declaration.
  */
 export class SigmaView extends DOMWidgetView {
-  singleton: boolean = true;
-  rng: RNGFunction;
-
   container: HTMLElement;
   renderer: Sigma;
   graph: Graph;
@@ -440,13 +441,12 @@ export class SigmaView extends DOMWidgetView {
   render() {
     super.render();
 
-    this.rng = seedrandom('ipysigma');
     this.el.classList.add('ipysigma-widget');
 
     const height = this.model.get('height');
     const data = this.model.get('data');
 
-    const graph = buildGraph(data, this.rng);
+    const graph = buildGraph(data, createRng());
     this.graph = graph;
 
     // Preexisting layout?
@@ -485,6 +485,7 @@ export class SigmaView extends DOMWidgetView {
           louvain.assign(graph, {
             nodeCommunityAttribute: nodeMetrics[metric],
             getEdgeWeight: this.edgeWeightAttribute,
+            rng: createRng(),
           });
         } else {
           throw new Error('unkown metric ' + metric);
