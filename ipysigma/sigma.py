@@ -358,6 +358,7 @@ class Sigma(DOMWidget):
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         edge_weight="weight",
+        edge_sort_key=None,
         camera_state=DEFAULT_CAMERA_STATE,
         selected_node=None,
         selected_edge=None,
@@ -496,7 +497,15 @@ class Sigma(DOMWidget):
 
         edges = []
 
-        for source, target, attr in graph.edges.data():
+        edge_iterator = graph.edges.data()
+
+        if edge_sort_key is not None:
+            if not callable(edge_sort_key):
+                raise TypeError("edge_sort_key shoudl be callable")
+
+            edge_iterator = sorted(edge_iterator, key=edge_sort_key)
+
+        for source, target, attr in edge_iterator:
             if principal_component and source not in principal_component:
                 continue
 
