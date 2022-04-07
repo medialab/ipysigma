@@ -501,7 +501,7 @@ class Sigma(DOMWidget):
 
         if edge_sort_key is not None:
             if not callable(edge_sort_key):
-                raise TypeError("edge_sort_key shoudl be callable")
+                raise TypeError("edge_sort_key should be callable")
 
             edge_iterator = sorted(edge_iterator, key=edge_sort_key)
 
