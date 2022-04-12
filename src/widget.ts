@@ -90,6 +90,7 @@ type RawVisualVariable = {
 type CategoryVisualVariable = {
   type: 'category';
   attribute: string;
+  palette?: ColorEntries<string>;
 };
 
 type ContinuousVisualVariable = {
@@ -604,13 +605,6 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      const nodeColorPaletteEntries = this.model.get(
-        'node_color_palette'
-      ) as ColorEntries<string> | null;
-      const edgeColorPaletteEntries = this.model.get(
-        'edge_color_palette'
-      ) as ColorEntries<string> | null;
-
       const clickableEdges: boolean = this.model.get('clickable_edges');
 
       let defaultEdgeType = this.model.get('default_edge_type') as
@@ -642,6 +636,16 @@ export class SigmaView extends DOMWidgetView {
       const visualVariables = this.model.get(
         'visual_variables'
       ) as VisualVariables;
+
+      const nodeColorPaletteEntries =
+        visualVariables.node_color.type === 'category'
+          ? visualVariables.node_color.palette
+          : null;
+
+      const edgeColorPaletteEntries =
+        visualVariables.edge_color.type === 'category'
+          ? visualVariables.edge_color.palette
+          : null;
 
       // Nodes
       const nodeDisplayDataRegister: Record<

@@ -311,8 +311,6 @@ class Sigma(DOMWidget):
     default_node_color = Unicode("#999").tag(sync=True)
     default_edge_color = Unicode("#ccc").tag(sync=True)
     default_edge_type = Unicode(allow_none=True).tag(sync=True)
-    node_color_palette = List(allow_none=True).tag(sync=True)
-    edge_color_palette = List(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "node_label": {"type": "raw", "attribute": "label"},
@@ -536,12 +534,21 @@ class Sigma(DOMWidget):
             )
 
             visual_variables["node_color"] = variable
+
+            if node_color_palette is not None:
+                if not isinstance(node_color_palette, Mapping):
+                    raise TypeError(
+                        "node_color_palette should be a mapping (i.e. a dict)"
+                    )
+
+                variable["palette"] = list(node_color_palette.items())
+
+            elif node_color_gradient is not None:
+                variable["type"] = "continuous"
+                variable["range"] = node_color_gradient
+
         elif node_raw_color is not None:
             visual_variables["node_color"]["attribute"] = node_raw_color
-
-        if node_color_gradient is not None:
-            visual_variables["node_color"]["type"] = "continuous"
-            visual_variables["node_color"]["range"] = node_color_gradient
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
@@ -571,6 +578,19 @@ class Sigma(DOMWidget):
 
             visual_variables["edge_color"] = variable
 
+            # Palette?
+            if edge_color_palette is not None:
+                if not isinstance(edge_color_palette, Mapping):
+                    raise TypeError(
+                        "edge_color_palette should be a mapping (i.e. a dict)"
+                    )
+
+                variable["palette"] = list(edge_color_palette.items())
+
+            elif edge_color_gradient is not None:
+                variable["type"] = "continuous"
+                variable["range"] = edge_color_gradient
+
         elif edge_color_from is not None:
             if not graph.is_directed():
                 raise TypeError("edge_color_from only works with directed graphs")
@@ -585,10 +605,6 @@ class Sigma(DOMWidget):
 
         elif edge_raw_color is not None:
             visual_variables["edge_color"]["attribute"] = edge_raw_color
-
-        if edge_color_gradient is not None:
-            visual_variables["edge_color"]["type"] = "continuous"
-            visual_variables["edge_color"]["range"] = edge_color_gradient
 
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
@@ -636,21 +652,6 @@ class Sigma(DOMWidget):
                 )
 
             self.default_edge_type = default_edge_type
-
-        # Palettes
-        self.node_color_palette = None
-        if node_color_palette is not None:
-            if not isinstance(node_color_palette, Mapping):
-                raise TypeError("node_color_palette should be a mapping (i.e. a dict)")
-
-            self.node_color_palette = list(node_color_palette.items())
-
-        self.edge_color_palette = None
-        if edge_color_palette is not None:
-            if not isinstance(edge_color_palette, Mapping):
-                raise TypeError("edge_color_palette should be a mapping (i.e. a dict)")
-
-            self.edge_color_palette = list(edge_color_palette.items())
 
         self.visual_variables = visual_variables
         self.default_node_color = default_node_color
