@@ -313,16 +313,16 @@ class Sigma(DOMWidget):
     default_edge_type = Unicode(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
-            "node_label": {"type": "raw", "attribute": "label"},
-            "node_color": {"type": "raw", "attribute": "color"},
-            "node_size": {
+            "nodeLabel": {"type": "raw", "attribute": "label"},
+            "nodeColor": {"type": "raw", "attribute": "color"},
+            "nodeSize": {
                 "type": "continuous",
                 "attribute": "size",
                 "range": DEFAULT_NODE_SIZE_RANGE,
             },
-            "edge_label": None,
-            "edge_color": {"type": "raw", "attribute": "color"},
-            "edge_size": {
+            "edgeLabel": {"type": "disabled"},
+            "edgeColor": {"type": "raw", "attribute": "color"},
+            "edgeSize": {
                 "type": "continuous",
                 "attribute": "size",
                 "range": DEFAULT_EDGE_SIZE_RANGE,
@@ -533,7 +533,7 @@ class Sigma(DOMWidget):
                 nodes, variable, "node_color", node_color, item_type="node"
             )
 
-            visual_variables["node_color"] = variable
+            visual_variables["nodeColor"] = variable
 
             if node_color_palette is not None:
                 if not isinstance(node_color_palette, Mapping):
@@ -548,7 +548,7 @@ class Sigma(DOMWidget):
                 variable["range"] = node_color_gradient
 
         elif node_raw_color is not None:
-            visual_variables["node_color"]["attribute"] = node_raw_color
+            visual_variables["nodeColor"]["attribute"] = node_raw_color
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
@@ -557,7 +557,7 @@ class Sigma(DOMWidget):
                 nodes, variable, "node_size", node_size, item_type="node"
             )
 
-            visual_variables["node_size"] = variable
+            visual_variables["nodeSize"] = variable
 
         if node_label is not None:
             variable = {"type": "raw"}
@@ -566,7 +566,7 @@ class Sigma(DOMWidget):
                 nodes, variable, "node_label", node_label, item_type="node"
             )
 
-            visual_variables["node_label"] = variable
+            visual_variables["nodeLabel"] = variable
 
         # Edges
         if edge_color is not None:
@@ -576,7 +576,7 @@ class Sigma(DOMWidget):
                 edges, variable, "edge_color", edge_color, item_type="edge"
             )
 
-            visual_variables["edge_color"] = variable
+            visual_variables["edgeColor"] = variable
 
             # Palette?
             if edge_color_palette is not None:
@@ -598,13 +598,13 @@ class Sigma(DOMWidget):
             if edge_color_from not in ["source", "target"]:
                 raise TypeError('edge_color_from should be "source" or "target"')
 
-            visual_variables["edge_color"] = {
+            visual_variables["edgeColor"] = {
                 "type": "dependent",
                 "value": edge_color_from,
             }
 
         elif edge_raw_color is not None:
-            visual_variables["edge_color"]["attribute"] = edge_raw_color
+            visual_variables["edgeColor"]["attribute"] = edge_raw_color
 
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
@@ -613,7 +613,7 @@ class Sigma(DOMWidget):
                 edges, variable, "edge_size", edge_size, item_type="edge"
             )
 
-            visual_variables["edge_size"] = variable
+            visual_variables["edgeSize"] = variable
 
         if edge_label is not None:
             variable = {"type": "raw"}
@@ -622,7 +622,7 @@ class Sigma(DOMWidget):
                 edges, variable, "edge_label", edge_label, item_type="edge"
             )
 
-            visual_variables["edge_label"] = variable
+            visual_variables["edgeLabel"] = variable
 
         if edge_weight is not None:
             variable = {"type": "raw"}

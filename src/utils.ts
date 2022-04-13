@@ -1,4 +1,3 @@
-// Taken and adapted from: https://github.com/jacomyal/sigma.js/blob/main/examples/png-snapshot/saveAsPNG.ts
 import Sigma from 'sigma';
 import FileSaver from 'file-saver';
 import * as gexf from 'graphology-gexf/browser';
@@ -7,6 +6,7 @@ import renderAsSVG from 'graphology-svg/renderer';
 // @ts-ignore
 import { DEFAULTS as SVG_DEFAULTS } from 'graphology-svg/defaults';
 
+// Taken and adapted from: https://github.com/jacomyal/sigma.js/blob/main/examples/png-snapshot/saveAsPNG.ts
 function renderToAuxiliaryCanvas(
   renderer: Sigma,
   inputLayers?: string[]
@@ -130,27 +130,4 @@ export function saveAsSVG(renderer: Sigma): void {
 
   const data = renderAsSVG(renderer.getGraph(), settings);
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
-}
-
-export type ColorEntries<T> = Array<[key: T, value: string]>;
-
-export class RawPalette<T> {
-  map: Map<T, string>;
-  defaultColor: string;
-  overflowing = true;
-  size: number;
-
-  constructor(entries: ColorEntries<T>, defaultColor: string) {
-    this.map = new Map(entries);
-    this.size = this.map.size;
-    this.defaultColor = defaultColor;
-  }
-
-  get(value: T): string {
-    return this.map.get(value) || this.defaultColor;
-  }
-
-  forEach(callback: (value: string, key: T) => void): void {
-    this.map.forEach(callback);
-  }
 }
