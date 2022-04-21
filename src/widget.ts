@@ -1263,12 +1263,13 @@ export class SigmaView extends DOMWidgetView {
     const graph = this.graph;
     const renderer = this.renderer;
 
-    const settings = this.model.get('layout_settings') as
-      | ForceAtlas2Settings
-      | undefined;
+    let settings = (this.model.get('layout_settings') ||
+      {}) as ForceAtlas2Settings;
+    const inferredSettings = forceAtlas2.inferSettings(graph);
+    settings = Object.assign(inferredSettings, settings);
 
     this.layout = new LayoutSupervisor(graph, {
-      settings: settings ? settings : forceAtlas2.inferSettings(graph),
+      settings,
       getEdgeWeight: this.edgeWeightAttribute,
     });
 

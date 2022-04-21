@@ -60,7 +60,7 @@
     "graphology": "^0.24.1",
     "graphology-communities-louvain": "^2.0.0",
     "graphology-gexf": "^0.10.1",
-    "graphology-layout-forceatlas2": "0.9.1-zeroweights1",
+    "graphology-layout-forceatlas2": "0.9.1-zeroweights2",
     "graphology-layout-noverlap": "^0.4.2",
     "graphology-svg": "^0.1.3",
     "iwanthue": "^1.6.1",
