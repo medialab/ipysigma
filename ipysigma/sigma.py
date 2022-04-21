@@ -308,8 +308,14 @@ class Sigma(DOMWidget):
     selected_edge = Tuple(allow_none=True).tag(sync=True)
     selected_node_category_values = List(allow_none=True).tag(sync=True)
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
-    default_node_color = Unicode("#999").tag(sync=True)
-    default_edge_color = Unicode("#ccc").tag(sync=True)
+    renderer_settings = Dict(
+        {
+            "defaultNodeColor": "#999",
+            "defaultEdgeColor": "#ccc",
+            "labelGridCellSize": 250,
+            "labelDensity": 1,
+        }
+    ).tag(sync=True)
     default_edge_type = Unicode(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
@@ -367,6 +373,9 @@ class Sigma(DOMWidget):
         clickable_edges=False,
         process_gexf_viz=True,
         only_largest_component=False,
+        label_density=1,
+        label_grid_cell_size=250,
+        label_rendered_size_threshold=None
     ):
         super(Sigma, self).__init__()
 
@@ -654,8 +663,21 @@ class Sigma(DOMWidget):
             self.default_edge_type = default_edge_type
 
         self.visual_variables = visual_variables
-        self.default_node_color = default_node_color
-        self.default_edge_color = default_edge_color
+
+        renderer_settings = {
+            "defaultNodeColor": default_node_color,
+            "defaultEdgeColor": default_edge_color,
+            "labelDensity": label_density,
+            "labelGridCellSize": label_grid_cell_size,
+        }
+
+        if label_rendered_size_threshold is not None:
+            renderer_settings[
+                "labelRenderedSizeThreshold"
+            ] = label_rendered_size_threshold
+
+        self.renderer_settings = renderer_settings
+
         self.data = {
             "nodes": nodes,
             "edges": edges,

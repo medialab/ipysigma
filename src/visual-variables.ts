@@ -298,7 +298,7 @@ export class VisualVariableScalesBuilder {
     return scales;
   }
 
-  getLabelRenderedSizeThreshold(): number {
+  inferLabelRenderedSizeThreshold(): number {
     const attribute = this.variables.nodeSize.attribute;
     const extent = this.nodeExtents.attributes[attribute];
 

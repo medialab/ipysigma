@@ -562,16 +562,18 @@ export class SigmaView extends DOMWidgetView {
         triangle: EdgeTriangleProgram,
       };
 
-      const rendererSettings: Partial<SigmaSettings> = {
+      let rendererSettings = this.model.get(
+        'renderer_settings'
+      ) as Partial<SigmaSettings>;
+
+      rendererSettings = {
         zIndex: true,
         defaultEdgeType,
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
-        labelGridCellSize: 250,
         hoverRenderer: drawHover,
-        defaultNodeColor: this.model.get('default_node_color') || '#999',
-        defaultEdgeColor: this.model.get('default_edge_color') || '#ccc',
         edgeProgramClasses,
+        ...rendererSettings,
       };
 
       // Gathering info about the graph to build reducers correctly
@@ -586,8 +588,9 @@ export class SigmaView extends DOMWidgetView {
 
       scaleBuilder.readGraph(graph);
 
-      rendererSettings.labelRenderedSizeThreshold =
-        scaleBuilder.getLabelRenderedSizeThreshold();
+      if (!('labelRenderedSizeThreshold' in rendererSettings))
+        rendererSettings.labelRenderedSizeThreshold =
+          scaleBuilder.inferLabelRenderedSizeThreshold();
 
       const scales = scaleBuilder.build();
 
