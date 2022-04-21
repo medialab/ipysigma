@@ -11,6 +11,7 @@ import NoverlapSupervisor from 'graphology-layout-noverlap/worker';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
 import type { ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
 import louvain from 'graphology-communities-louvain';
+import { collectLayout, assignLayout } from 'graphology-layout/utils';
 
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
@@ -219,29 +220,6 @@ function renderTypedValue(value: any): string {
   return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;
 }
 
-function applyLayout(graph: Graph, mapping: LayoutMapping): void {
-  graph.updateEachNodeAttributes((node, attr) => {
-    const pos = mapping[node];
-
-    if (!pos) return attr;
-
-    attr.x = pos.x;
-    attr.y = pos.y;
-
-    return attr;
-  });
-}
-
-function collectLayout(graph: Graph): LayoutMapping {
-  const mapping: LayoutMapping = {};
-
-  graph.forEachNode((node, attr) => {
-    mapping[node] = { x: attr.x, y: attr.y };
-  });
-
-  return mapping;
-}
-
 function buildGraph(data: SerializedGraph, rng: RNGFunction): Graph {
   const graph = Graph.from(data);
 
@@ -396,7 +374,7 @@ export class SigmaView extends DOMWidgetView {
     const preexistingLayout = this.model.get('layout');
 
     if (preexistingLayout) {
-      applyLayout(graph, preexistingLayout);
+      assignLayout(graph, preexistingLayout);
     } else {
       this.saveLayout();
     }
