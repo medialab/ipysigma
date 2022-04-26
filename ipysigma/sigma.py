@@ -345,6 +345,7 @@ class Sigma(DOMWidget):
         node_raw_color="color",
         node_color_gradient=None,
         node_color_palette=None,
+        node_hierarchical_color=False,
         default_node_color="#999",
         node_borders=False,
         node_border_color=None,
@@ -560,7 +561,10 @@ class Sigma(DOMWidget):
 
             visual_variables["nodeColor"] = variable
 
-            if node_color_palette is not None:
+            if node_hierarchical_color:
+                variable["type"] = "hierarchy"
+
+            elif node_color_palette is not None:
                 if not isinstance(node_color_palette, Mapping):
                     raise TypeError(
                         "node_color_palette should be a mapping (i.e. a dict)"

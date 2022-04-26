@@ -6,15 +6,12 @@ import MultiSet from 'mnemonist/multi-set';
 import DefaultMap from 'mnemonist/default-map';
 import Palette from 'iwanthue/palette';
 import { scaleLinear } from 'd3-scale';
+import chroma from 'chroma-js';
 
 /**
  * Constants.
  */
 const CATEGORY_MAX_COUNT = 10;
-
-// const testScale = scaleLinear().domain([0, 2]).range(['white', 'red']);
-// const values = [0, 1, 2].map((i) => testScale(i));
-// console.log(values);
 
 /**
  * Types.
@@ -115,14 +112,14 @@ export class HierarchicalMultiSet {
     this.container.get(value[0]).add(value[1]);
   }
 
-  top(count: number): Array<[string, number]> {
+  firstLevel(): MultiSet<string> {
     const values: MultiSet<string> = new MultiSet();
 
     this.container.forEach((set, name) => {
       values.set(name, set.size);
     });
 
-    return values.top(count);
+    return values;
   }
 }
 
@@ -170,6 +167,27 @@ export class AttributeCategories {
   add(attributes: Attributes): void {
     for (const name in this.attributes) {
       const value = attributes[name];
+
+      this.attributes[name].add(value);
+    }
+  }
+}
+
+export class AttributeHierarchicalCategories {
+  attributes: Record<string, HierarchicalMultiSet> = {};
+
+  constructor(names: Array<string>) {
+    // NOTE: this naturally deduplicates names
+    names.forEach(
+      (name) => (this.attributes[name] = new HierarchicalMultiSet())
+    );
+  }
+
+  add(attributes: Attributes): void {
+    for (const name in this.attributes) {
+      const value = attributes[name];
+
+      if (!value) return;
 
       this.attributes[name].add(value);
     }
@@ -227,12 +245,14 @@ export class VisualVariableScalesBuilder {
   edgeExtents: AttributeExtents;
   nodeCategories: AttributeCategories;
   edgeCategories: AttributeCategories;
+  nodeHierarchicalCategories: AttributeHierarchicalCategories;
 
   constructor(visualVariables: VisualVariables) {
     this.variables = visualVariables;
 
     const nodeExtentAttributes: Array<string> = [];
     const nodeCategoryAttributes: Array<string> = [];
+    const nodeHierarchicalCategoryAttributes: Array<string> = [];
     const edgeExtentAttributes: Array<string> = [];
     const edgeCategoryAttributes: Array<string> = [];
 
@@ -243,6 +263,8 @@ export class VisualVariableScalesBuilder {
         if (variable.type === 'category') {
           if (!variable.palette)
             nodeCategoryAttributes.push(variable.attribute);
+        } else if (variable.type === 'hierarchy') {
+          nodeHierarchicalCategoryAttributes.push(variable.attribute);
         } else if (variable.type === 'continuous') {
           nodeExtentAttributes.push(variable.attribute);
         }
@@ -261,12 +283,16 @@ export class VisualVariableScalesBuilder {
     this.edgeExtents = new AttributeExtents(edgeExtentAttributes);
     this.nodeCategories = new AttributeCategories(nodeCategoryAttributes);
     this.edgeCategories = new AttributeCategories(edgeCategoryAttributes);
+    this.nodeHierarchicalCategories = new AttributeHierarchicalCategories(
+      nodeHierarchicalCategoryAttributes
+    );
   }
 
   readGraph(graph: Graph): void {
     graph.forEachNode((node, attr) => {
       this.nodeExtents.add(attr);
       this.nodeCategories.add(attr);
+      this.nodeHierarchicalCategories.add(attr);
     });
 
     graph.forEachEdge((edge, attr) => {
@@ -302,12 +328,76 @@ export class VisualVariableScalesBuilder {
           : CategorySummary.fromTopValues(
               variable.attribute,
               categories.attributes[variable.attribute],
-              variable.default || '#¢cc'
+              variable.default || '#ccc'
             );
 
         const palette = summary.palette;
 
         scale = (attr) => palette.get(attr[variable.attribute]);
+        scale.summary = summary;
+      }
+
+      // Hierarchical category
+      else if (variable.type === 'hierarchy') {
+        const hierarchy =
+          this.nodeHierarchicalCategories.attributes[variable.attribute];
+
+        const summary = CategorySummary.fromTopValues(
+          variable.attribute,
+          hierarchy.firstLevel(),
+          variable.default || '#ccc'
+        );
+
+        const firstLevelPalette = summary.palette;
+
+        const secondLevelPalettes: Map<string, Palette<string>> = new Map();
+
+        firstLevelPalette.forEach((color, firstLevelValue) => {
+          const secondLevel = hierarchy.container.get(firstLevelValue);
+          const count = Math.min(CATEGORY_MAX_COUNT, secondLevel.dimension);
+          const values = Array.from(
+            secondLevel.top(count).map((item) => item[0])
+          );
+
+          const lightColor = chroma(color).mix('#fff', 0.9).hex();
+
+          const subScale = scaleLinear()
+            .domain([0, values.length - 1])
+            .range([color, lightColor] as unknown as [number, number]);
+
+          const colors = values.map((_, i) =>
+            subScale(i)
+          ) as unknown as string[];
+
+          const mapping: Map<string, string> = new Map();
+
+          values.forEach((value, i) => {
+            mapping.set(value, colors[i]);
+          });
+
+          const secondLevelPalette = Palette.fromMapping(
+            firstLevelValue,
+            mapping,
+            'white'
+          );
+
+          secondLevelPalettes.set(firstLevelValue, secondLevelPalette);
+        });
+
+        const defaultColor = variable.default || '#ccc';
+
+        scale = (attr) => {
+          const value = attr[variable.attribute];
+
+          if (!value) return defaultColor;
+
+          const secondLevelPalette = secondLevelPalettes.get(value[0]);
+
+          if (!secondLevelPalette) return defaultColor;
+
+          return secondLevelPalette.get(value[1]);
+        };
+
         scale.summary = summary;
       }
 
