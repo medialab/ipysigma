@@ -22,6 +22,7 @@ import {
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
 import EdgeFastProgram from 'sigma/rendering/webgl/programs/edge.fast';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
+import createNodeBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/border';
 
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
@@ -81,6 +82,10 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   hoverLabel?: string | null;
   categoryValue?: string;
 }
+
+type IPysigmaProgramSettings = {
+  nodeBorderRatio: number;
+};
 
 /**
  * Template.
@@ -526,6 +531,9 @@ export class SigmaView extends DOMWidgetView {
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
       const clickableEdges: boolean = this.model.get('clickable_edges');
+      const programSettings = this.model.get(
+        'program_settings'
+      ) as IPysigmaProgramSettings;
 
       let defaultEdgeType = this.model.get('default_edge_type') as
         | string
@@ -540,6 +548,13 @@ export class SigmaView extends DOMWidgetView {
         triangle: EdgeTriangleProgram,
       };
 
+      const nodeProgramClasses = {
+        ...DEFAULT_SIGMA_SETTINGS.nodeProgramClasses,
+        border: createNodeBorderProgram({
+          borderRatio: programSettings.nodeBorderRatio,
+        }),
+      };
+
       let rendererSettings = this.model.get(
         'renderer_settings'
       ) as Partial<SigmaSettings>;
@@ -551,6 +566,7 @@ export class SigmaView extends DOMWidgetView {
         enableEdgeHoverEvents: clickableEdges,
         hoverRenderer: drawHover,
         edgeProgramClasses,
+        nodeProgramClasses,
         ...rendererSettings,
       };
 

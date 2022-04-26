@@ -316,11 +316,13 @@ class Sigma(DOMWidget):
             "labelDensity": 1,
         }
     ).tag(sync=True)
+    program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
     default_edge_type = Unicode(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "nodeLabel": {"type": "raw", "attribute": "label"},
             "nodeColor": {"type": "raw", "attribute": "color"},
+            "nodeBorderColor": {"type": "disabled"},
             "nodeSize": {
                 "type": "continuous",
                 "attribute": "size",
@@ -347,6 +349,13 @@ class Sigma(DOMWidget):
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color="#999",
+        node_borders=False,
+        node_border_color=None,
+        node_raw_border_color="borderColor",
+        node_border_color_gradient=None,
+        node_border_color_palette=None,
+        default_node_border_color="#fff",
+        node_border_ratio=0.1,
         node_size="size",
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
@@ -566,6 +575,35 @@ class Sigma(DOMWidget):
         elif node_raw_color is not None:
             visual_variables["nodeColor"]["attribute"] = node_raw_color
 
+        if node_borders:
+            if node_border_color is not None:
+                variable = {"type": "category"}
+
+                resolve_variable_kwarg(
+                    nodes,
+                    variable,
+                    "node_border_color",
+                    node_border_color,
+                    item_type="node",
+                )
+
+                visual_variables["nodeBorderColor"] = variable
+
+                if node_border_color_palette is not None:
+                    if not isinstance(node_border_color_palette, Mapping):
+                        raise TypeError(
+                            "node_border_color_palette should be a mapping (i.e. a dict)"
+                        )
+
+                    variable["palette"] = list(node_border_color_palette.items())
+
+                elif node_border_color_gradient is not None:
+                    variable["type"] = "continuous"
+                    variable["range"] = node_border_color_gradient
+
+            elif node_raw_border_color is not None:
+                visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
 
@@ -684,6 +722,8 @@ class Sigma(DOMWidget):
             ] = label_rendered_size_threshold
 
         self.renderer_settings = renderer_settings
+
+        self.program_settings = {"nodeBorderRatio": node_border_ratio}
 
         self.data = {
             "nodes": nodes,

@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
+    "@yomguithereal/sigma-experiments-renderers": "^0.1.0",
     "choices.js": "^10.1.0",
     "comma-number": "^2.1.0",
     "d3-scale": "^4.0.2",
