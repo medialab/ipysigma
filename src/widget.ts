@@ -653,6 +653,10 @@ export class SigmaView extends DOMWidgetView {
           displayData.size = displayData.size ? displayData.size / 2 : 1;
           displayData.hoverLabel = displayData.label;
           displayData.label = '';
+
+          if (nodeBordersEnabled) {
+            displayData.borderColor = MUTED_NODE_COLOR;
+          }
         } else {
           displayData.zIndex = 1;
         }
