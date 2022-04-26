@@ -33,7 +33,7 @@ import debounce from 'debounce';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import drawHover from './custom-hover';
 import {
-  AnyPalette,
+  CategorySummary,
   VisualVariableScalesBuilder,
   VisualVariable,
   VisualVariables,
@@ -575,8 +575,8 @@ export class SigmaView extends DOMWidgetView {
       this.updateLegend(
         visualVariables,
         {
-          nodeColor: scales.nodeColor.palette,
-          edgeColor: scales.edgeColor.palette,
+          nodeColor: scales.nodeColor.summary,
+          edgeColor: scales.edgeColor.summary,
         },
         rendererSettings
       );
@@ -771,9 +771,9 @@ export class SigmaView extends DOMWidgetView {
 
   updateLegend(
     variables: VisualVariables,
-    palettes: {
-      nodeColor?: AnyPalette<string>;
-      edgeColor?: AnyPalette<string>;
+    summaries: {
+      nodeColor?: CategorySummary;
+      edgeColor?: CategorySummary;
     },
     rendererSettings: Partial<SigmaSettings>
   ) {
@@ -787,7 +787,7 @@ export class SigmaView extends DOMWidgetView {
       type: ItemType,
       title: string,
       variable: VisualVariable,
-      palette?: AnyPalette<string>,
+      summary?: CategorySummary,
       defaultColor?: string
     ) {
       let html = `<b>${title}</b><br>`;
@@ -823,12 +823,12 @@ export class SigmaView extends DOMWidgetView {
 
           const paletteItems: string[] = [];
 
-          if (palette) {
+          if (summary) {
             const values: string[] = [];
             categoryMap.set(dataId, { type, values });
             let i = 0;
 
-            palette.forEach((color, value) => {
+            summary.palette.forEach((color, value) => {
               values.push(value);
               paletteItems.push(
                 `<span title="click to filter" class="category" data-key="${dataId}" data-index="${i++}"><span style="color: ${color}">■</span> <span class="category-value">${value}</span></span>`
@@ -837,9 +837,9 @@ export class SigmaView extends DOMWidgetView {
 
             dataId++;
 
-            if (palette.overflowing) {
+            if (summary.overflowing) {
               paletteItems.push(
-                `<span style="color: ${palette.defaultColor}">■</span> ...`
+                `<span style="color: ${summary.palette.defaultColor}">■</span> ...`
               );
             }
           } else {
@@ -861,7 +861,7 @@ export class SigmaView extends DOMWidgetView {
         'node',
         'Node colors',
         variables.nodeColor,
-        palettes.nodeColor,
+        summaries.nodeColor,
         rendererSettings.defaultNodeColor
       ),
       renderLegend('node', 'Node sizes', variables.nodeSize),
@@ -869,7 +869,7 @@ export class SigmaView extends DOMWidgetView {
         'edge',
         'Edge colors',
         variables.edgeColor,
-        palettes.edgeColor,
+        summaries.edgeColor,
         rendererSettings.defaultEdgeColor
       ),
       renderLegend('edge', 'Edge sizes', variables.edgeSize),
@@ -929,10 +929,10 @@ export class SigmaView extends DOMWidgetView {
         const { type, value } = getSpanInfo(span);
 
         const relatedPaletteCount = (
-          type === 'node' ? palettes.nodeColor : palettes.edgeColor
-        ) as AnyPalette<string>;
+          type === 'node' ? summaries.nodeColor : summaries.edgeColor
+        ) as CategorySummary;
 
-        this.toggleCategoryValue(type, relatedPaletteCount.size, value);
+        this.toggleCategoryValue(type, relatedPaletteCount.palette.size, value);
         updateSpans();
         this.renderer.refresh();
       };

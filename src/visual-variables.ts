@@ -2,7 +2,7 @@
  * Code related to visual variables.
  */
 import Graph, { Attributes } from 'graphology-types';
-import PaletteBuilder from 'iwanthue/palette-builder';
+import MultiSet from 'mnemonist/multi-set';
 import Palette from 'iwanthue/palette';
 import { scaleLinear } from 'd3-scale';
 
@@ -21,7 +21,7 @@ export type EdgeColorDependency = 'source' | 'target';
 
 export interface AttributeScale {
   (value: Attributes): string | number;
-  palette?: AnyPalette<string>;
+  summary?: CategorySummary;
 }
 
 export type RawVisualVariable = {
@@ -84,29 +84,6 @@ function isValidNumber(value: any): value is number {
 /**
  * Helper classes.
  */
-export class RawPalette<T> {
-  map: Map<T, string>;
-  defaultColor: string;
-  overflowing = true;
-  size: number;
-
-  constructor(entries: ColorEntries<T>, defaultColor: string) {
-    this.map = new Map(entries);
-    this.size = this.map.size;
-    this.defaultColor = defaultColor;
-  }
-
-  get(value: T): string {
-    return this.map.get(value) || this.defaultColor;
-  }
-
-  forEach(callback: (value: string, key: T) => void): void {
-    this.map.forEach(callback);
-  }
-}
-
-export type AnyPalette<T> = RawPalette<T> | Palette<T>;
-
 export class Extent {
   min = Infinity;
   max = -Infinity;
@@ -141,17 +118,11 @@ export class AttributeExtents {
 }
 
 export class AttributeCategories {
-  attributes: Record<string, PaletteBuilder<string>>;
-  palettes: Record<string, Palette<string>>;
+  attributes: Record<string, MultiSet<string>> = {};
 
-  constructor(names: Array<string>, defaultColor: string) {
+  constructor(names: Array<string>) {
     // NOTE: this naturally deduplicates names
-    names.forEach(
-      (name) =>
-        (this.attributes[name] = new PaletteBuilder(name, CATEGORY_MAX_COUNT, {
-          defaultColor,
-        }))
-    );
+    names.forEach((name) => (this.attributes[name] = new MultiSet()));
   }
 
   add(attributes: Attributes): void {
@@ -161,12 +132,46 @@ export class AttributeCategories {
       this.attributes[name].add(value);
     }
   }
+}
 
-  finalize(): void {
-    for (const name in this.attributes) {
-      const builder = this.attributes[name];
-      this.palettes[name] = builder.build();
-    }
+export class CategorySummary {
+  name: string;
+  palette: Palette<string>;
+  overflowing: boolean;
+
+  constructor(
+    name: string,
+    palette: Palette<string>,
+    overflowing: boolean = false
+  ) {
+    this.name = name;
+    this.palette = palette;
+    this.overflowing = overflowing;
+  }
+
+  static fromTopValues(
+    name: string,
+    frequencies: MultiSet<string>,
+    defaultColor: string
+  ) {
+    const count = Math.min(CATEGORY_MAX_COUNT, frequencies.dimension);
+    const topValues = frequencies.top(count);
+    const overflowing = count < frequencies.dimension;
+
+    const values = topValues.map((item) => item[0]);
+    const palette = Palette.generateFromValues(name, values, { defaultColor });
+
+    return new CategorySummary(name, palette, overflowing);
+  }
+
+  static fromColorEntries(
+    name: string,
+    entries: ColorEntries<string>,
+    defaultColor: string
+  ) {
+    const palette = Palette.fromEntries(name, entries, defaultColor);
+
+    return new CategorySummary(name, palette);
   }
 }
 
@@ -222,14 +227,8 @@ export class VisualVariableScalesBuilder {
 
     this.nodeExtents = new AttributeExtents(nodeExtentAttributes);
     this.edgeExtents = new AttributeExtents(edgeExtentAttributes);
-    this.nodeCategories = new AttributeCategories(
-      nodeCategoryAttributes,
-      options.defaultNodeColor
-    );
-    this.edgeCategories = new AttributeCategories(
-      edgeCategoryAttributes,
-      options.defaultEdgeColor
-    );
+    this.nodeCategories = new AttributeCategories(nodeCategoryAttributes);
+    this.edgeCategories = new AttributeCategories(edgeCategoryAttributes);
   }
 
   readGraph(graph: Graph): void {
@@ -242,9 +241,6 @@ export class VisualVariableScalesBuilder {
       this.edgeExtents.add(attr);
       this.edgeCategories.add(attr);
     });
-
-    this.nodeCategories.finalize();
-    this.edgeCategories.finalize();
   }
 
   build(): VisualVariableScales {
@@ -265,12 +261,26 @@ export class VisualVariableScalesBuilder {
           ? this.nodeCategories
           : this.edgeCategories;
 
-        const palette: AnyPalette<string> = variable.palette
-          ? new RawPalette(variable.palette, this.options.defaultNodeColor)
-          : categories.palettes[variable.attribute];
+        const defaultColor = variableName.startsWith('node')
+          ? this.options.defaultNodeColor
+          : this.options.defaultEdgeColor;
+
+        const summary = variable.palette
+          ? CategorySummary.fromColorEntries(
+              variable.attribute,
+              variable.palette,
+              defaultColor
+            )
+          : CategorySummary.fromTopValues(
+              variable.attribute,
+              categories.attributes[variable.attribute],
+              defaultColor
+            );
+
+        const palette = summary.palette;
 
         scale = (attr) => palette.get(attr[variable.attribute]);
-        scale.palette = palette;
+        scale.summary = summary;
       }
 
       // Continuous variables
