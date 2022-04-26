@@ -329,9 +329,6 @@ export class SigmaView extends DOMWidgetView {
   renderer: Sigma;
   graph: Graph;
   edgeWeightAttribute: string | null = null;
-  metrics: {
-    node: Record<string, string>;
-  };
 
   originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
@@ -402,25 +399,52 @@ export class SigmaView extends DOMWidgetView {
     // Widget-side metrics
     this.edgeWeightAttribute = this.model.get('edge_weight') as string | null;
 
-    const nodeMetrics = this.model.get('node_metrics') as
-      | Record<string, string>
-      | undefined;
+    const nodeMetrics =
+      (this.model.get('node_metrics') as Record<string, string>) || {};
 
-    if (nodeMetrics) {
-      for (const metric in nodeMetrics) {
+    console.log(nodeMetrics);
+    for (const metric in nodeMetrics) {
+      const attrName = nodeMetrics[metric];
+
+      if (metric === 'louvain' || metric === 'hlouvain') {
+        const details = louvain.detailed(graph, {
+          nodeCommunityAttribute: nodeMetrics[metric],
+          getEdgeWeight: this.edgeWeightAttribute,
+          rng: createRng(),
+        });
+
+        let i = 0;
+
+        const lastLayer = details.dendrogram[details.dendrogram.length - 1];
+        const penultimateLayer =
+          details.dendrogram.length >= 3
+            ? details.dendrogram[details.dendrogram.length - 2]
+            : lastLayer;
+
         if (metric === 'louvain') {
-          louvain.assign(graph, {
-            nodeCommunityAttribute: nodeMetrics[metric],
-            getEdgeWeight: this.edgeWeightAttribute,
-            rng: createRng(),
-          });
+          graph.updateEachNodeAttributes(
+            (node, attr) => {
+              attr[attrName] = lastLayer[i++];
+
+              return attr;
+            },
+            { attributes: [attrName] }
+          );
         } else {
-          throw new Error('unkown metric ' + metric);
+          graph.updateEachNodeAttributes(
+            (node, attr) => {
+              attr[attrName] = [lastLayer[i], penultimateLayer[i]];
+              i++;
+
+              return attr;
+            },
+            { attributes: [attrName] }
+          );
         }
+      } else {
+        throw new Error('unkown metric ' + metric);
       }
     }
-
-    this.metrics = { node: nodeMetrics || {} };
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     this.el.style.width = '100%';
@@ -589,9 +613,9 @@ export class SigmaView extends DOMWidgetView {
       const scales = scaleBuilder.build();
 
       this.updateLegend(visualVariables, {
-        nodeColor: scales.nodeColor.summary,
+        nodeColor: scales.nodeColor?.summary,
         nodeBorderColor: scales.nodeBorderColor?.summary,
-        edgeColor: scales.edgeColor.summary,
+        edgeColor: scales.edgeColor?.summary,
       });
 
       const nodeDisplayDataRegister: Record<

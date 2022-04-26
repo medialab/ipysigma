@@ -21,7 +21,7 @@ DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
-SUPPORTED_NODE_METRICS = {"louvain"}
+SUPPORTED_NODE_METRICS = {"louvain", "hlouvain"}
 SUPPORTED_UNDIRECTED_EDGE_TYPES = {"line", "slim"}
 SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
 
