@@ -351,6 +351,7 @@ class Sigma(DOMWidget):
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
         node_metrics=None,
+        node_sort_key=None,
         edge_color=None,
         edge_raw_color="color",
         edge_color_gradient=None,
@@ -502,17 +503,15 @@ class Sigma(DOMWidget):
 
             nodes.append(serialized_node)
 
+        if node_sort_key is not None:
+            if not callable(node_sort_key):
+                raise TypeError("node_sort_key should be callable")
+
+            nodes.sort(key=lambda n: node_sort_key(n["key"], n["attributes"]))
+
         edges = []
 
-        edge_iterator = graph.edges.data()
-
-        if edge_sort_key is not None:
-            if not callable(edge_sort_key):
-                raise TypeError("edge_sort_key should be callable")
-
-            edge_iterator = sorted(edge_iterator, key=edge_sort_key)
-
-        for source, target, attr in edge_iterator:
+        for source, target, attr in graph.edges.data():
             if principal_component and source not in principal_component:
                 continue
 
@@ -530,6 +529,14 @@ class Sigma(DOMWidget):
                 serialized_edge["undirected"] = True
 
             edges.append(serialized_edge)
+
+        if edge_sort_key is not None:
+            if not callable(edge_sort_key):
+                raise TypeError("edge_sort_key should be callable")
+
+            edges.sort(
+                key=lambda e: edge_sort_key(e["source"], e["target"], e["attributes"])
+            )
 
         # Serializing visual variables
         visual_variables = self.visual_variables.copy()
