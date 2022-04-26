@@ -310,18 +310,15 @@ class Sigma(DOMWidget):
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
     renderer_settings = Dict(
         {
-            "defaultNodeColor": "#999",
-            "defaultEdgeColor": "#ccc",
             "labelGridCellSize": 250,
             "labelDensity": 1,
         }
     ).tag(sync=True)
     program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
-    default_edge_type = Unicode(allow_none=True).tag(sync=True)
     visual_variables = Dict(
         {
             "nodeLabel": {"type": "raw", "attribute": "label"},
-            "nodeColor": {"type": "raw", "attribute": "color"},
+            "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
             "nodeBorderColor": {"type": "disabled"},
             "nodeSize": {
                 "type": "continuous",
@@ -329,7 +326,7 @@ class Sigma(DOMWidget):
                 "range": DEFAULT_NODE_SIZE_RANGE,
             },
             "edgeLabel": {"type": "disabled"},
-            "edgeColor": {"type": "raw", "attribute": "color"},
+            "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},
             "edgeSize": {
                 "type": "continuous",
                 "attribute": "size",
@@ -349,9 +346,8 @@ class Sigma(DOMWidget):
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color="#999",
-        node_borders=False,
         node_border_color=None,
-        node_raw_border_color="borderColor",
+        node_raw_border_color=None,
         node_border_color_gradient=None,
         node_border_color_palette=None,
         default_node_border_color="#fff",
@@ -433,6 +429,9 @@ class Sigma(DOMWidget):
 
         node_size_range = resolve_range("node_size_range", node_size_range)
         node_color_gradient = resolve_range("node_color_gradient", node_color_gradient)
+        node_border_color_gradient = resolve_range(
+            "node_border_color_gradient", node_border_color_gradient
+        )
         edge_size_range = resolve_range("edge_size_range", edge_size_range)
         edge_color_gradient = resolve_range("edge_color_gradient", edge_color_gradient)
 
@@ -575,34 +574,37 @@ class Sigma(DOMWidget):
         elif node_raw_color is not None:
             visual_variables["nodeColor"]["attribute"] = node_raw_color
 
-        if node_borders:
-            if node_border_color is not None:
-                variable = {"type": "category"}
+        visual_variables["nodeColor"]["default"] = default_node_color
 
-                resolve_variable_kwarg(
-                    nodes,
-                    variable,
-                    "node_border_color",
-                    node_border_color,
-                    item_type="node",
-                )
+        if node_border_color is not None:
+            variable = {"type": "category"}
 
-                visual_variables["nodeBorderColor"] = variable
+            resolve_variable_kwarg(
+                nodes,
+                variable,
+                "node_border_color",
+                node_border_color,
+                item_type="node",
+            )
 
-                if node_border_color_palette is not None:
-                    if not isinstance(node_border_color_palette, Mapping):
-                        raise TypeError(
-                            "node_border_color_palette should be a mapping (i.e. a dict)"
-                        )
+            visual_variables["nodeBorderColor"] = variable
 
-                    variable["palette"] = list(node_border_color_palette.items())
+            if node_border_color_palette is not None:
+                if not isinstance(node_border_color_palette, Mapping):
+                    raise TypeError(
+                        "node_border_color_palette should be a mapping (i.e. a dict)"
+                    )
 
-                elif node_border_color_gradient is not None:
-                    variable["type"] = "continuous"
-                    variable["range"] = node_border_color_gradient
+                variable["palette"] = list(node_border_color_palette.items())
 
-            elif node_raw_border_color is not None:
-                visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+            elif node_border_color_gradient is not None:
+                variable["type"] = "continuous"
+                variable["range"] = node_border_color_gradient
+
+        elif node_raw_border_color is not None:
+            visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+
+        visual_variables["nodeBorderColor"]["default"] = default_node_border_color
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
@@ -660,6 +662,8 @@ class Sigma(DOMWidget):
         elif edge_raw_color is not None:
             visual_variables["edgeColor"]["attribute"] = edge_raw_color
 
+        visual_variables["edgeColor"]["default"] = default_edge_color
+
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
 
@@ -689,7 +693,19 @@ class Sigma(DOMWidget):
         else:
             self.edge_weight = None
 
-        self.default_edge_type = None
+        self.visual_variables = visual_variables
+
+        # Building renderer settings
+        renderer_settings = {
+            "labelDensity": label_density,
+            "labelGridCellSize": label_grid_cell_size,
+        }
+
+        if label_rendered_size_threshold is not None:
+            renderer_settings[
+                "labelRenderedSizeThreshold"
+            ] = label_rendered_size_threshold
+
         if default_edge_type is not None:
             if is_directed and default_edge_type not in SUPPORTED_DIRECTED_EDGE_TYPES:
                 raise TypeError(
@@ -705,24 +721,11 @@ class Sigma(DOMWidget):
                     % default_edge_type
                 )
 
-            self.default_edge_type = default_edge_type
-
-        self.visual_variables = visual_variables
-
-        renderer_settings = {
-            "defaultNodeColor": default_node_color,
-            "defaultEdgeColor": default_edge_color,
-            "labelDensity": label_density,
-            "labelGridCellSize": label_grid_cell_size,
-        }
-
-        if label_rendered_size_threshold is not None:
-            renderer_settings[
-                "labelRenderedSizeThreshold"
-            ] = label_rendered_size_threshold
+            renderer_settings["defaultEdgeType"] = default_edge_type
 
         self.renderer_settings = renderer_settings
 
+        # Building webgl program settings
         self.program_settings = {"nodeBorderRatio": node_border_ratio}
 
         self.data = {

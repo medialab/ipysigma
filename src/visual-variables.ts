@@ -27,12 +27,14 @@ export interface AttributeScale {
 export type RawVisualVariable = {
   type: 'raw';
   attribute: string;
+  default?: string;
 };
 
 export type CategoryVisualVariable = {
   type: 'category';
   attribute: string;
   palette?: ColorEntries<string>;
+  default?: string;
 };
 
 export type ContinuousVisualVariable = {
@@ -62,6 +64,11 @@ export type VisualVariables = {
     | RawVisualVariable
     | ContinuousVisualVariable
     | CategoryVisualVariable;
+  nodeBorderColor:
+    | RawVisualVariable
+    | ContinuousVisualVariable
+    | CategoryVisualVariable
+    | DisabledVisualVariable;
   nodeSize: ContinuousVisualVariable;
   nodeLabel: RawVisualVariable;
   edgeColor:
@@ -175,29 +182,19 @@ export class CategorySummary {
   }
 }
 
-export type VisualVariableScalesBuilderOptions = {
-  defaultNodeColor: string;
-  defaultEdgeColor: string;
-};
-
 export type VisualVariableScales = {
   [name: keyof VisualVariables]: AttributeScale;
 };
 
 export class VisualVariableScalesBuilder {
   variables: VisualVariables;
-  options: VisualVariableScalesBuilderOptions;
   nodeExtents: AttributeExtents;
   edgeExtents: AttributeExtents;
   nodeCategories: AttributeCategories;
   edgeCategories: AttributeCategories;
 
-  constructor(
-    visualVariables: VisualVariables,
-    options: VisualVariableScalesBuilderOptions
-  ) {
+  constructor(visualVariables: VisualVariables) {
     this.variables = visualVariables;
-    this.options = options;
 
     const nodeExtentAttributes: Array<string> = [];
     const nodeCategoryAttributes: Array<string> = [];
@@ -252,7 +249,7 @@ export class VisualVariableScalesBuilder {
 
       // Raw variables
       if (variable.type === 'raw') {
-        scale = (attr) => attr[variable.attribute];
+        scale = (attr) => attr[variable.attribute] || variable.default;
       }
 
       // Category variables
@@ -261,20 +258,16 @@ export class VisualVariableScalesBuilder {
           ? this.nodeCategories
           : this.edgeCategories;
 
-        const defaultColor = variableName.startsWith('node')
-          ? this.options.defaultNodeColor
-          : this.options.defaultEdgeColor;
-
         const summary = variable.palette
           ? CategorySummary.fromColorEntries(
               variable.attribute,
               variable.palette,
-              defaultColor
+              variable.default || '#ccc'
             )
           : CategorySummary.fromTopValues(
               variable.attribute,
               categories.attributes[variable.attribute],
-              defaultColor
+              variable.default || '#¢cc'
             );
 
         const palette = summary.palette;

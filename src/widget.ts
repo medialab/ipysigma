@@ -81,6 +81,7 @@ type LayoutMapping = Record<string, Position>;
 interface IPysigmaNodeDisplayData extends NodeDisplayData {
   hoverLabel?: string | null;
   categoryValue?: string;
+  borderColor?: string;
 }
 
 type IPysigmaProgramSettings = {
@@ -535,12 +536,12 @@ export class SigmaView extends DOMWidgetView {
         'program_settings'
       ) as IPysigmaProgramSettings;
 
-      let defaultEdgeType = this.model.get('default_edge_type') as
-        | string
-        | null;
+      const visualVariables = this.model.get(
+        'visual_variables'
+      ) as VisualVariables;
 
-      if (!defaultEdgeType)
-        defaultEdgeType = graph.type !== 'undirected' ? 'arrow' : 'line';
+      const nodeBordersEnabled =
+        visualVariables.nodeBorderColor.type !== 'disabled';
 
       const edgeProgramClasses = {
         ...DEFAULT_SIGMA_SETTINGS.edgeProgramClasses,
@@ -550,10 +551,13 @@ export class SigmaView extends DOMWidgetView {
 
       const nodeProgramClasses = {
         ...DEFAULT_SIGMA_SETTINGS.nodeProgramClasses,
-        border: createNodeBorderProgram({
-          borderRatio: programSettings.nodeBorderRatio,
-        }),
       };
+
+      if (nodeBordersEnabled) {
+        nodeProgramClasses.circle = createNodeBorderProgram({
+          borderRatio: programSettings.nodeBorderRatio,
+        });
+      }
 
       let rendererSettings = this.model.get(
         'renderer_settings'
@@ -561,7 +565,6 @@ export class SigmaView extends DOMWidgetView {
 
       rendererSettings = {
         zIndex: true,
-        defaultEdgeType,
         enableEdgeClickEvents: clickableEdges,
         enableEdgeHoverEvents: clickableEdges,
         hoverRenderer: drawHover,
@@ -570,15 +573,12 @@ export class SigmaView extends DOMWidgetView {
         ...rendererSettings,
       };
 
-      // Gathering info about the graph to build reducers correctly
-      const visualVariables = this.model.get(
-        'visual_variables'
-      ) as VisualVariables;
+      if (!rendererSettings.defaultEdgeType)
+        rendererSettings.defaultEdgeType =
+          graph.type !== 'undirected' ? 'arrow' : 'line';
 
-      const scaleBuilder = new VisualVariableScalesBuilder(visualVariables, {
-        defaultNodeColor: rendererSettings.defaultNodeColor as string,
-        defaultEdgeColor: rendererSettings.defaultEdgeColor as string,
-      });
+      // Gathering info about the graph to build reducers correctly
+      const scaleBuilder = new VisualVariableScalesBuilder(visualVariables);
 
       scaleBuilder.readGraph(graph);
 
@@ -588,14 +588,11 @@ export class SigmaView extends DOMWidgetView {
 
       const scales = scaleBuilder.build();
 
-      this.updateLegend(
-        visualVariables,
-        {
-          nodeColor: scales.nodeColor.summary,
-          edgeColor: scales.edgeColor.summary,
-        },
-        rendererSettings
-      );
+      this.updateLegend(visualVariables, {
+        nodeColor: scales.nodeColor.summary,
+        nodeBorderColor: scales.nodeBorderColor.summary,
+        edgeColor: scales.edgeColor.summary,
+      });
 
       const nodeDisplayDataRegister: Record<
         string,
@@ -636,6 +633,10 @@ export class SigmaView extends DOMWidgetView {
         displayData.color = scales.nodeColor(data) as string;
         displayData.size = scales.nodeSize(data) as number;
         displayData.label = (scales.nodeLabel(data) || node) as string;
+
+        if (nodeBordersEnabled) {
+          displayData.borderColor = scales.nodeBorderColor(data) as string;
+        }
 
         // Transient state
         if (node === this.selectedNode) {
@@ -789,9 +790,9 @@ export class SigmaView extends DOMWidgetView {
     variables: VisualVariables,
     summaries: {
       nodeColor?: CategorySummary;
+      nodeBorderColor?: CategorySummary;
       edgeColor?: CategorySummary;
-    },
-    rendererSettings: Partial<SigmaSettings>
+    }
   ) {
     type ItemType = 'node' | 'edge';
 
@@ -806,11 +807,13 @@ export class SigmaView extends DOMWidgetView {
       summary?: CategorySummary,
       defaultColor?: string
     ) {
+      if (variable.type === 'disabled') return null;
+
       let html = `<b>${title}</b><br>`;
 
       if (variable.type === 'dependent') {
         html += `based on <span class="ipysigma-keyword">${variable.value}</span> color`;
-      } else if (variable.type !== 'disabled') {
+      } else {
         const source = variable.attribute.startsWith('$$')
           ? 'kwarg'
           : 'attribute';
@@ -832,7 +835,7 @@ export class SigmaView extends DOMWidgetView {
           } else {
             html += `(from <span style="color: ${variable.range[0]}">■</span> ${variable.range[0]} to <span style="color: ${variable.range[1]}">■</span> ${variable.range[1]})`;
           }
-        } else if (variable.type === 'category') {
+        } else {
           html += `<span class="ipysigma-keyword">${escapeHtml(
             name
           )}</span> ${source} as a category:`;
@@ -877,25 +880,26 @@ export class SigmaView extends DOMWidgetView {
         'node',
         'Node colors',
         variables.nodeColor,
-        summaries.nodeColor,
-        rendererSettings.defaultNodeColor
+        summaries.nodeColor
+      ),
+      renderLegend(
+        'node',
+        'Node border colors',
+        variables.nodeBorderColor,
+        summaries.nodeBorderColor
       ),
       renderLegend('node', 'Node sizes', variables.nodeSize),
       renderLegend(
         'edge',
         'Edge colors',
         variables.edgeColor,
-        summaries.edgeColor,
-        rendererSettings.defaultEdgeColor
+        summaries.edgeColor
       ),
       renderLegend('edge', 'Edge sizes', variables.edgeSize),
+      renderLegend('edge', 'Edge labels', variables.edgeLabel),
     ];
 
-    if (variables.edgeLabel) {
-      items.push(renderLegend('edge', 'Edge labels', variables.edgeLabel));
-    }
-
-    this.legendElement.innerHTML = items.join('<hr>');
+    this.legendElement.innerHTML = items.filter((l) => l).join('<hr>');
 
     // Binding category span events
     function getSpanInfo(span: HTMLElement): { type: ItemType; value: string } {
