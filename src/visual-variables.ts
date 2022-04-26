@@ -3,6 +3,7 @@
  */
 import Graph, { Attributes } from 'graphology-types';
 import MultiSet from 'mnemonist/multi-set';
+import DefaultMap from 'mnemonist/default-map';
 import Palette from 'iwanthue/palette';
 import { scaleLinear } from 'd3-scale';
 
@@ -10,6 +11,10 @@ import { scaleLinear } from 'd3-scale';
  * Constants.
  */
 const CATEGORY_MAX_COUNT = 10;
+
+// const testScale = scaleLinear().domain([0, 2]).range(['white', 'red']);
+// const values = [0, 1, 2].map((i) => testScale(i));
+// console.log(values);
 
 /**
  * Types.
@@ -37,6 +42,12 @@ export type CategoryVisualVariable = {
   default?: string;
 };
 
+export type HierarchicalCategoryVisualVariable = {
+  type: 'hierarchy';
+  attribute: string;
+  default?: string;
+};
+
 export type ContinuousVisualVariable = {
   type: 'continuous';
   attribute: string;
@@ -57,13 +68,15 @@ export type VisualVariable =
   | CategoryVisualVariable
   | ContinuousVisualVariable
   | DependentVisualVariable
-  | DisabledVisualVariable;
+  | DisabledVisualVariable
+  | HierarchicalCategoryVisualVariable;
 
 export type VisualVariables = {
   nodeColor:
     | RawVisualVariable
     | ContinuousVisualVariable
-    | CategoryVisualVariable;
+    | CategoryVisualVariable
+    | HierarchicalCategoryVisualVariable;
   nodeBorderColor:
     | RawVisualVariable
     | ContinuousVisualVariable
@@ -91,6 +104,28 @@ function isValidNumber(value: any): value is number {
 /**
  * Helper classes.
  */
+export class HierarchicalMultiSet {
+  container: DefaultMap<string, MultiSet<string>>;
+
+  constructor() {
+    this.container = new DefaultMap(() => new MultiSet());
+  }
+
+  add(value: [string, string]): void {
+    this.container.get(value[0]).add(value[1]);
+  }
+
+  top(count: number): Array<[string, number]> {
+    const values: MultiSet<string> = new MultiSet();
+
+    this.container.forEach((set, name) => {
+      values.set(name, set.size);
+    });
+
+    return values.top(count);
+  }
+}
+
 export class Extent {
   min = Infinity;
   max = -Infinity;
