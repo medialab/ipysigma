@@ -590,7 +590,7 @@ export class SigmaView extends DOMWidgetView {
 
       this.updateLegend(visualVariables, {
         nodeColor: scales.nodeColor.summary,
-        nodeBorderColor: scales.nodeBorderColor.summary,
+        nodeBorderColor: scales.nodeBorderColor?.summary,
         edgeColor: scales.edgeColor.summary,
       });
 

@@ -346,8 +346,9 @@ class Sigma(DOMWidget):
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color="#999",
+        node_borders=False,
         node_border_color=None,
-        node_raw_border_color=None,
+        node_raw_border_color="borderColor",
         node_border_color_gradient=None,
         node_border_color_palette=None,
         default_node_border_color="#fff",
@@ -576,35 +577,41 @@ class Sigma(DOMWidget):
 
         visual_variables["nodeColor"]["default"] = default_node_color
 
-        if node_border_color is not None:
-            variable = {"type": "category"}
+        if node_borders:
+            visual_variables["nodeBorderColor"] = {
+                "type": "raw",
+                "attribute": node_raw_border_color,
+            }
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                "node_border_color",
-                node_border_color,
-                item_type="node",
-            )
+            if node_border_color is not None:
+                variable = {"type": "category"}
 
-            visual_variables["nodeBorderColor"] = variable
+                resolve_variable_kwarg(
+                    nodes,
+                    variable,
+                    "node_border_color",
+                    node_border_color,
+                    item_type="node",
+                )
 
-            if node_border_color_palette is not None:
-                if not isinstance(node_border_color_palette, Mapping):
-                    raise TypeError(
-                        "node_border_color_palette should be a mapping (i.e. a dict)"
-                    )
+                visual_variables["nodeBorderColor"] = variable
 
-                variable["palette"] = list(node_border_color_palette.items())
+                if node_border_color_palette is not None:
+                    if not isinstance(node_border_color_palette, Mapping):
+                        raise TypeError(
+                            "node_border_color_palette should be a mapping (i.e. a dict)"
+                        )
 
-            elif node_border_color_gradient is not None:
-                variable["type"] = "continuous"
-                variable["range"] = node_border_color_gradient
+                    variable["palette"] = list(node_border_color_palette.items())
 
-        elif node_raw_border_color is not None:
-            visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+                elif node_border_color_gradient is not None:
+                    variable["type"] = "continuous"
+                    variable["range"] = node_border_color_gradient
 
-        visual_variables["nodeBorderColor"]["default"] = default_node_border_color
+            elif node_raw_border_color is not None:
+                visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+
+            visual_variables["nodeBorderColor"]["default"] = default_node_border_color
 
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
