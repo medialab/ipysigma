@@ -166,7 +166,10 @@ export class AttributeCategories {
 
   add(attributes: Attributes): void {
     for (const name in this.attributes) {
-      const value = attributes[name];
+      // TODO: this is ungodly
+      const value = Array.isArray(attributes[name])
+        ? attributes[name][0]
+        : attributes[name];
 
       this.attributes[name].add(value);
     }
@@ -333,7 +336,13 @@ export class VisualVariableScalesBuilder {
 
         const palette = summary.palette;
 
-        scale = (attr) => palette.get(attr[variable.attribute]);
+        // TODO: this is ungodly
+        scale = (attr) =>
+          palette.get(
+            Array.isArray(attr[variable.attribute])
+              ? attr[variable.attribute][0]
+              : attr[variable.attribute]
+          );
         scale.summary = summary;
       }
 
@@ -359,11 +368,14 @@ export class VisualVariableScalesBuilder {
             secondLevel.top(count).map((item) => item[0])
           );
 
-          const lightColor = chroma(color).mix('#fff', 0.9).hex();
+          const lightColor = chroma(color).mix('#fff', 0.7).hex();
 
           const subScale = scaleLinear()
             .domain([0, values.length - 1])
-            .range([color, lightColor] as unknown as [number, number]);
+            .range([color, count > 1 ? lightColor : color] as unknown as [
+              number,
+              number
+            ]);
 
           const colors = values.map((_, i) =>
             subScale(i)
@@ -378,7 +390,7 @@ export class VisualVariableScalesBuilder {
           const secondLevelPalette = Palette.fromMapping(
             firstLevelValue,
             mapping,
-            'white'
+            '#999'
           );
 
           secondLevelPalettes.set(firstLevelValue, secondLevelPalette);
