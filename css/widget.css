@@ -24,6 +24,10 @@
   color: black;
 }
 
+.ipysigma-widget ~ .ipysigma-widget {
+  border-left: none;
+}
+
 .ipysigma-widget hr {
   height: 1px;
   border: none;

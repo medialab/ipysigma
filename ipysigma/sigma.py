@@ -308,6 +308,7 @@ class Sigma(DOMWidget):
     selected_edge = Tuple(allow_none=True).tag(sync=True)
     selected_node_category_values = List(allow_none=True).tag(sync=True)
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
+    sync_key = Unicode(allow_none=True).tag(sync=True)
     renderer_settings = Dict(
         {
             "labelGridCellSize": 250,
@@ -383,7 +384,8 @@ class Sigma(DOMWidget):
         only_largest_component=False,
         label_density=1,
         label_grid_cell_size=250,
-        label_rendered_size_threshold=None
+        label_rendered_size_threshold=None,
+        sync_key=None
     ):
         super(Sigma, self).__init__()
 
@@ -747,6 +749,8 @@ class Sigma(DOMWidget):
                 "multi": is_multi,
             },
         }
+
+        self.sync_key = sync_key
 
     def __repr__(self):
         return "Sigma(nx.%s with %s nodes and %s edges)" % (

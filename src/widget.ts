@@ -24,6 +24,7 @@ import EdgeFastProgram from 'sigma/rendering/webgl/programs/edge.fast';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
 import createNodeBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/border';
 
+import EventEmitter from 'events';
 import seedrandom from 'seedrandom';
 import type { Properties as CSSProperties } from 'csstype';
 import comma from 'comma-number';
@@ -322,6 +323,16 @@ function getGraphDescription(graph: Graph): string {
 }
 
 /**
+ * Global.
+ */
+type SyncRegistryEntry = {
+  emitter: EventEmitter;
+  renderers: Set<Sigma>;
+};
+
+const SYNC_REGISTRY: Map<string, SyncRegistryEntry> = new Map();
+
+/**
  * View declaration.
  */
 export class SigmaView extends DOMWidgetView {
@@ -329,6 +340,7 @@ export class SigmaView extends DOMWidgetView {
   renderer: Sigma;
   graph: Graph;
   edgeWeightAttribute: string | null = null;
+  syncKey: string | undefined;
 
   originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
@@ -402,7 +414,6 @@ export class SigmaView extends DOMWidgetView {
     const nodeMetrics =
       (this.model.get('node_metrics') as Record<string, string>) || {};
 
-    console.log(nodeMetrics);
     for (const metric in nodeMetrics) {
       const attrName = nodeMetrics[metric];
 
@@ -776,6 +787,26 @@ export class SigmaView extends DOMWidgetView {
       this.bindCameraHandlers();
       this.bindFullscreenHandlers();
       this.bindLayoutHandlers();
+
+      this.syncKey = this.model.get('sync_key') as string | undefined;
+
+      if (this.syncKey) {
+        const currentSyncEntry = SYNC_REGISTRY.get(this.syncKey);
+
+        if (!currentSyncEntry) {
+          const emitter = new EventEmitter();
+
+          SYNC_REGISTRY.set(this.syncKey, {
+            emitter,
+            renderers: new Set([this.renderer]),
+          });
+
+          this.bindSyncEvents(emitter);
+        } else {
+          currentSyncEntry.renderers.add(this.renderer);
+          this.bindSyncEvents(currentSyncEntry.emitter);
+        }
+      }
     });
   }
 
@@ -1403,11 +1434,49 @@ export class SigmaView extends DOMWidgetView {
     };
   }
 
+  bindSyncEvents(emitter: EventEmitter) {
+    let cameraLock = false;
+
+    const camera = this.renderer.getCamera();
+
+    camera.on('updated', (state) => {
+      if (cameraLock) {
+        cameraLock = false;
+        return;
+      }
+
+      emitter.emit('camera', { state, renderer: this.renderer });
+    });
+
+    emitter.on('camera', ({ state, renderer }) => {
+      if (renderer === this.renderer) return;
+
+      cameraLock = true;
+      camera.setState(state);
+    });
+  }
+
   remove() {
     // Cleanup to avoid leaks and free GPU slots
     if (this.renderer) this.renderer.kill();
     if (this.layout) this.layout.kill();
     if (this.noverlap) this.noverlap.kill();
+
+    if (this.syncKey) {
+      const syncEntry = SYNC_REGISTRY.get(this.syncKey);
+
+      if (!syncEntry) {
+        throw new Error(
+          'sync entry not found on remove. this should not happen!'
+        );
+      }
+
+      if (syncEntry.renderers.size > 1) {
+        syncEntry.renderers.delete(this.renderer);
+      } else {
+        SYNC_REGISTRY.delete(this.syncKey);
+      }
+    }
 
     super.remove();
   }
