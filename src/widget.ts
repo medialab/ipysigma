@@ -1436,6 +1436,7 @@ export class SigmaView extends DOMWidgetView {
 
   bindSyncEvents(emitter: EventEmitter) {
     let cameraLock = false;
+    let graphLock = false;
 
     const camera = this.renderer.getCamera();
 
@@ -1448,11 +1449,33 @@ export class SigmaView extends DOMWidgetView {
       emitter.emit('camera', { state, renderer: this.renderer });
     });
 
+    const graph = this.renderer.getGraph();
+
+    graph.on('eachNodeAttributesUpdated', () => {
+      if (graphLock) {
+        graphLock = false;
+        return;
+      }
+
+      emitter.emit('layout', {
+        layout: collectLayout(graph),
+        renderer: this.renderer,
+      });
+    });
+
+    // TODO: emitter cleanup to avoid leaks
     emitter.on('camera', ({ state, renderer }) => {
       if (renderer === this.renderer) return;
 
       cameraLock = true;
       camera.setState(state);
+    });
+
+    emitter.on('layout', ({ layout, renderer }) => {
+      if (renderer === this.renderer) return;
+
+      graphLock = true;
+      assignLayout(graph, layout);
     });
   }
 
