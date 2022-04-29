@@ -93,62 +93,62 @@ type IPysigmaProgramSettings = {
  * Template.
  */
 const TEMPLATE = `
-<div id="ipysigma-container"></div>
-<div id="ipysigma-left-panel">
-  <div id="ipysigma-graph-description"></div>
+<div class="ipysigma-container"></div>
+<div class="ipysigma-left-panel">
+  <div class="ipysigma-graph-description"></div>
   <div>
-    <button id="ipysigma-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="zoom">
+    <button class="ipysigma-zoom-button ipysigma-button ipysigma-svg-icon" title="zoom">
       ${zoomIcon}
     </button>
-    <button id="ipysigma-unzoom-button" class="ipysigma-button ipysigma-svg-icon" title="unzoom">
+    <button class="ipysigma-unzoom-button ipysigma-button ipysigma-svg-icon" title="unzoom">
       ${unzoomIcon}
     </button>
-    <button id="ipysigma-reset-zoom-button" class="ipysigma-button ipysigma-svg-icon" title="reset zoom">
+    <button class="ipysigma-reset-zoom-button ipysigma-button ipysigma-svg-icon" title="reset zoom">
       ${resetZoomIcon}
     </button>
   </div>
   <div>
-    <button id="ipysigma-fullscreen-button" class="ipysigma-button ipysigma-svg-icon" title="enter fullscreen">
+    <button class="ipysigma-fullscreen-button ipysigma-button ipysigma-svg-icon" title="enter fullscreen">
       ${fullscreenEnterIcon}
     </button>
   </div>
-  <div id="ipysigma-layout-controls">
-    <button id="ipysigma-layout-button" class="ipysigma-button ipysigma-svg-icon" title="start layout">
+  <div class="ipysigma-layout-controls">
+    <button class="ipysigma-layout-button ipysigma-button ipysigma-svg-icon" title="start layout">
       ${playIcon}
     </button>
-    <button id="ipysigma-noverlap-button" class="ipysigma-button ipysigma-svg-icon" title="spread nodes">
+    <button class="ipysigma-noverlap-button ipysigma-button ipysigma-svg-icon" title="spread nodes">
       ${scatterIcon}
     </button>
-    <button id="ipysigma-reset-layout-button" class="ipysigma-button ipysigma-svg-icon" title="reset layout">
+    <button class="ipysigma-reset-layout-button ipysigma-button ipysigma-svg-icon" title="reset layout">
       ${resetLayoutIcon}
     </button>
   </div>
 </div>
-<div id="ipysigma-right-panel">
-  <select id="ipysigma-search">
+<div class="ipysigma-right-panel">
+  <select class="ipysigma-search">
     <option value="">Search a node...</option>
   </select>
-  <div id="ipysigma-information-display">
-    <div id="ipysigma-information-display-tabs">
-      <span id="ipysigma-information-legend-button" class="ipysigma-tab-button">legend</span>
+  <div class="ipysigma-information-display">
+    <div class="ipysigma-information-display-tabs">
+      <span class="ipysigma-information-legend-button ipysigma-tab-button">legend</span>
       &middot;
-      <span id="ipysigma-information-info-button" class="ipysigma-tab-button">info</span>
+      <span class="ipysigma-information-info-button ipysigma-tab-button">info</span>
     </div>
     <hr>
-    <div id="ipysigma-legend"></div>
-    <div id="ipysigma-information-contents"></div>
+    <div class="ipysigma-legend"></div>
+    <div class="ipysigma-information-contents"></div>
   </div>
-  <div id="ipysigma-download-controls">
-    <button id="ipysigma-download-png-button" class="ipysigma-button">
+  <div class="ipysigma-download-controls">
+    <button class="ipysigma-download-png-button ipysigma-button">
       png
     </button>
-    <button id="ipysigma-download-svg-button" class="ipysigma-button">
+    <button class="ipysigma-download-svg-button ipysigma-button">
       svg
     </button>
-    <button id="ipysigma-download-gexf-button" class="ipysigma-button">
+    <button class="ipysigma-download-gexf-button ipysigma-button">
       gexf
     </button>
-    <button id="ipysigma-download-json-button" class="ipysigma-button">
+    <button class="ipysigma-download-json-button ipysigma-button">
       json
     </button>
   </div>
@@ -466,50 +466,50 @@ export class SigmaView extends DOMWidgetView {
     this.el.style.height = height + 'px';
 
     this.container = this.el.querySelector(
-      '#ipysigma-container'
+      '.ipysigma-container'
     ) as HTMLElement;
     this.container.style.width = '100%';
     this.container.style.height = height + 'px';
 
     // Description
     const description = this.el.querySelector(
-      '#ipysigma-graph-description'
+      '.ipysigma-graph-description'
     ) as HTMLElement;
     description.innerHTML = getGraphDescription(graph);
 
     // Camera controls
     this.zoomButton = this.el.querySelector(
-      '#ipysigma-zoom-button'
+      '.ipysigma-zoom-button'
     ) as HTMLElement;
     this.unzoomButton = this.el.querySelector(
-      '#ipysigma-unzoom-button'
+      '.ipysigma-unzoom-button'
     ) as HTMLElement;
     this.resetZoomButton = this.el.querySelector(
-      '#ipysigma-reset-zoom-button'
+      '.ipysigma-reset-zoom-button'
     ) as HTMLElement;
 
     // Fullscreen controls
     this.fullscreenButton = this.el.querySelector(
-      '#ipysigma-fullscreen-button'
+      '.ipysigma-fullscreen-button'
     ) as HTMLElement;
 
     // Layout controls
     this.layoutControls = this.el.querySelector(
-      '#ipysigma-layout-controls'
+      '.ipysigma-layout-controls'
     ) as HTMLElement;
     this.layoutButton = this.el.querySelector(
-      '#ipysigma-layout-button'
+      '.ipysigma-layout-button'
     ) as HTMLButtonElement;
     this.noverlapButton = this.el.querySelector(
-      '#ipysigma-noverlap-button'
+      '.ipysigma-noverlap-button'
     ) as HTMLButtonElement;
     this.resetLayoutButton = this.el.querySelector(
-      '#ipysigma-reset-layout-button'
+      '.ipysigma-reset-layout-button'
     ) as HTMLButtonElement;
 
     // Search
     var searchContainer = this.el.querySelector(
-      '#ipysigma-search'
+      '.ipysigma-search'
     ) as HTMLElement;
 
     const nodeLabelAttribute =
@@ -539,33 +539,33 @@ export class SigmaView extends DOMWidgetView {
     });
 
     this.infoElement = this.el.querySelector(
-      '#ipysigma-information-contents'
+      '.ipysigma-information-contents'
     ) as HTMLElement;
     this.legendElement = this.el.querySelector(
-      '#ipysigma-legend'
+      '.ipysigma-legend'
     ) as HTMLElement;
 
     this.nodeInfoButton = this.el.querySelector(
-      '#ipysigma-information-info-button'
+      '.ipysigma-information-info-button'
     ) as HTMLElement;
     this.legendButton = this.el.querySelector(
-      '#ipysigma-information-legend-button'
+      '.ipysigma-information-legend-button'
     ) as HTMLElement;
 
     this.changeInformationDisplayTab('legend');
 
     // Download controls
     this.downloadPNGButton = this.el.querySelector(
-      '#ipysigma-download-png-button'
+      '.ipysigma-download-png-button'
     ) as HTMLElement;
     this.downloadGEXFButton = this.el.querySelector(
-      '#ipysigma-download-gexf-button'
+      '.ipysigma-download-gexf-button'
     ) as HTMLElement;
     this.downloadSVGButton = this.el.querySelector(
-      '#ipysigma-download-svg-button'
+      '.ipysigma-download-svg-button'
     ) as HTMLElement;
     this.downloadJSONButton = this.el.querySelector(
-      '#ipysigma-download-json-button'
+      '.ipysigma-download-json-button'
     ) as HTMLElement;
 
     // Waiting for widget to be mounted to register events

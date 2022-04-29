@@ -36,13 +36,13 @@
   margin-bottom: 6px;
 }
 
-.ipysigma-widget #ipysigma-left-panel {
+.ipysigma-widget .ipysigma-left-panel {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-.ipysigma-widget #ipysigma-right-panel {
+.ipysigma-widget .ipysigma-right-panel {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -50,7 +50,7 @@
   height: calc(100% - 20px);
 }
 
-.ipysigma-widget #ipysigma-graph-description {
+.ipysigma-widget .ipysigma-graph-description {
   background-color: white;
   border: 1px solid #e0e0e0;
   padding: 5px 10px;
@@ -88,30 +88,30 @@
   box-sizing: border-box;
 }
 
-.ipysigma-widget #ipysigma-zoom-button {
+.ipysigma-widget .ipysigma-zoom-button {
   margin-top: 10px;
 }
 
-.ipysigma-widget #ipysigma-unzoom-button {
+.ipysigma-widget .ipysigma-unzoom-button {
   margin-top: 10px;
 }
 
-.ipysigma-widget #ipysigma-reset-zoom-button {
+.ipysigma-widget .ipysigma-reset-zoom-button {
   margin-top: 10px;
 }
 
-.ipysigma-widget #ipysigma-fullscreen-button {
+.ipysigma-widget .ipysigma-fullscreen-button {
   margin-top: 10px;
 }
 
-.ipysigma-widget #ipysigma-layout-controls {
+.ipysigma-widget .ipysigma-layout-controls {
   width: 100%;
   margin-top: 10px;
   display: flex;
 }
 
-.ipysigma-widget #ipysigma-reset-layout-button,
-.ipysigma-widget #ipysigma-noverlap-button {
+.ipysigma-widget .ipysigma-reset-layout-button,
+.ipysigma-widget .ipysigma-noverlap-button {
   margin-left: 4px;
 }
 
@@ -127,7 +127,7 @@
   cursor: pointer;
 }
 
-.ipysigma-widget #ipysigma-information-display {
+.ipysigma-widget .ipysigma-information-display {
   width: 100%;
   height: calc(100% - 45px - 5px - 20px);
   overflow-y: auto;
@@ -140,8 +140,8 @@
   padding: 10px;
 }
 
-.ipysigma-widget #ipysigma-information-contents,
-.ipysigma-widget #ipysigma-legend {
+.ipysigma-widget .ipysigma-information-contents,
+.ipysigma-widget .ipysigma-legend {
   font-family: monospace;
 }
 
@@ -158,15 +158,15 @@
   color: #0457ab;
 }
 
-.ipysigma-widget #ipysigma-download-controls {
+.ipysigma-widget .ipysigma-download-controls {
   margin-top: 5px;
   /* display: flex; */
   height: 30px;
 }
 
-.ipysigma-widget #ipysigma-download-png-button,
-.ipysigma-widget #ipysigma-download-svg-button,
-.ipysigma-widget #ipysigma-download-gexf-button {
+.ipysigma-widget .ipysigma-download-png-button,
+.ipysigma-widget .ipysigma-download-svg-button,
+.ipysigma-widget .ipysigma-download-gexf-button {
   margin-right: 3px;
 }
 
