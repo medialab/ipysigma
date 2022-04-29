@@ -47,7 +47,7 @@
   top: 10px;
   right: 10px;
   width: 250px;
-  height: calc(100% - 20px);
+  height: 100%;
 }
 
 .ipysigma-widget .ipysigma-graph-description {
@@ -129,7 +129,7 @@
 
 .ipysigma-widget .ipysigma-information-display {
   width: 100%;
-  height: calc(100% - 45px - 5px - 20px);
+  height: calc(100% - 45px - 5px - 20px - 25px);
   overflow-y: auto;
   background-color: white;
   border: 1px solid #e0e0e0;
@@ -138,6 +138,22 @@
   /* font-style: italic; */
   line-height: 16px;
   padding: 10px;
+}
+
+.ipysigma-widget .ipysigma-information-shadow-display {
+  width: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  font-size: 12px;
+  /* font-style: italic; */
+  line-height: 16px;
+  padding: 10px;
+}
+
+.ipysigma-widget .ipysigma-information-hide-button,
+.ipysigma-widget .ipysigma-information-show-button {
+  float: right;
+  cursor: pointer;
 }
 
 .ipysigma-widget .ipysigma-information-contents,
@@ -161,7 +177,10 @@
 .ipysigma-widget .ipysigma-download-controls {
   margin-top: 5px;
   /* display: flex; */
-  height: 30px;
+  text-align: right;
+  position: absolute;
+  bottom: 20px;
+  right: 0px;
 }
 
 .ipysigma-widget .ipysigma-download-png-button,

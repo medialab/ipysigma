@@ -65,7 +65,6 @@ import '../css/widget.css';
 /**
  * Constants.
  */
-const CAMERA_OFFSET = 0.65;
 const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
 const EDGE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color']);
 const MUTED_NODE_COLOR = '#ccc';
@@ -128,11 +127,15 @@ const TEMPLATE = `
   <select class="ipysigma-search">
     <option value="">Search a node...</option>
   </select>
+  <div class="ipysigma-information-shadow-display" style="display: none;">
+    <span class="ipysigma-information-show-button">show legend</span>
+  </div>
   <div class="ipysigma-information-display">
     <div class="ipysigma-information-display-tabs">
       <span class="ipysigma-information-legend-button ipysigma-tab-button">legend</span>
       &middot;
       <span class="ipysigma-information-info-button ipysigma-tab-button">info</span>
+      <span class="ipysigma-information-hide-button">hide</span>
     </div>
     <hr>
     <div class="ipysigma-legend"></div>
@@ -363,10 +366,15 @@ export class SigmaView extends DOMWidgetView {
 
   choices: Choices;
   currentTab: InformationDisplayTab = 'legend';
-  infoElement: HTMLElement;
+  informationDisplayElement: HTMLElement;
+  informationShadowDisplayElement: HTMLElement;
+  itemInfoElement: HTMLElement;
   legendElement: HTMLElement;
   legendButton: HTMLElement;
   nodeInfoButton: HTMLElement;
+  hideInformationButton: HTMLElement;
+  showInformationButton: HTMLElement;
+  isInformationShown: boolean = true;
   selectedNode: string | null = null;
   selectedEdge: string | null = null;
   focusedNodes: Set<string> | null = null;
@@ -538,7 +546,13 @@ export class SigmaView extends DOMWidgetView {
       position: 'bottom',
     });
 
-    this.infoElement = this.el.querySelector(
+    this.informationDisplayElement = this.el.querySelector(
+      '.ipysigma-information-display'
+    ) as HTMLElement;
+    this.informationShadowDisplayElement = this.el.querySelector(
+      '.ipysigma-information-shadow-display'
+    ) as HTMLElement;
+    this.itemInfoElement = this.el.querySelector(
       '.ipysigma-information-contents'
     ) as HTMLElement;
     this.legendElement = this.el.querySelector(
@@ -550,6 +564,12 @@ export class SigmaView extends DOMWidgetView {
     ) as HTMLElement;
     this.legendButton = this.el.querySelector(
       '.ipysigma-information-legend-button'
+    ) as HTMLElement;
+    this.hideInformationButton = this.el.querySelector(
+      '.ipysigma-information-hide-button'
+    ) as HTMLElement;
+    this.showInformationButton = this.el.querySelector(
+      '.ipysigma-information-show-button'
     ) as HTMLElement;
 
     this.changeInformationDisplayTab('legend');
@@ -837,15 +857,29 @@ export class SigmaView extends DOMWidgetView {
 
   changeInformationDisplayTab(tab: InformationDisplayTab) {
     if (tab === 'legend') {
-      hide(this.infoElement);
+      hide(this.itemInfoElement);
       show(this.legendElement);
       this.legendButton.classList.remove('selectable');
       this.nodeInfoButton.classList.add('selectable');
     } else {
       hide(this.legendElement);
-      show(this.infoElement);
+      show(this.itemInfoElement);
       this.legendButton.classList.add('selectable');
       this.nodeInfoButton.classList.remove('selectable');
+    }
+  }
+
+  toggleInformationDisplay(): void {
+    if (this.isInformationShown) {
+      // Hiding
+      hide(this.informationDisplayElement);
+      show(this.informationShadowDisplayElement);
+      this.isInformationShown = false;
+    } else {
+      // Showing
+      show(this.informationDisplayElement);
+      hide(this.informationShadowDisplayElement);
+      this.isInformationShown = true;
     }
   }
 
@@ -1028,14 +1062,15 @@ export class SigmaView extends DOMWidgetView {
     this.selectedEdge = null;
     this.selectedNode = null;
     this.focusedNodes = null;
+    this.syncHoveredNode = null;
 
     this.choices.setChoiceByValue('');
 
     if (this.model.get('clickable_edges')) {
-      this.infoElement.innerHTML =
+      this.itemInfoElement.innerHTML =
         '<i>Click on a node/edge or search a node to display information about it...</i>';
     } else {
-      this.infoElement.innerHTML =
+      this.itemInfoElement.innerHTML =
         '<i>Click on a node or search a node to display information about it...</i>';
     }
 
@@ -1174,7 +1209,7 @@ export class SigmaView extends DOMWidgetView {
       }
     }
 
-    this.infoElement.innerHTML = innerHTML;
+    this.itemInfoElement.innerHTML = innerHTML;
 
     this.changeInformationDisplayTab('info');
 
@@ -1276,6 +1311,14 @@ export class SigmaView extends DOMWidgetView {
 
       this.changeInformationDisplayTab('info');
     };
+
+    this.hideInformationButton.onclick = () => {
+      this.toggleInformationDisplay();
+    };
+
+    this.showInformationButton.onclick = () => {
+      this.toggleInformationDisplay();
+    };
   }
 
   bindDownloadHandlers() {
@@ -1303,9 +1346,7 @@ export class SigmaView extends DOMWidgetView {
     };
 
     this.resetZoomButton.onclick = () => {
-      this.renderer
-        .getCamera()
-        .animate({ ratio: 1, x: CAMERA_OFFSET, y: 0.5, angle: 0 });
+      this.renderer.getCamera().animatedReset();
     };
   }
 

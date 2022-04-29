@@ -18,7 +18,7 @@ from ._frontend import module_name, module_version
 # =============================================================================
 DEFAULT_NODE_SIZE_RANGE = (3, 15)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
-DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.65, "y": 0.5, "angle": 0}
+DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain", "hlouvain"}
