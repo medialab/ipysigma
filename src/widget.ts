@@ -339,8 +339,12 @@ export class SigmaView extends DOMWidgetView {
   container: HTMLElement;
   renderer: Sigma;
   graph: Graph;
+  emitter: EventEmitter = new EventEmitter();
   edgeWeightAttribute: string | null = null;
+
   syncKey: string | undefined;
+  syncHoveredNode: string | null = null;
+  syncListeners: Record<string, (...args: any) => void> = {};
 
   originalLayoutPositions: LayoutMapping;
   layout: LayoutSupervisor;
@@ -674,7 +678,7 @@ export class SigmaView extends DOMWidgetView {
         }
 
         // Transient state
-        if (node === this.selectedNode) {
+        if (node === this.selectedNode || node === this.syncHoveredNode) {
           displayData.highlighted = true;
         }
 
@@ -1042,6 +1046,7 @@ export class SigmaView extends DOMWidgetView {
     this.touch();
 
     this.renderer.refresh();
+    this.emitter.emit('clearSelectedItem');
   }
 
   toggleCategoryValue(type: ItemType, max: number, value: string) {
@@ -1174,6 +1179,7 @@ export class SigmaView extends DOMWidgetView {
     this.changeInformationDisplayTab('info');
 
     this.renderer.refresh();
+    this.emitter.emit('selectItem', { type, key });
   }
 
   moveCameraToNode(node: string): void {
@@ -1434,49 +1440,127 @@ export class SigmaView extends DOMWidgetView {
     };
   }
 
-  bindSyncEvents(emitter: EventEmitter) {
-    let cameraLock = false;
-    let graphLock = false;
+  bindSyncEvents(syncEmitter: EventEmitter) {
+    let lock = false;
 
+    // From the broadcaster's standpoint
     const camera = this.renderer.getCamera();
 
     camera.on('updated', (state) => {
-      if (cameraLock) {
-        cameraLock = false;
+      if (lock) {
+        lock = false;
         return;
       }
 
-      emitter.emit('camera', { state, renderer: this.renderer });
+      syncEmitter.emit('camera', { state, renderer: this.renderer });
     });
 
     const graph = this.renderer.getGraph();
 
-    graph.on('eachNodeAttributesUpdated', () => {
-      if (graphLock) {
-        graphLock = false;
+    graph.on('nodeAttributesUpdated', ({ key, attributes }) => {
+      if (lock) {
+        lock = false;
         return;
       }
 
-      emitter.emit('layout', {
+      syncEmitter.emit('nodePosition', {
+        node: key,
+        position: { x: attributes.x, y: attributes.y },
+        renderer: this.renderer,
+      });
+    });
+
+    graph.on('eachNodeAttributesUpdated', () => {
+      if (lock) {
+        lock = false;
+        return;
+      }
+
+      syncEmitter.emit('layout', {
         layout: collectLayout(graph),
         renderer: this.renderer,
       });
     });
 
-    // TODO: emitter cleanup to avoid leaks
-    emitter.on('camera', ({ state, renderer }) => {
+    this.emitter.on('selectItem', (payload) => {
+      if (lock) {
+        lock = false;
+        return;
+      }
+
+      syncEmitter.emit('selectItem', { ...payload, renderer: this.renderer });
+    });
+
+    this.emitter.on('clearSelectedItem', () => {
+      if (lock) {
+        lock = false;
+        return;
+      }
+
+      syncEmitter.emit('clearSelectedItem', { renderer: this.renderer });
+    });
+
+    this.renderer.on('enterNode', ({ node }) => {
+      syncEmitter.emit('enterNode', { node, renderer: this.renderer });
+    });
+
+    this.renderer.on('leaveNode', ({ node }) => {
+      syncEmitter.emit('leaveNode', { node, renderer: this.renderer });
+    });
+
+    // From the receiver's end
+    this.syncListeners.camera = ({ state, renderer }) => {
       if (renderer === this.renderer) return;
 
-      cameraLock = true;
+      lock = true;
       camera.setState(state);
-    });
+    };
 
-    emitter.on('layout', ({ layout, renderer }) => {
+    this.syncListeners.layout = ({ layout, renderer }) => {
       if (renderer === this.renderer) return;
 
-      graphLock = true;
+      lock = true;
       assignLayout(graph, layout);
-    });
+    };
+
+    this.syncListeners.nodePosition = ({ node, position, renderer }) => {
+      if (renderer === this.renderer) return;
+
+      lock = true;
+      graph.mergeNodeAttributes(node, position);
+    };
+
+    this.syncListeners.enterNode = ({ node, renderer }) => {
+      if (renderer === this.renderer) return;
+
+      this.syncHoveredNode = node;
+      this.renderer.scheduleRefresh();
+    };
+
+    this.syncListeners.leaveNode = ({ renderer }) => {
+      if (renderer === this.renderer) return;
+
+      this.syncHoveredNode = null;
+      this.renderer.scheduleRefresh();
+    };
+
+    this.syncListeners.selectItem = ({ renderer, key, type }) => {
+      if (renderer === this.renderer) return;
+
+      lock = true;
+      this.selectItem(type, key);
+    };
+
+    this.syncListeners.clearSelectedItem = ({ renderer }) => {
+      if (renderer === this.renderer) return;
+
+      lock = true;
+      this.clearSelectedItem();
+    };
+
+    for (const eventName in this.syncListeners) {
+      syncEmitter.on(eventName, this.syncListeners[eventName]);
+    }
   }
 
   remove() {
@@ -1496,10 +1580,20 @@ export class SigmaView extends DOMWidgetView {
 
       if (syncEntry.renderers.size > 1) {
         syncEntry.renderers.delete(this.renderer);
+
+        for (const eventName in this.syncListeners) {
+          syncEntry.emitter.removeListener(
+            eventName,
+            this.syncListeners[eventName]
+          );
+        }
       } else {
+        syncEntry.emitter.removeAllListeners();
         SYNC_REGISTRY.delete(this.syncKey);
       }
     }
+
+    this.emitter.removeAllListeners();
 
     super.remove();
   }
