@@ -86,6 +86,8 @@ def resolve_metrics(name, target, supported):
                 % (name, v, ", ".join('"%s"' % m for m in supported))
             )
 
+    metrics = {k: {"name": v} for k, v in metrics.items()}
+
     return metrics
 
 

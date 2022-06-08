@@ -423,22 +423,41 @@ export class SigmaView extends DOMWidgetView {
     // Widget-side metrics
     this.edgeWeightAttribute = this.model.get('edge_weight') as string | null;
 
-    const nodeMetrics =
-      (this.model.get('node_metrics') as Record<string, string>) || {};
+    let nodeMetrics =
+      (this.model.get('node_metrics') as Record<
+        string,
+        { name: string; result: any }
+      >) || {};
+
+    // NOTE: for some untractable reason, I need a completly new deep object
+    nodeMetrics = JSON.parse(JSON.stringify(nodeMetrics));
 
     for (const attrName in nodeMetrics) {
-      const metric = nodeMetrics[attrName];
+      const metricSpec = nodeMetrics[attrName];
+      const metric = metricSpec.name;
 
       if (metric === 'louvain') {
-        louvain.assign(graph, {
-          nodeCommunityAttribute: attrName,
+        const communities = louvain(graph, {
           getEdgeWeight: this.edgeWeightAttribute,
           rng: createRng(),
         });
+
+        metricSpec.result = communities;
+
+        graph.updateEachNodeAttributes(
+          (node, attr) => {
+            attr[attrName] = communities[node];
+            return attr;
+          },
+          { attributes: [attrName] }
+        );
       } else {
         throw new Error(`unkown metric "${metric}"` + metric);
       }
     }
+
+    this.model.set('node_metrics', nodeMetrics);
+    this.touch();
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     this.el.style.width = '100%';
