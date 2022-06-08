@@ -21,7 +21,7 @@ DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
-SUPPORTED_NODE_METRICS = {"louvain", "hlouvain"}
+SUPPORTED_NODE_METRICS = {"louvain"}
 SUPPORTED_UNDIRECTED_EDGE_TYPES = {"line", "slim"}
 SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
 
@@ -79,11 +79,11 @@ def resolve_metrics(name, target, supported):
             + " should be a list of metrics to compute or a dict mapping metric names to attribute names"
         )
 
-    for k in metrics:
-        if k not in supported:
+    for v in metrics.values():
+        if v not in supported:
             raise TypeError(
                 'unknown %s "%s", expecting one of %s'
-                % (name, k, ", ".join('"%s"' % m for m in supported))
+                % (name, v, ", ".join('"%s"' % m for m in supported))
             )
 
     return metrics
@@ -346,7 +346,6 @@ class Sigma(DOMWidget):
         node_raw_color="color",
         node_color_gradient=None,
         node_color_palette=None,
-        node_hierarchical_color=False,
         default_node_color="#999",
         node_borders=False,
         node_border_color=None,
@@ -563,10 +562,7 @@ class Sigma(DOMWidget):
 
             visual_variables["nodeColor"] = variable
 
-            if node_hierarchical_color:
-                variable["type"] = "hierarchy"
-
-            elif node_color_palette is not None:
+            if node_color_palette is not None:
                 if not isinstance(node_color_palette, Mapping):
                     raise TypeError(
                         "node_color_palette should be a mapping (i.e. a dict)"

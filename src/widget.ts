@@ -426,46 +426,17 @@ export class SigmaView extends DOMWidgetView {
     const nodeMetrics =
       (this.model.get('node_metrics') as Record<string, string>) || {};
 
-    for (const metric in nodeMetrics) {
-      const attrName = nodeMetrics[metric];
+    for (const attrName in nodeMetrics) {
+      const metric = nodeMetrics[attrName];
 
-      if (metric === 'louvain' || metric === 'hlouvain') {
-        const details = louvain.detailed(graph, {
-          nodeCommunityAttribute: nodeMetrics[metric],
+      if (metric === 'louvain') {
+        louvain.assign(graph, {
+          nodeCommunityAttribute: attrName,
           getEdgeWeight: this.edgeWeightAttribute,
           rng: createRng(),
         });
-
-        let i = 0;
-
-        const lastLayer = details.dendrogram[details.dendrogram.length - 1];
-        const penultimateLayer =
-          details.dendrogram.length >= 3
-            ? details.dendrogram[details.dendrogram.length - 2]
-            : lastLayer;
-
-        if (metric === 'louvain') {
-          graph.updateEachNodeAttributes(
-            (node, attr) => {
-              attr[attrName] = lastLayer[i++];
-
-              return attr;
-            },
-            { attributes: [attrName] }
-          );
-        } else {
-          graph.updateEachNodeAttributes(
-            (node, attr) => {
-              attr[attrName] = [lastLayer[i], penultimateLayer[i]];
-              i++;
-
-              return attr;
-            },
-            { attributes: [attrName] }
-          );
-        }
       } else {
-        throw new Error('unkown metric ' + metric);
+        throw new Error(`unkown metric "${metric}"` + metric);
       }
     }
 
