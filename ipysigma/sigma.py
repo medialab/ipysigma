@@ -70,9 +70,17 @@ def resolve_metrics(name, target, supported):
         return {}
 
     if isinstance(target, Sequence) and not isinstance(target, (str, bytes)):
-        metrics = {k: k for k in target}
+        metrics = {k: {"name": k} for k in target}
     elif isinstance(target, Mapping):
-        metrics = dict(target)
+        metrics = {}
+
+        for k, v in target.items():
+            spec = v
+
+            if isinstance(v, str):
+                spec = {"name": v}
+
+            metrics[k] = spec
     else:
         raise TypeError(
             name
@@ -80,13 +88,12 @@ def resolve_metrics(name, target, supported):
         )
 
     for v in metrics.values():
-        if v not in supported:
+        metric_name = v["name"]
+        if metric_name not in supported:
             raise TypeError(
                 'unknown %s "%s", expecting one of %s'
-                % (name, v, ", ".join('"%s"' % m for m in supported))
+                % (name, metric_name, ", ".join('"%s"' % m for m in supported))
             )
-
-    metrics = {k: {"name": v} for k, v in metrics.items()}
 
     return metrics
 

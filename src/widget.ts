@@ -424,10 +424,7 @@ export class SigmaView extends DOMWidgetView {
     this.edgeWeightAttribute = this.model.get('edge_weight') as string | null;
 
     let nodeMetrics =
-      (this.model.get('node_metrics') as Record<
-        string,
-        { name: string; result: any }
-      >) || {};
+      (this.model.get('node_metrics') as Record<string, any>) || {};
 
     // NOTE: for some untractable reason, I need a completly new deep object
     nodeMetrics = JSON.parse(JSON.stringify(nodeMetrics));
@@ -440,6 +437,7 @@ export class SigmaView extends DOMWidgetView {
         const communities = louvain(graph, {
           getEdgeWeight: this.edgeWeightAttribute,
           rng: createRng(),
+          resolution: metricSpec.resolution || 1,
         });
 
         metricSpec.result = communities;
