@@ -157,9 +157,10 @@ export class CategorySummary {
   static fromTopValues(
     name: string,
     frequencies: MultiSet<string>,
-    defaultColor: string
+    defaultColor: string,
+    maxCount = CATEGORY_MAX_COUNT
   ) {
-    const count = Math.min(CATEGORY_MAX_COUNT, frequencies.dimension);
+    const count = Math.min(maxCount, frequencies.dimension);
     const topValues = frequencies.top(count);
     const overflowing = count < frequencies.dimension;
 
@@ -190,9 +191,14 @@ export class VisualVariableScalesBuilder {
   edgeExtents: AttributeExtents;
   nodeCategories: AttributeCategories;
   edgeCategories: AttributeCategories;
+  maxCategoryColors: number;
 
-  constructor(visualVariables: VisualVariables) {
+  constructor(
+    visualVariables: VisualVariables,
+    maxCategoryColors = CATEGORY_MAX_COUNT
+  ) {
     this.variables = visualVariables;
+    this.maxCategoryColors = maxCategoryColors;
 
     const nodeExtentAttributes: Array<string> = [];
     const nodeCategoryAttributes: Array<string> = [];
@@ -265,7 +271,8 @@ export class VisualVariableScalesBuilder {
           : CategorySummary.fromTopValues(
               variable.attribute,
               categories.attributes[variable.attribute],
-              variable.default || '#ccc'
+              variable.default || '#ccc',
+              this.maxCategoryColors
             );
 
         const palette = summary.palette;

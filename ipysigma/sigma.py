@@ -16,6 +16,8 @@ from ._frontend import module_name, module_version
 # =============================================================================
 # Constants
 # =============================================================================
+MAX_CATEGORY_COLORS = 10
+DEFAULT_HEIGHT = 500
 DEFAULT_NODE_SIZE_RANGE = (3, 15)
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
@@ -304,7 +306,7 @@ class Sigma(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
-    height = Int(500).tag(sync=True)
+    height = Int(DEFAULT_HEIGHT).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     clickable_edges = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
@@ -324,6 +326,7 @@ class Sigma(DOMWidget):
             "labelDensity": 1,
         }
     ).tag(sync=True)
+    max_category_colors = Int(MAX_CATEGORY_COLORS).tag(sync=True)
     program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
     visual_variables = Dict(
         {
@@ -349,7 +352,7 @@ class Sigma(DOMWidget):
         self,
         graph,
         *,
-        height=500,
+        height=DEFAULT_HEIGHT,
         start_layout=False,
         node_color=None,
         node_raw_color="color",
@@ -393,6 +396,7 @@ class Sigma(DOMWidget):
         label_density=1,
         label_grid_cell_size=250,
         label_rendered_size_threshold=None,
+        max_category_colors=MAX_CATEGORY_COLORS,
         sync_key=None
     ):
         super(Sigma, self).__init__()
@@ -400,6 +404,9 @@ class Sigma(DOMWidget):
         # Validation
         if height < 250:
             raise TypeError("Sigma widget cannot have a height < 250 px")
+
+        if not isinstance(max_category_colors, int) or max_category_colors < 0:
+            raise TypeError("max_category_colors should be a positive integer")
 
         if selected_node is not None and selected_edge is not None:
             raise TypeError(
@@ -452,6 +459,7 @@ class Sigma(DOMWidget):
 
         # Traits
         self.height = height
+        self.max_category_colors = max_category_colors
         self.start_layout = start_layout
         self.snapshot = None
         self.layout = None

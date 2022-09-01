@@ -625,7 +625,12 @@ export class SigmaView extends DOMWidgetView {
           graph.type !== 'undirected' ? 'arrow' : 'line';
 
       // Gathering info about the graph to build reducers correctly
-      const scaleBuilder = new VisualVariableScalesBuilder(visualVariables);
+      const maxCategoryColors = this.model.get('max_category_colors') as number;
+
+      const scaleBuilder = new VisualVariableScalesBuilder(
+        visualVariables,
+        maxCategoryColors
+      );
 
       scaleBuilder.readGraph(graph);
 
