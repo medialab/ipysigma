@@ -16,6 +16,7 @@ deps:
 	pip3 install -U pip
 	pip3 install build twine jupyter_packaging black
 	pip3 install jupyterlab
+	pip3 install networkx igraph
 	pip3 install -e ".[test, examples]"
 	yarn run build
 	jupyter labextension develop --overwrite .
