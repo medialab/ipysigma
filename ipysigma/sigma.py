@@ -10,7 +10,6 @@ from ipywidgets.embed import embed_minimal_html
 from IPython.display import Image, display
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Sequence, Mapping, Iterable
-import networkx as nx
 from ._frontend import module_name, module_version
 
 # =============================================================================
