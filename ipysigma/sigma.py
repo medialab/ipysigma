@@ -202,42 +202,6 @@ def process_edge_gexf_viz(attr):
     del attr["viz"]
 
 
-def largest_connected_component(graph):
-    """
-    Function returning the largest connected component of given networkx graph
-    as a set of nodes.
-
-    Note: taken from pelote, maybe we can depend on pelote directly instead?
-
-    Args:
-        graph (nx.AnyGraph): target graph.
-
-    Returns:
-        set: set of nodes representing the largest connected component.
-    """
-
-    largest = None
-    remaining_nodes = graph.order()
-
-    components = (
-        nx.connected_components
-        if not graph.is_directed()
-        else nx.weakly_connected_components
-    )
-
-    for component in components(graph):
-        if largest is None or len(component) > len(largest):
-            largest = component
-
-        # Early exit
-        remaining_nodes -= len(largest)
-
-        if len(largest) > remaining_nodes:
-            break
-
-    return largest
-
-
 # =============================================================================
 # Widget definition
 # =============================================================================
@@ -293,9 +257,6 @@ class Sigma(DOMWidget):
         process_gexf_viz (bool, optional): whether to process "viz" data typically
             found in gexf files so they can be displayed correctly.
             Defaults to True.
-        only_largest_component (bool, optional): whether to only display the graph's
-            largest connected component.
-            Defaults to False.
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
@@ -392,7 +353,6 @@ class Sigma(DOMWidget):
         layout_settings=None,
         clickable_edges=False,
         process_gexf_viz=True,
-        only_largest_component=False,
         label_density=1,
         label_grid_cell_size=250,
         label_rendered_size_threshold=None,
@@ -497,9 +457,6 @@ class Sigma(DOMWidget):
 
         # Serializing graph as per graphology's JSON format
         principal_component = None
-
-        if only_largest_component:
-            principal_component = largest_connected_component(graph)
 
         nodes = []
         self.node_type = None
