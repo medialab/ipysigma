@@ -1236,12 +1236,16 @@ export class SigmaView extends DOMWidgetView {
       debouncedSaveCameraState(state);
     });
 
+    let hoveredCount = 0;
+
     this.renderer.on('enterNode', () => {
+      hoveredCount++;
       this.container.style.cursor = 'pointer';
     });
 
     this.renderer.on('leaveNode', () => {
-      this.container.style.cursor = 'default';
+      hoveredCount--;
+      if (hoveredCount === 0) this.container.style.cursor = 'default';
     });
 
     this.renderer.on('clickNode', ({ node }) => {
@@ -1258,11 +1262,13 @@ export class SigmaView extends DOMWidgetView {
 
     if (this.model.get('clickable_edges')) {
       this.renderer.on('enterEdge', () => {
+        hoveredCount++;
         this.container.style.cursor = 'pointer';
       });
 
       this.renderer.on('leaveEdge', () => {
-        this.container.style.cursor = 'default';
+        hoveredCount--;
+        if (hoveredCount === 0) this.container.style.cursor = 'default';
       });
 
       this.renderer.on('clickEdge', ({ edge }) => {
