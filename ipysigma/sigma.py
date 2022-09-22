@@ -124,7 +124,9 @@ def resolve_range(name, target):
     )
 
 
-def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
+def resolve_variable_kwarg(
+    items, variable, name, target, item_type="node", is_directed=True
+):
 
     # Partition
     if is_partition(target):
@@ -145,20 +147,33 @@ def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
         target = "$$%s" % name
 
         for item in items:
-            k = item["key"] if item_type == "node" else (item["source"], item["target"])
 
-            try:
+            # Function
+            if callable(mapping):
 
-                # Function
-                if callable(mapping):
-                    v = mapping(k)
-
-                # Mapping
+                if item_type == "node":
+                    v = mapping(item["key"])
                 else:
-                    v = mapping[k]
+                    v = mapping(item["source"], item["target"])
 
-            except (IndexError, KeyError):
-                v = None
+            # Mapping
+            else:
+                if item_type == "node":
+                    try:
+                        v = mapping[item["key"]]
+                    except (IndexError, KeyError):
+                        v = None
+                else:
+                    try:
+                        v = mapping[(item["source"], item["target"])]
+                    except (IndexError, KeyError):
+                        if not is_directed:
+                            try:
+                                v = mapping[(item["target"], item["source"])]
+                            except (IndexError, KeyError):
+                                v = None
+                        else:
+                            v = None
 
             if v is None:
                 continue
@@ -549,7 +564,12 @@ class Sigma(DOMWidget):
             variable = {"type": "category"}
 
             resolve_variable_kwarg(
-                nodes, variable, "node_color", node_color, item_type="node"
+                nodes,
+                variable,
+                "node_color",
+                node_color,
+                item_type="node",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["nodeColor"] = variable
@@ -586,6 +606,7 @@ class Sigma(DOMWidget):
                     "node_border_color",
                     node_border_color,
                     item_type="node",
+                    is_directed=self.graph_interface.is_directed(),
                 )
 
                 visual_variables["nodeBorderColor"] = variable
@@ -611,7 +632,12 @@ class Sigma(DOMWidget):
             variable = {"type": "continuous", "range": node_size_range}
 
             resolve_variable_kwarg(
-                nodes, variable, "node_size", node_size, item_type="node"
+                nodes,
+                variable,
+                "node_size",
+                node_size,
+                item_type="node",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["nodeSize"] = variable
@@ -620,7 +646,12 @@ class Sigma(DOMWidget):
             variable = {"type": "raw"}
 
             resolve_variable_kwarg(
-                nodes, variable, "node_label", node_label, item_type="node"
+                nodes,
+                variable,
+                "node_label",
+                node_label,
+                item_type="node",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["nodeLabel"] = variable
@@ -630,7 +661,12 @@ class Sigma(DOMWidget):
             variable = {"type": "category"}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_color", edge_color, item_type="edge"
+                edges,
+                variable,
+                "edge_color",
+                edge_color,
+                item_type="edge",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["edgeColor"] = variable
@@ -669,7 +705,12 @@ class Sigma(DOMWidget):
             variable = {"type": "continuous", "range": edge_size_range}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_size", edge_size, item_type="edge"
+                edges,
+                variable,
+                "edge_size",
+                edge_size,
+                item_type="edge",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["edgeSize"] = variable
@@ -678,7 +719,12 @@ class Sigma(DOMWidget):
             variable = {"type": "raw"}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_label", edge_label, item_type="edge"
+                edges,
+                variable,
+                "edge_label",
+                edge_label,
+                item_type="edge",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             visual_variables["edgeLabel"] = variable
@@ -687,7 +733,12 @@ class Sigma(DOMWidget):
             variable = {"type": "raw"}
 
             resolve_variable_kwarg(
-                edges, variable, "edge_weight", edge_weight, item_type="edge"
+                edges,
+                variable,
+                "edge_weight",
+                edge_weight,
+                item_type="edge",
+                is_directed=self.graph_interface.is_directed(),
             )
 
             self.edge_weight = variable["attribute"]
