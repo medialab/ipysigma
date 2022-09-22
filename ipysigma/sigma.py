@@ -73,7 +73,16 @@ def resolve_metrics(name, target, supported):
         return {}
 
     if isinstance(target, Sequence) and not isinstance(target, (str, bytes)):
-        metrics = {k: {"name": k} for k in target}
+        metrics = {}
+
+        for v in target:
+            spec = v
+
+            if isinstance(v, str):
+                spec = {'name': v}
+
+            metrics[spec['name']] = spec
+
     elif isinstance(target, Mapping):
         metrics = {}
 
