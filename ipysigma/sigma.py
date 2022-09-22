@@ -12,6 +12,8 @@ from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Sequence, Mapping, Iterable
 from ._frontend import module_name, module_version
 
+from ipysigma.interfaces import get_graph_interface
+
 # =============================================================================
 # Constants
 # =============================================================================
@@ -61,7 +63,7 @@ def is_indexable(value):
 def is_partition(value):
     return (
         isinstance(value, list)
-        and value
+        and len(value) > 0
         and isinstance(value[0], (set, frozenset, list))
     )
 
@@ -123,6 +125,8 @@ def resolve_range(name, target):
 
 
 def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
+
+    # Partition
     if is_partition(target):
         partition = target
         target = {}
@@ -131,10 +135,12 @@ def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
             for item in group:
                 target[item] = i
 
+    # Attribute name
     if isinstance(target, str):
         variable["attribute"] = target
 
-    elif is_indexable(target):
+    # Mapping or function
+    elif is_indexable(target) or callable(target):
         mapping = target
         target = "$$%s" % name
 
@@ -142,7 +148,15 @@ def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
             k = item["key"] if item_type == "node" else (item["source"], item["target"])
 
             try:
-                v = mapping[k]
+
+                # Function
+                if callable(mapping):
+                    v = mapping(k)
+
+                # Mapping
+                else:
+                    v = mapping[k]
+
             except (IndexError, KeyError):
                 v = None
 
@@ -153,8 +167,12 @@ def resolve_variable_kwarg(items, variable, name, target, item_type="node"):
 
         variable["attribute"] = target
 
+    # Fail
     else:
-        raise TypeError("%s should be a string or a mapping" % name)
+        raise TypeError(
+            "%s should be an attribute name, or a mapping, or a partition, or a function"
+            % name
+        )
 
 
 def process_node_gexf_viz(attr):
@@ -388,7 +406,7 @@ class Sigma(DOMWidget):
             ):
                 raise TypeError("selected_edge should be a (source, target) tuple")
 
-            if not graph.has_edge(*selected_edge):
+            if not self.graph_interface.has_edge(*selected_edge):
                 raise KeyError("selected_edge does not exist in the graph")
 
         if selected_node_category_values is not None and not isinstance(
@@ -415,6 +433,7 @@ class Sigma(DOMWidget):
 
         # Own
         self.graph = graph
+        self.graph_interface = get_graph_interface(self.graph)
 
         # Traits
         self.height = height
@@ -451,8 +470,8 @@ class Sigma(DOMWidget):
 
             self.layout = layout
 
-        is_directed = graph.is_directed()
-        is_multi = graph.is_multigraph()
+        is_directed = self.graph_interface.is_directed()
+        is_multi = self.graph_interface.is_multi()
 
         # Serializing graph as per graphology's JSON format
         principal_component = None
@@ -460,7 +479,7 @@ class Sigma(DOMWidget):
         nodes = []
         self.node_type = None
 
-        for node, attr in graph.nodes.data():
+        for node, attr in self.graph_interface.nodes():
             if principal_component and node not in principal_component:
                 continue
 
@@ -495,7 +514,7 @@ class Sigma(DOMWidget):
 
         edges = []
 
-        for source, target, attr in graph.edges.data():
+        for source, target, attr in self.graph_interface.edges():
             if principal_component and source not in principal_component:
                 continue
 
@@ -630,7 +649,7 @@ class Sigma(DOMWidget):
                 variable["range"] = edge_color_gradient
 
         elif edge_color_from is not None:
-            if not graph.is_directed():
+            if not self.graph_interface.is_directed():
                 raise TypeError("edge_color_from only works with directed graphs")
 
             if edge_color_from not in ["source", "target"]:
@@ -722,10 +741,10 @@ class Sigma(DOMWidget):
         self.sync_key = sync_key
 
     def __repr__(self):
-        return "Sigma(nx.%s with %s nodes and %s edges)" % (
-            self.graph.__class__.__name__,
-            pretty_print_int(self.graph.order()),
-            pretty_print_int(self.graph.size()),
+        return "Sigma(%s with %s nodes and %s edges)" % (
+            self.graph_interface.name(),
+            pretty_print_int(self.graph_interface.order()),
+            pretty_print_int(self.graph_interface.size()),
         )
 
     def get_layout(self):
@@ -745,26 +764,6 @@ class Sigma(DOMWidget):
             return None
 
         return {self.node_type(n): p for n, p in self.layout.items()}
-
-    def persist_layout(self):
-        """
-        Method applying the layout computed by ForceAtlas2 in the widget to
-        the networkx graph passed as input to the widget.
-
-        Note that it therefores mutates the networkx graph.
-
-        Note that this method will raise an error if the widget was never displayed.
-        """
-
-        if self.layout is None:
-            raise TypeError(
-                "Widget did not compute any layout yet. Are you sure you displayed it?"
-            )
-
-        for node, attr in self.graph.nodes(data=True):
-            pos = self.layout[str(node)]
-            attr["x"] = pos["x"]
-            attr["y"] = pos["y"]
 
     def get_camera_state(self):
         """
