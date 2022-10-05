@@ -79,9 +79,9 @@ def resolve_metrics(name, target, supported):
             spec = v
 
             if isinstance(v, str):
-                spec = {'name': v}
+                spec = {"name": v}
 
-            metrics[spec['name']] = spec
+            metrics[spec["name"]] = spec
 
     elif isinstance(target, Mapping):
         metrics = {}
@@ -150,39 +150,47 @@ def resolve_variable_kwarg(
     if isinstance(target, str):
         variable["attribute"] = target
 
-    # Mapping or function
-    elif is_indexable(target) or callable(target):
+    # Mappping
+    # NOTE: must be used before callable to handle stuff like g.degree
+    elif is_indexable(target):
         mapping = target
         target = "$$%s" % name
 
         for item in items:
-
-            # Function
-            if callable(mapping):
-
-                if item_type == "node":
-                    v = mapping(item["key"])
-                else:
-                    v = mapping(item["source"], item["target"])
-
-            # Mapping
+            if item_type == "node":
+                try:
+                    v = mapping[item["key"]]
+                except (IndexError, KeyError):
+                    v = None
             else:
-                if item_type == "node":
-                    try:
-                        v = mapping[item["key"]]
-                    except (IndexError, KeyError):
-                        v = None
-                else:
-                    try:
-                        v = mapping[(item["source"], item["target"])]
-                    except (IndexError, KeyError):
-                        if not is_directed:
-                            try:
-                                v = mapping[(item["target"], item["source"])]
-                            except (IndexError, KeyError):
-                                v = None
-                        else:
+                try:
+                    v = mapping[(item["source"], item["target"])]
+                except (IndexError, KeyError):
+                    if not is_directed:
+                        try:
+                            v = mapping[(item["target"], item["source"])]
+                        except (IndexError, KeyError):
                             v = None
+                    else:
+                        v = None
+
+            if v is None:
+                continue
+
+            item["attributes"][target] = v
+
+        variable["attribute"] = target
+
+    # Callable
+    elif callable(target):
+        mapping = target
+        target = "$$%s" % name
+
+        for item in items:
+            if item_type == "node":
+                v = mapping(item["key"], item["attributes"])
+            else:
+                v = mapping(item["source"], item["target"], item["attributes"])
 
             if v is None:
                 continue
@@ -197,6 +205,69 @@ def resolve_variable_kwarg(
             "%s should be an attribute name, or a mapping, or a partition, or a function"
             % name
         )
+
+
+def check_zindex_int_return(fn):
+    def wrapper(*args):
+        z = fn(*args)
+
+        if not isinstance(z, int):
+            raise TypeError("zindex values should be None or an int")
+
+        return z
+
+    return wrapper
+
+
+def zindex_sort_items(items, sorter, item_type="node", is_directed=True):
+    if callable(sorter):
+
+        def key(*args):
+            return sorter(*args) or 0
+
+    elif is_indexable(sorter):
+        if item_type == "node":
+
+            def key(n, _):
+                return sorter.get(n) or 0
+
+        else:
+
+            def key(u, v, _):
+                z = sorter.get((u, v))
+
+                if z is None and not is_directed:
+                    z = sorter.get((v, u))
+
+                if not z:
+                    z = 0
+
+                return z
+
+    else:
+        if item_type == "node":
+
+            def key(_, a):
+                return a.get(sorter) or 0
+
+        else:
+
+            def key(_u, _v, a):
+                return a.get(sorter) or 0
+
+    safe_key = check_zindex_int_return(key)
+
+    if item_type == "node":
+
+        def item_key(item):
+            return safe_key(item["key"], item["attributes"])
+
+    else:
+
+        def item_key(item):
+            return safe_key(item["source"], item["target"], item["attributes"])
+
+    items.sort(key=item_key)
 
 
 def process_node_gexf_viz(attr):
@@ -372,7 +443,7 @@ class Sigma(DOMWidget):
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         node_label="label",
         node_metrics=None,
-        node_sort_key=None,
+        node_zindex=None,
         edge_color=None,
         edge_raw_color="color",
         edge_color_gradient=None,
@@ -384,7 +455,7 @@ class Sigma(DOMWidget):
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         edge_weight="weight",
-        edge_sort_key=None,
+        edge_zindex=None,
         camera_state=DEFAULT_CAMERA_STATE,
         selected_node=None,
         selected_edge=None,
@@ -530,12 +601,6 @@ class Sigma(DOMWidget):
 
             nodes.append(serialized_node)
 
-        if node_sort_key is not None:
-            if not callable(node_sort_key):
-                raise TypeError("node_sort_key should be callable")
-
-            nodes.sort(key=lambda n: node_sort_key(n["key"], n["attributes"]))
-
         edges = []
 
         for source, target, attr in self.graph_interface.edges():
@@ -556,14 +621,6 @@ class Sigma(DOMWidget):
                 serialized_edge["undirected"] = True
 
             edges.append(serialized_edge)
-
-        if edge_sort_key is not None:
-            if not callable(edge_sort_key):
-                raise TypeError("edge_sort_key should be callable")
-
-            edges.sort(
-                key=lambda e: edge_sort_key(e["source"], e["target"], e["attributes"])
-            )
 
         # Serializing visual variables
         visual_variables = self.visual_variables.copy()
@@ -755,6 +812,17 @@ class Sigma(DOMWidget):
             self.edge_weight = None
 
         self.visual_variables = visual_variables
+
+        # Handling z-index
+        if node_zindex is not None:
+            zindex_sort_items(
+                nodes, node_zindex, item_type="node", is_directed=is_directed
+            )
+
+        if edge_zindex is not None:
+            zindex_sort_items(
+                edges, edge_zindex, item_type="edge", is_directed=is_directed
+            )
 
         # Building renderer settings
         renderer_settings = {
