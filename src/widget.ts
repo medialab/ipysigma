@@ -1350,17 +1350,11 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindFullscreenHandlers() {
+    document.addEventListener('fullscreenchange', () => { this.fullscreenExitHandler() }, false);
+
     this.fullscreenButton.onclick = () => {
       if (screenfull.isFullscreen) {
-        screenfull.exit().then(() => {
-          const targetHeight = this.model.get('height') + 'px';
-
-          this.el.style.height = targetHeight;
-          this.container.style.height = targetHeight;
-          this.fullscreenButton.innerHTML = fullscreenEnterIcon;
-          this.fullscreenButton.setAttribute('title', 'enter fullscreen');
-          this.renderer.scheduleRefresh();
-        });
+        screenfull.exit()
       } else {
         screenfull.request(this.el).then(() => {
           this.el.style.height = '100%';
@@ -1372,6 +1366,17 @@ export class SigmaView extends DOMWidgetView {
       }
     };
   }
+
+  fullscreenExitHandler() {
+    if (!screenfull.isFullscreen) {
+      const targetHeight = this.model.get('height') + 'px';
+      this.el.style.height = targetHeight;
+      this.container.style.height = targetHeight;
+      this.fullscreenButton.innerHTML = fullscreenEnterIcon;
+      this.fullscreenButton.setAttribute('title', 'enter fullscreen');
+      this.renderer.scheduleRefresh();
+    }
+  };
 
   bindLayoutHandlers() {
     const graph = this.graph;
