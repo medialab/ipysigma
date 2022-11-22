@@ -68,7 +68,7 @@ import '../css/widget.css';
 const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
 const EDGE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color']);
 const MUTED_NODE_COLOR = '#ccc';
-const IPYSIGMA_KWARG_PREFIX = 'ipysigma_kwarg_'
+const IPYSIGMA_KWARG_PREFIX = 'ipysigma_kwarg_';
 
 /**
  * Types.
@@ -1176,9 +1176,11 @@ export class SigmaView extends DOMWidgetView {
       else if (k.startsWith(IPYSIGMA_KWARG_PREFIX)) target = kwargInfo;
 
       target.push(
-        `<b>${k.startsWith(IPYSIGMA_KWARG_PREFIX) ? k.slice(IPYSIGMA_KWARG_PREFIX.length) : k}</b> ${renderTypedValue(
-          attr[k]
-        )}`
+        `<b>${
+          k.startsWith(IPYSIGMA_KWARG_PREFIX)
+            ? k.slice(IPYSIGMA_KWARG_PREFIX.length)
+            : k
+        }</b> ${renderTypedValue(attr[k])}`
       );
     }
 
@@ -1351,7 +1353,7 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindFullscreenHandlers() {
-    const enter =() =>{
+    const enter = () => {
       this.el.style.height = '100%';
       this.container.style.height = '100%';
       this.fullscreenButton.innerHTML = fullscreenExitIcon;
@@ -1359,7 +1361,7 @@ export class SigmaView extends DOMWidgetView {
       this.renderer.scheduleRefresh();
     };
 
-    const exit =() =>{
+    const exit = () => {
       const targetHeight = this.model.get('height') + 'px';
       this.el.style.height = targetHeight;
       this.container.style.height = targetHeight;
@@ -1375,7 +1377,7 @@ export class SigmaView extends DOMWidgetView {
 
     this.fullscreenButton.onclick = () => {
       if (screenfull.isFullscreen) {
-        screenfull.exit()
+        screenfull.exit();
       } else {
         screenfull.request(this.el);
       }

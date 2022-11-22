@@ -153,13 +153,34 @@ class Sigma(DOMWidget):
         self,
         graph,
         *,
+        # Various options
         height=None,
         start_layout=False,
+        node_metrics=None,
+        layout_settings=None,
+        clickable_edges=False,
+        process_gexf_viz=True,
+        max_category_colors=MAX_CATEGORY_COLORS,
+        sync_key=None,
+        # Widget state
+        camera_state=DEFAULT_CAMERA_STATE,
+        selected_node=None,
+        selected_edge=None,
+        selected_node_category_values=None,
+        selected_edge_category_values=None,
+        # Label display options
+        label_density=1,
+        label_grid_cell_size=250,
+        label_rendered_size_threshold=None,
+        # Node layout
+        layout=None,
+        # Node color
         node_color=None,
         raw_node_color="color",
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color="#999",
+        # Node borders
         node_borders=False,
         node_border_color=None,
         raw_node_border_color="border_color",
@@ -167,11 +188,16 @@ class Sigma(DOMWidget):
         node_border_color_palette=None,
         default_node_border_color="#fff",
         node_border_ratio=0.1,
+        # Node size
         node_size="size",
+        raw_node_size=None,
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
+        default_node_size=DEFAULT_NODE_SIZE_RANGE[0],
+        # Node label
         node_label="label",
-        node_metrics=None,
+        # Node z index
         node_zindex=None,
+        # Edge color
         edge_color=None,
         raw_edge_color="color",
         edge_color_gradient=None,
@@ -179,25 +205,13 @@ class Sigma(DOMWidget):
         edge_color_palette=None,
         default_edge_color="#ccc",
         default_edge_type=None,
+        # Edge size
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         edge_label=None,
         edge_weight="weight",
+        # Edge z index
         edge_zindex=None,
-        camera_state=DEFAULT_CAMERA_STATE,
-        selected_node=None,
-        selected_edge=None,
-        selected_node_category_values=None,
-        selected_edge_category_values=None,
-        layout=None,
-        layout_settings=None,
-        clickable_edges=False,
-        process_gexf_viz=True,
-        label_density=1,
-        label_grid_cell_size=250,
-        label_rendered_size_threshold=None,
-        max_category_colors=MAX_CATEGORY_COLORS,
-        sync_key=None
     ):
         super(Sigma, self).__init__()
 
@@ -421,12 +435,23 @@ class Sigma(DOMWidget):
 
             visual_variables["nodeBorderColor"]["default"] = default_node_border_color
 
-        if node_size is not None:
+        if raw_node_size is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                "raw_node_size", nodes, raw_node_size
+            )
+
+            visual_variables["nodeSize"] = variable
+
+        elif node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
 
             variable["attribute"] = resolve_variable("node_size", nodes, node_size)
 
             visual_variables["nodeSize"] = variable
+
+        visual_variables["nodeSize"]["default"] = default_node_size
 
         if node_label is not None:
             variable = {"type": "raw"}

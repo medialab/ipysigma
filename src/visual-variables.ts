@@ -41,6 +41,7 @@ export type ContinuousVisualVariable = {
   type: 'continuous';
   attribute: string;
   range: Range;
+  default?: number;
 };
 
 export type DependentVisualVariable = {
@@ -69,7 +70,7 @@ export type VisualVariables = {
     | ContinuousVisualVariable
     | CategoryVisualVariable
     | DisabledVisualVariable;
-  nodeSize: ContinuousVisualVariable;
+  nodeSize: RawVisualVariable | ContinuousVisualVariable;
   nodeLabel: RawVisualVariable;
   edgeColor:
     | RawVisualVariable
@@ -212,16 +213,20 @@ export class VisualVariableScalesBuilder {
         if (variable.type === 'category') {
           if (!variable.palette)
             nodeCategoryAttributes.push(variable.attribute);
-        } else if (variable.type === 'continuous') {
-          nodeExtentAttributes.push(variable.attribute);
+        } else if (
+          variable.type === 'continuous' ||
+          variableName === 'nodeSize'
+        ) {
+          nodeExtentAttributes.push(
+            (variable as ContinuousVisualVariable).attribute
+          );
         }
       } else if (variableName.startsWith('edge')) {
         if (variable.type === 'category') {
           if (!variable.palette)
             edgeCategoryAttributes.push(variable.attribute);
         } else if (variable.type === 'continuous') {
-          if (variable.range[0] !== variable.range[1])
-            edgeExtentAttributes.push(variable.attribute);
+          edgeExtentAttributes.push(variable.attribute);
         }
       }
     }
@@ -290,13 +295,22 @@ export class VisualVariableScalesBuilder {
         const extent = extents.attributes[variable.attribute];
 
         if (variable.range[0] === variable.range[1] || extent.isConstant()) {
-          scale = () => variable.range[0];
+          scale = () =>
+            isValidNumber(variable.default)
+              ? variable.default
+              : variable.range[0];
         } else {
           const continuousScale = scaleLinear()
             .domain([extent.min as number, extent.max as number])
             .range(variable.range as [number, number]);
 
-          scale = (attr) => continuousScale(attr[variable.attribute]);
+          scale = (attr) => {
+            const value = attr[variable.attribute];
+
+            if (!isValidNumber(value)) return variable.default || 2;
+
+            return continuousScale(value);
+          };
         }
       }
 
