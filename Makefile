@@ -31,9 +31,9 @@ format:
 unit:
 	@echo Running python tests...
 	py.test -svvv
-	@echo Running javascript tests...
-	yarn test
-	@echo
+	# @echo Running javascript tests...
+	# yarn test
+	# @echo
 
 release:
 	$(call clean)

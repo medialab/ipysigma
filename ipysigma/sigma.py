@@ -9,278 +9,29 @@ from ipywidgets import DOMWidget, Output
 from ipywidgets.embed import embed_minimal_html
 from IPython.display import Image, display
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
-from collections.abc import Sequence, Mapping, Iterable
+from collections.abc import Mapping, Iterable
 from ._frontend import module_name, module_version
 
 from ipysigma.interfaces import get_graph_interface
 from ipysigma.utils import (
     pretty_print_int,
-    is_partition,
-    extract_rgba_from_viz,
+    resolve_metrics,
+    resolve_range,
+    resolve_variable,
+    zindex_sort_items,
 )
-
-# =============================================================================
-# Constants
-# =============================================================================
-MAX_CATEGORY_COLORS = 10
-DEFAULT_HEIGHT = 500
-DEFAULT_NODE_SIZE_RANGE = (3, 15)
-DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
-DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
-SUPPORTED_NODE_TYPES = (int, str, float)
-SUPPORTED_RANGE_BOUNDS = (int, str, float)
-SUPPORTED_NODE_METRICS = {"louvain"}
-SUPPORTED_UNDIRECTED_EDGE_TYPES = {"line", "slim"}
-SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
-
-
-# =============================================================================
-# Helpers
-# =============================================================================
-def resolve_metrics(name, target, supported):
-    if not target:
-        return {}
-
-    if isinstance(target, Sequence) and not isinstance(target, (str, bytes)):
-        metrics = {}
-
-        for v in target:
-            spec = v
-
-            if isinstance(v, str):
-                spec = {"name": v}
-
-            metrics[spec["name"]] = spec
-
-    elif isinstance(target, Mapping):
-        metrics = {}
-
-        for k, v in target.items():
-            spec = v
-
-            if isinstance(v, str):
-                spec = {"name": v}
-
-            metrics[k] = spec
-    else:
-        raise TypeError(
-            name
-            + " should be a list of metrics to compute or a dict mapping metric names to attribute names"
-        )
-
-    for v in metrics.values():
-        metric_name = v["name"]
-        if metric_name not in supported:
-            raise TypeError(
-                'unknown %s "%s", expecting one of %s'
-                % (name, metric_name, ", ".join('"%s"' % m for m in supported))
-            )
-
-    return metrics
-
-
-def resolve_range(name, target):
-    if target is None:
-        return
-
-    if isinstance(target, SUPPORTED_RANGE_BOUNDS):
-        return (target, target)
-
-    if (
-        isinstance(target, Sequence)
-        and len(target) == 2
-        and isinstance(target[0], SUPPORTED_RANGE_BOUNDS)
-        and isinstance(target[1], SUPPORTED_RANGE_BOUNDS)
-    ):
-        if isinstance(target[0], str) and not isinstance(target[1], str):
-            raise TypeError(name + " contain mixed type (min, max) info")
-
-        return target
-
-    raise TypeError(
-        name + " should be a single value or a (min, max) sequence (list, tuple etc.)"
-    )
-
-
-def resolve_variable_kwarg(
-    items, variable, name, target, item_type="node", is_directed=True
-):
-
-    # Partition
-    if is_partition(target):
-        partition = target
-        target = {}
-
-        for i, group in enumerate(partition):
-            for item in group:
-                target[item] = i
-
-    # Attribute name
-    if isinstance(target, str):
-        variable["attribute"] = target
-
-    # Mappping
-    # NOTE: must be used before callable to handle stuff like g.degree
-    elif isinstance(target, Mapping):
-        mapping = target
-        target = "$$%s" % name
-
-        for item in items:
-            if item_type == "node":
-                try:
-                    v = mapping[item["key"]]
-                except (IndexError, KeyError):
-                    v = None
-            else:
-                try:
-                    v = mapping[(item["source"], item["target"])]
-                except (IndexError, KeyError):
-                    if not is_directed:
-                        try:
-                            v = mapping[(item["target"], item["source"])]
-                        except (IndexError, KeyError):
-                            v = None
-                    else:
-                        v = None
-
-            if v is None:
-                continue
-
-            item["attributes"][target] = v
-
-        variable["attribute"] = target
-
-    # Callable
-    elif callable(target):
-        mapping = target
-        target = "$$%s" % name
-
-        for item in items:
-            if item_type == "node":
-                v = mapping(item["key"], item["attributes"])
-            else:
-                v = mapping(item["source"], item["target"], item["attributes"])
-
-            if v is None:
-                continue
-
-            item["attributes"][target] = v
-
-        variable["attribute"] = target
-
-    # Fail
-    else:
-        raise TypeError(
-            "%s should be an attribute name, or a mapping, or a partition, or a function"
-            % name
-        )
-
-
-def check_zindex_int_return(fn):
-    def wrapper(*args):
-        z = fn(*args)
-
-        if not isinstance(z, int):
-            raise TypeError("zindex values should be None or an int")
-
-        return z
-
-    return wrapper
-
-
-def zindex_sort_items(items, sorter, item_type="node", is_directed=True):
-    if callable(sorter):
-
-        def key(*args):
-            return sorter(*args) or 0
-
-    elif is_indexable(sorter):
-        if item_type == "node":
-
-            def key(n, _):
-                return sorter.get(n) or 0
-
-        else:
-
-            def key(u, v, _):
-                z = sorter.get((u, v))
-
-                if z is None and not is_directed:
-                    z = sorter.get((v, u))
-
-                if not z:
-                    z = 0
-
-                return z
-
-    else:
-        if item_type == "node":
-
-            def key(_, a):
-                return a.get(sorter) or 0
-
-        else:
-
-            def key(_u, _v, a):
-                return a.get(sorter) or 0
-
-    safe_key = check_zindex_int_return(key)
-
-    if item_type == "node":
-
-        def item_key(item):
-            return safe_key(item["key"], item["attributes"])
-
-    else:
-
-        def item_key(item):
-            return safe_key(item["source"], item["target"], item["attributes"])
-
-    items.sort(key=item_key)
-
-
-def process_node_gexf_viz(attr):
-    if "viz" not in attr:
-        return
-
-    viz = attr["viz"]
-
-    # Size
-    if "size" in viz and "size" not in attr:
-        attr["size"] = viz["size"]
-
-    # Position
-    if "position" in viz and "x" not in attr and "y" not in attr:
-        pos = viz["position"]
-
-        if "x" in pos:
-            attr["x"] = pos["x"]
-
-        if "y" in pos:
-            attr["y"] = pos["y"]
-
-    # Color
-    if "color" in viz and "color" not in attr:
-        attr["color"] = extract_rgba_from_viz(viz["color"])
-
-    del attr["viz"]
-
-
-def process_edge_gexf_viz(attr):
-    if "viz" not in attr:
-        return
-
-    viz = attr["viz"]
-
-    # Thickness
-    if "thickness" in viz and "size" not in attr:
-        attr["size"] = viz["thickness"]
-
-    # Color
-    if "color" in viz and "color" not in attr:
-        attr["color"] = extract_rgba_from_viz(viz["color"])
-
-    del attr["viz"]
+from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
+from ipysigma.constants import (
+    MAX_CATEGORY_COLORS,
+    DEFAULT_HEIGHT,
+    DEFAULT_NODE_SIZE_RANGE,
+    DEFAULT_EDGE_SIZE_RANGE,
+    DEFAULT_CAMERA_STATE,
+    SUPPORTED_NODE_TYPES,
+    SUPPORTED_NODE_METRICS,
+    SUPPORTED_UNDIRECTED_EDGE_TYPES,
+    SUPPORTED_DIRECTED_EDGE_TYPES,
+)
 
 
 # =============================================================================
@@ -598,14 +349,7 @@ class Sigma(DOMWidget):
         if node_color is not None:
             variable = {"type": "category"}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                "node_color",
-                node_color,
-                item_type="node",
-                is_directed=self.graph_interface.is_directed(),
-            )
+            variable["attribute"] = resolve_variable("node_color", nodes, node_color)
 
             visual_variables["nodeColor"] = variable
 
@@ -635,13 +379,8 @@ class Sigma(DOMWidget):
             if node_border_color is not None:
                 variable = {"type": "category"}
 
-                resolve_variable_kwarg(
-                    nodes,
-                    variable,
-                    "node_border_color",
-                    node_border_color,
-                    item_type="node",
-                    is_directed=self.graph_interface.is_directed(),
+                variable["attribute"] = resolve_variable(
+                    "node_border_color", nodes, node_border_color
                 )
 
                 visual_variables["nodeBorderColor"] = variable
@@ -666,28 +405,14 @@ class Sigma(DOMWidget):
         if node_size is not None:
             variable = {"type": "continuous", "range": node_size_range}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                "node_size",
-                node_size,
-                item_type="node",
-                is_directed=self.graph_interface.is_directed(),
-            )
+            variable["attribute"] = resolve_variable("node_size", nodes, node_size)
 
             visual_variables["nodeSize"] = variable
 
         if node_label is not None:
             variable = {"type": "raw"}
 
-            resolve_variable_kwarg(
-                nodes,
-                variable,
-                "node_label",
-                node_label,
-                item_type="node",
-                is_directed=self.graph_interface.is_directed(),
-            )
+            variable["attribute"] = resolve_variable("node_label", nodes, node_label)
 
             visual_variables["nodeLabel"] = variable
 
@@ -695,10 +420,9 @@ class Sigma(DOMWidget):
         if edge_color is not None:
             variable = {"type": "category"}
 
-            resolve_variable_kwarg(
-                edges,
-                variable,
+            variable["attribute"] = resolve_variable(
                 "edge_color",
+                edges,
                 edge_color,
                 item_type="edge",
                 is_directed=self.graph_interface.is_directed(),
@@ -739,10 +463,9 @@ class Sigma(DOMWidget):
         if edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
 
-            resolve_variable_kwarg(
-                edges,
-                variable,
+            variable["attribute"] = resolve_variable(
                 "edge_size",
+                edges,
                 edge_size,
                 item_type="edge",
                 is_directed=self.graph_interface.is_directed(),
@@ -753,10 +476,9 @@ class Sigma(DOMWidget):
         if edge_label is not None:
             variable = {"type": "raw"}
 
-            resolve_variable_kwarg(
-                edges,
-                variable,
+            variable["attribute"] = resolve_variable(
                 "edge_label",
+                edges,
                 edge_label,
                 item_type="edge",
                 is_directed=self.graph_interface.is_directed(),
@@ -767,10 +489,9 @@ class Sigma(DOMWidget):
         if edge_weight is not None:
             variable = {"type": "raw"}
 
-            resolve_variable_kwarg(
-                edges,
-                variable,
+            variable["attribute"] = resolve_variable(
                 "edge_weight",
+                edges,
                 edge_weight,
                 item_type="edge",
                 is_directed=self.graph_interface.is_directed(),

@@ -1,7 +1,8 @@
 from inspect import signature, Parameter
-from collections import Mapping
+from collections import Mapping, Sequence
 
 from ipysigma.interfaces import is_networkx_degree_view
+from ipysigma.constants import SUPPORTED_RANGE_BOUNDS
 
 
 def count_arity(fn) -> int:
@@ -12,22 +13,6 @@ def count_arity(fn) -> int:
 
 def pretty_print_int(v):
     return "{:,}".format(int(v))
-
-
-def extract_rgba_from_viz(viz_color):
-    if "a" in viz_color:
-        return "rgba(%s, %s, %s, %s)" % (
-            viz_color["r"],
-            viz_color["g"],
-            viz_color["b"],
-            viz_color["a"],
-        )
-
-    return "rgba(%s, %s, %s)" % (
-        viz_color["r"],
-        viz_color["g"],
-        viz_color["b"],
-    )
 
 
 def is_partition(value):
@@ -138,3 +123,131 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
             "%s should be an attribute name, or a mapping, or a partition, or a function"
             % name
         )
+
+
+def resolve_metrics(name, target, supported):
+    if not target:
+        return {}
+
+    if isinstance(target, Sequence) and not isinstance(target, (str, bytes)):
+        metrics = {}
+
+        for v in target:
+            spec = v
+
+            if isinstance(v, str):
+                spec = {"name": v}
+
+            metrics[spec["name"]] = spec
+
+    elif isinstance(target, Mapping):
+        metrics = {}
+
+        for k, v in target.items():
+            spec = v
+
+            if isinstance(v, str):
+                spec = {"name": v}
+
+            metrics[k] = spec
+    else:
+        raise TypeError(
+            name
+            + " should be a list of metrics to compute or a dict mapping metric names to attribute names"
+        )
+
+    for v in metrics.values():
+        metric_name = v["name"]
+        if metric_name not in supported:
+            raise TypeError(
+                'unknown %s "%s", expecting one of %s'
+                % (name, metric_name, ", ".join('"%s"' % m for m in supported))
+            )
+
+    return metrics
+
+
+def resolve_range(name, target):
+    if target is None:
+        return
+
+    if isinstance(target, SUPPORTED_RANGE_BOUNDS):
+        return (target, target)
+
+    if (
+        isinstance(target, Sequence)
+        and len(target) == 2
+        and isinstance(target[0], SUPPORTED_RANGE_BOUNDS)
+        and isinstance(target[1], SUPPORTED_RANGE_BOUNDS)
+    ):
+        if isinstance(target[0], str) and not isinstance(target[1], str):
+            raise TypeError(name + " contain mixed type (min, max) info")
+
+        return target
+
+    raise TypeError(
+        name + " should be a single value or a (min, max) sequence (list, tuple etc.)"
+    )
+
+
+def check_zindex_int_return(fn):
+    def wrapper(*args):
+        z = fn(*args)
+
+        if not isinstance(z, int):
+            raise TypeError("zindex values should be None or an int")
+
+        return z
+
+    return wrapper
+
+
+def zindex_sort_items(items, sorter, item_type="node", is_directed=True):
+    if callable(sorter):
+
+        def key(*args):
+            return sorter(*args) or 0
+
+    elif isinstance(sorter, Mapping):
+        if item_type == "node":
+
+            def key(n, _):
+                return sorter.get(n) or 0
+
+        else:
+
+            def key(u, v, _):
+                z = sorter.get((u, v))
+
+                if z is None and not is_directed:
+                    z = sorter.get((v, u))
+
+                if not z:
+                    z = 0
+
+                return z
+
+    else:
+        if item_type == "node":
+
+            def key(_, a):
+                return a.get(sorter) or 0
+
+        else:
+
+            def key(_u, _v, a):
+                return a.get(sorter) or 0
+
+    safe_key = check_zindex_int_return(key)
+
+    if item_type == "node":
+
+        def item_key(item):
+            return safe_key(item["key"], item["attributes"])
+
+    else:
+
+        def item_key(item):
+            return safe_key(item["source"], item["target"], item["attributes"])
+
+    items.sort(key=item_key)

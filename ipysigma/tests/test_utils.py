@@ -99,8 +99,6 @@ class TestResolveVariable(object):
             {"key": 1, "attributes": {"ipysigma_kwarg_node_size": 1}},
         ]
 
-        print(type(g.eigenvector_centrality()))
-
     def test_node_callable(self):
         def getter(node):
             return node + "_single_value"
@@ -132,4 +130,4 @@ class TestResolveVariable(object):
             {"key": "two", "attributes": {"ipysigma_kwarg_node_value": "two_value"}},
         ]
 
-    # TODO: edges
+    # TODO: edges (partitions)
