@@ -125,3 +125,17 @@ def get_graph_interface(graph):
     raise TypeError(
         "unknown graph type. expecting either a networkx or igraph instance."
     )
+
+
+def is_networkx_degree_view(target) -> bool:
+    if not NETWORKX_INSTALLED:
+        return False
+
+    return isinstance(
+        target,
+        (
+            nx.classes.reportviews.DegreeView,
+            nx.classes.reportviews.InDegreeView,
+            nx.classes.reportviews.OutDegreeView,
+        ),
+    )

@@ -2,6 +2,8 @@
 define clean
 	rm -rf *.egg-info
 	rm -rf dist
+	find . -name __pycache__ | xargs rm -rf
+	find . -name .ipynb_checkpoints | xargs rm -rf
 endef
 
 # Commands

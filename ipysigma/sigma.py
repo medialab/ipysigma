@@ -15,7 +15,6 @@ from ._frontend import module_name, module_version
 from ipysigma.interfaces import get_graph_interface
 from ipysigma.utils import (
     pretty_print_int,
-    is_indexable,
     is_partition,
     extract_rgba_from_viz,
 )
@@ -122,7 +121,7 @@ def resolve_variable_kwarg(
 
     # Mappping
     # NOTE: must be used before callable to handle stuff like g.degree
-    elif is_indexable(target):
+    elif isinstance(target, Mapping):
         mapping = target
         target = "$$%s" % name
 
