@@ -28,7 +28,7 @@ format:
 
 unit:
 	@echo Running python tests...
-	py.test
+	py.test -svvv
 	@echo Running javascript tests...
 	yarn test
 	@echo
