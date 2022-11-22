@@ -20,6 +20,7 @@ deps:
 	pip3 install jupyterlab
 	pip3 install networkx igraph
 	pip3 install -e ".[test, examples]"
+	yarn install
 	yarn run build
 	jupyter labextension develop --overwrite .
 	jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
