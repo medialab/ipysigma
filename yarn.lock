@@ -4401,7 +4401,7 @@ graphology-utils@^2.0.0, graphology-utils@^2.1.0, graphology-utils@^2.3.0, graph
   resolved "https://registry.yarnpkg.com/graphology-utils/-/graphology-utils-2.5.2.tgz#4d30d6e567d27c01f105e1494af816742e8d2440"
   integrity sha512-ckHg8MXrXJkOARk56ZaSCM1g1Wihe2d6iTmz1enGOz4W/l831MBCKSayeFQfowgF8wd+PQ4rlch/56Vs/VZLDQ==
 
-graphology@^0.25.0:
+graphology@^0.25.1:
   version "0.25.1"
   resolved "https://registry.yarnpkg.com/graphology/-/graphology-0.25.1.tgz#f92b86294782522d3898ce4480e4a577c0c2568a"
   integrity sha512-yYA7BJCcXN2DrKNQQ9Qf22zBHm/yTbyBR71T1MYBbGtywNHsv0QZtk8zaR6zxNcp2hCCZayUkHp9DyMSZCpoxQ==

@@ -59,7 +59,7 @@
     "d3-scale": "^4.0.2",
     "debounce": "^1.2.1",
     "file-saver": "^2.0.5",
-    "graphology": "^0.25.0",
+    "graphology": "^0.25.1",
     "graphology-communities-louvain": "^2.0.0",
     "graphology-gexf": "^0.10.1",
     "graphology-layout": "^0.6.0",

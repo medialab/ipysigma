@@ -363,9 +363,6 @@ class Sigma(DOMWidget):
             # them pointless for graphology, gexf etc.
             serialized_edge = {"source": source, "target": target, "attributes": attr}
 
-            if not is_directed:
-                serialized_edge["undirected"] = True
-
             edges.append(serialized_edge)
 
         # Serializing visual variables
