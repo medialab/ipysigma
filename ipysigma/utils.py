@@ -202,52 +202,12 @@ def check_zindex_int_return(fn):
     return wrapper
 
 
-def zindex_sort_items(items, sorter, item_type="node", is_directed=True):
-    if callable(sorter):
+def sort_items_per_zindex(name, items, sorter, item_type="node", is_directed=True):
+    zindex_attr_name = resolve_variable(
+        name, items, sorter, item_type=item_type, is_directed=is_directed
+    )
 
-        def key(*args):
-            return sorter(*args) or 0
-
-    elif isinstance(sorter, Mapping):
-        if item_type == "node":
-
-            def key(n, _):
-                return sorter.get(n) or 0
-
-        else:
-
-            def key(u, v, _):
-                z = sorter.get((u, v))
-
-                if z is None and not is_directed:
-                    z = sorter.get((v, u))
-
-                if not z:
-                    z = 0
-
-                return z
-
-    else:
-        if item_type == "node":
-
-            def key(_, a):
-                return a.get(sorter) or 0
-
-        else:
-
-            def key(_u, _v, a):
-                return a.get(sorter) or 0
-
-    safe_key = check_zindex_int_return(key)
-
-    if item_type == "node":
-
-        def item_key(item):
-            return safe_key(item["key"], item["attributes"])
-
-    else:
-
-        def item_key(item):
-            return safe_key(item["source"], item["target"], item["attributes"])
+    def item_key(item):
+        return item["attributes"].get(zindex_attr_name, 0)
 
     items.sort(key=item_key)

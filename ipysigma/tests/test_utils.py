@@ -2,7 +2,7 @@ import networkx as nx
 import igraph as ig
 from copy import deepcopy
 
-from ipysigma.utils import is_partition, resolve_variable
+from ipysigma.utils import is_partition, resolve_variable, sort_items_per_zindex
 
 
 class TestMiscUtils(object):
@@ -131,3 +131,50 @@ class TestResolveVariable(object):
         ]
 
     # TODO: edges (partitions)
+
+
+class TestSortItemsPerZindex(object):
+    def test_attribute(self):
+        items = [
+            {"key": "one", "attributes": {"z": 2}},
+            {"key": "two", "attributes": {"z": 3}},
+            {"key": "three", "attributes": {"z": 1}},
+        ]
+
+        sort_items_per_zindex("node_zindex", items, "z")
+
+        assert items == [
+            {"key": "three", "attributes": {"z": 1}},
+            {"key": "one", "attributes": {"z": 2}},
+            {"key": "two", "attributes": {"z": 3}},
+        ]
+
+    def test_callable(self):
+        items = [
+            {"key": "one", "attributes": {"age": 2}},
+            {"key": "two", "attributes": {"age": 3}},
+            {"key": "three", "attributes": {"age": 1}},
+        ]
+
+        sort_items_per_zindex("node_zindex", items, lambda n, attr: attr["age"] * 2)
+
+        assert items == [
+            {"key": "three", "attributes": {"age": 1, "ipysigma_kwarg_node_zindex": 2}},
+            {"key": "one", "attributes": {"age": 2, "ipysigma_kwarg_node_zindex": 4}},
+            {"key": "two", "attributes": {"age": 3, "ipysigma_kwarg_node_zindex": 6}},
+        ]
+
+    def test_mapping(self):
+        items = [
+            {"key": "one", "attributes": {}},
+            {"key": "two", "attributes": {}},
+            {"key": "three", "attributes": {}},
+        ]
+
+        sort_items_per_zindex("node_zindex", items, {"one": 2, "two": 3, "three": 1})
+
+        assert items == [
+            {"key": "three", "attributes": {"ipysigma_kwarg_node_zindex": 1}},
+            {"key": "one", "attributes": {"ipysigma_kwarg_node_zindex": 2}},
+            {"key": "two", "attributes": {"ipysigma_kwarg_node_zindex": 3}},
+        ]

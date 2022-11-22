@@ -18,7 +18,7 @@ from ipysigma.utils import (
     resolve_metrics,
     resolve_range,
     resolve_variable,
-    zindex_sort_items,
+    sort_items_per_zindex,
 )
 from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
 from ipysigma.constants import (
@@ -505,13 +505,11 @@ class Sigma(DOMWidget):
 
         # Handling z-index
         if node_zindex is not None:
-            zindex_sort_items(
-                nodes, node_zindex, item_type="node", is_directed=is_directed
-            )
+            sort_items_per_zindex("node_zindex", nodes, node_zindex)
 
         if edge_zindex is not None:
-            zindex_sort_items(
-                edges, edge_zindex, item_type="edge", is_directed=is_directed
+            sort_items_per_zindex(
+                "edge_zindex", edges, edge_zindex, item_type="edge", is_directed=is_directed
             )
 
         # Building renderer settings
