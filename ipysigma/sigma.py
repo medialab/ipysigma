@@ -315,15 +315,10 @@ class Sigma(DOMWidget):
         is_multi = self.graph_interface.is_multi()
 
         # Serializing graph as per graphology's JSON format
-        principal_component = None
-
         nodes = []
         self.node_type = None
 
         for node, attr in self.graph_interface.nodes():
-            if principal_component and node not in principal_component:
-                continue
-
             if self.node_type is None:
                 self.node_type = type(node)
 
@@ -350,9 +345,6 @@ class Sigma(DOMWidget):
         edges = []
 
         for source, target, attr in self.graph_interface.edges():
-            if principal_component and source not in principal_component:
-                continue
-
             attr = attr.copy()
 
             if process_gexf_viz:
