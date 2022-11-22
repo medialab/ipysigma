@@ -24,6 +24,7 @@ from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
 from ipysigma.constants import (
     MAX_CATEGORY_COLORS,
     DEFAULT_HEIGHT,
+    MIN_HEIGHT,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
@@ -98,6 +99,8 @@ class Sigma(DOMWidget):
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
 
+    default_height = DEFAULT_HEIGHT
+
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(DEFAULT_HEIGHT).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
@@ -141,20 +144,25 @@ class Sigma(DOMWidget):
         }
     ).tag(sync=True)
 
+    @classmethod
+    def set_defaults(cls, height=None):
+        if height is not None:
+            cls.default_height = height
+
     def __init__(
         self,
         graph,
         *,
-        height=DEFAULT_HEIGHT,
+        height=None,
         start_layout=False,
         node_color=None,
-        node_raw_color="color",
+        raw_node_color="color",
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color="#999",
         node_borders=False,
         node_border_color=None,
-        node_raw_border_color="borderColor",
+        raw_node_border_color="border_color",
         node_border_color_gradient=None,
         node_border_color_palette=None,
         default_node_border_color="#fff",
@@ -165,7 +173,7 @@ class Sigma(DOMWidget):
         node_metrics=None,
         node_zindex=None,
         edge_color=None,
-        edge_raw_color="color",
+        raw_edge_color="color",
         edge_color_gradient=None,
         edge_color_from=None,
         edge_color_palette=None,
@@ -193,8 +201,12 @@ class Sigma(DOMWidget):
     ):
         super(Sigma, self).__init__()
 
+        # Resolving overridable defaults
+        if height is None:
+            height = self.default_height
+
         # Validation
-        if height < 250:
+        if height < MIN_HEIGHT:
             raise TypeError("Sigma widget cannot have a height < 250 px")
 
         if not isinstance(max_category_colors, int) or max_category_colors < 0:
@@ -365,17 +377,18 @@ class Sigma(DOMWidget):
                 variable["type"] = "continuous"
                 variable["range"] = node_color_gradient
 
-        elif node_raw_color is not None:
-            visual_variables["nodeColor"]["attribute"] = node_raw_color
+        elif raw_node_color is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                "raw_node_color", nodes, raw_node_color
+            )
+
+            visual_variables["nodeColor"] = variable
 
         visual_variables["nodeColor"]["default"] = default_node_color
 
         if node_borders:
-            visual_variables["nodeBorderColor"] = {
-                "type": "raw",
-                "attribute": node_raw_border_color,
-            }
-
             if node_border_color is not None:
                 variable = {"type": "category"}
 
@@ -397,8 +410,14 @@ class Sigma(DOMWidget):
                     variable["type"] = "continuous"
                     variable["range"] = node_border_color_gradient
 
-            elif node_raw_border_color is not None:
-                visual_variables["nodeBorderColor"]["attribute"] = node_raw_border_color
+            elif raw_node_border_color is not None:
+                variable = {"type": "raw"}
+
+                variable["attribute"] = resolve_variable(
+                    "raw_node_border_color", nodes, raw_node_border_color
+                )
+
+                visual_variables["nodeBorderColor"] = variable
 
             visual_variables["nodeBorderColor"]["default"] = default_node_border_color
 
@@ -455,8 +474,14 @@ class Sigma(DOMWidget):
                 "value": edge_color_from,
             }
 
-        elif edge_raw_color is not None:
-            visual_variables["edgeColor"]["attribute"] = edge_raw_color
+        elif raw_edge_color is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                "raw_edge_color", nodes, raw_edge_color
+            )
+
+            visual_variables["edgeColor"] = variable
 
         visual_variables["edgeColor"]["default"] = default_edge_color
 
@@ -509,7 +534,11 @@ class Sigma(DOMWidget):
 
         if edge_zindex is not None:
             sort_items_per_zindex(
-                "edge_zindex", edges, edge_zindex, item_type="edge", is_directed=is_directed
+                "edge_zindex",
+                edges,
+                edge_zindex,
+                item_type="edge",
+                is_directed=is_directed,
             )
 
         # Building renderer settings

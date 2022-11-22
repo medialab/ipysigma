@@ -68,6 +68,7 @@ import '../css/widget.css';
 const NODE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color', 'x', 'y']);
 const EDGE_VIZ_ATTRIBUTES = new Set(['label', 'size', 'color']);
 const MUTED_NODE_COLOR = '#ccc';
+const IPYSIGMA_KWARG_PREFIX = 'ipysigma_kwarg_'
 
 /**
  * Types.
@@ -904,11 +905,11 @@ export class SigmaView extends DOMWidgetView {
       if (variable.type === 'dependent') {
         html += `based on <span class="ipysigma-keyword">${variable.value}</span> color`;
       } else {
-        const source = variable.attribute.startsWith('$$')
+        const source = variable.attribute.startsWith(IPYSIGMA_KWARG_PREFIX)
           ? 'kwarg'
           : 'attribute';
-        const name = variable.attribute.startsWith('$$')
-          ? variable.attribute.slice(2)
+        const name = variable.attribute.startsWith(IPYSIGMA_KWARG_PREFIX)
+          ? variable.attribute.slice(IPYSIGMA_KWARG_PREFIX.length)
           : variable.attribute;
 
         if (variable.type === 'raw') {
@@ -1172,10 +1173,10 @@ export class SigmaView extends DOMWidgetView {
       let target = info;
 
       if (vizAttributes.has(k)) target = vizInfo;
-      else if (k.startsWith('$$')) target = kwargInfo;
+      else if (k.startsWith(IPYSIGMA_KWARG_PREFIX)) target = kwargInfo;
 
       target.push(
-        `<b>${k.startsWith('$$') ? k.slice(2) : k}</b> ${renderTypedValue(
+        `<b>${k.startsWith(IPYSIGMA_KWARG_PREFIX) ? k.slice(IPYSIGMA_KWARG_PREFIX.length) : k}</b> ${renderTypedValue(
           attr[k]
         )}`
       );
