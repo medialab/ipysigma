@@ -200,15 +200,18 @@ class Sigma(DOMWidget):
         # Edge color
         edge_color=None,
         raw_edge_color="color",
+        edge_color_palette=None,
         edge_color_gradient=None,
         edge_color_from=None,
-        edge_color_palette=None,
         default_edge_color="#ccc",
+        # Edge type
         default_edge_type=None,
         # Edge size
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
+        # Edge label
         edge_label=None,
+        # Edge weight
         edge_weight="weight",
         # Edge z index
         edge_zindex=None,
