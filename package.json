@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4 || ^5 || ^6",
-    "@yomguithereal/sigma-experiments-renderers": "^0.1.0",
+    "@yomguithereal/sigma-experiments-renderers": "0.2.0",
     "choices.js": "^10.1.0",
     "chroma-js": "^2.4.2",
     "comma-number": "^2.1.0",
@@ -70,7 +70,7 @@
     "mnemonist": "^0.39.1",
     "screenfull": "^6.0.1",
     "seedrandom": "^3.0.5",
-    "sigma": "^2.3.0"
+    "sigma": "3.0.0-alpha2"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

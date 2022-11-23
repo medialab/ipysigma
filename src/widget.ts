@@ -16,13 +16,13 @@ import { collectLayout, assignLayout } from 'graphology-layout/utils';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import {
-  Settings as SigmaSettings,
-  DEFAULT_SETTINGS as DEFAULT_SIGMA_SETTINGS,
+  Settings as SigmaSettings
 } from 'sigma/settings';
+import { NodeProgramConstructor } from 'sigma/rendering/webgl/programs/common/node';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
-import EdgeFastProgram from 'sigma/rendering/webgl/programs/edge.fast';
+import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
-import createNodeBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/border';
+import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
 
 import EventEmitter from 'events';
 import seedrandom from 'seedrandom';
@@ -83,6 +83,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   hoverLabel?: string | null;
   categoryValue?: string;
   borderColor?: string;
+  borderRatio?: number;
 }
 
 type IPysigmaProgramSettings = {
@@ -592,19 +593,14 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.nodeBorderColor.type !== 'disabled';
 
       const edgeProgramClasses = {
-        ...DEFAULT_SIGMA_SETTINGS.edgeProgramClasses,
-        slim: EdgeFastProgram,
+        slim: EdgeLineProgram,
         triangle: EdgeTriangleProgram,
       };
 
-      const nodeProgramClasses = {
-        ...DEFAULT_SIGMA_SETTINGS.nodeProgramClasses,
-      };
+      const nodeProgramClasses = {} as Record<string, NodeProgramConstructor>;
 
       if (nodeBordersEnabled) {
-        nodeProgramClasses.circle = createNodeBorderProgram({
-          borderRatio: programSettings.nodeBorderRatio,
-        });
+        nodeProgramClasses.circle = NodePointWithBorderProgram;
       }
 
       let rendererSettings = this.model.get(
@@ -688,6 +684,7 @@ export class SigmaView extends DOMWidgetView {
         displayData.label = (scales.nodeLabel(data) || node) as string;
 
         if (nodeBordersEnabled) {
+          displayData.borderRatio = programSettings.nodeBorderRatio;
           displayData.borderColor = scales.nodeBorderColor(data) as string;
         }
 
