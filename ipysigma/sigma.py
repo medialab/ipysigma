@@ -5,7 +5,7 @@
 # =============================================================================
 #
 #
-from ipywidgets import DOMWidget, Output
+from ipywidgets import DOMWidget, Output, HTML
 from ipywidgets.embed import embed_minimal_html
 from IPython.display import Image, display
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
@@ -692,3 +692,17 @@ class Sigma(DOMWidget):
         embed_minimal_html(path, views=[self], **kwargs)
 
         self.snapshot = current_snapshot
+
+    def embed(self):
+        from io import StringIO
+        import html
+
+        buf = StringIO()
+
+        embed_minimal_html(buf, views=[self])
+
+        return HTML(
+            """<iframe style="height: 500px; width: 100%; border: none;" srcdoc="{}"></iframe>""".format(
+                html.escape(buf.getvalue(), quote=True)
+            )
+        )
