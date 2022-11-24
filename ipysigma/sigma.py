@@ -147,6 +147,11 @@ class Sigma(DOMWidget):
     @classmethod
     def set_defaults(cls, height=None):
         if height is not None:
+            if height < MIN_HEIGHT:
+                raise TypeError(
+                    "Sigma widget cannot have a height < %i px" % MIN_HEIGHT
+                )
+
             cls.default_height = height
 
     def __init__(
@@ -194,7 +199,8 @@ class Sigma(DOMWidget):
         node_size_range=DEFAULT_NODE_SIZE_RANGE,
         default_node_size=DEFAULT_NODE_SIZE_RANGE[0],
         # Node label
-        node_label="label",
+        raw_node_label="label",
+        node_label=None,
         # Node z index
         node_zindex=None,
         # Edge color
@@ -210,6 +216,7 @@ class Sigma(DOMWidget):
         edge_size="size",
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
         # Edge label
+        raw_edge_label="label",
         edge_label=None,
         # Edge weight
         edge_weight="weight",
@@ -224,7 +231,7 @@ class Sigma(DOMWidget):
 
         # Validation
         if height < MIN_HEIGHT:
-            raise TypeError("Sigma widget cannot have a height < 250 px")
+            raise TypeError("Sigma widget cannot have a height < %i px" % MIN_HEIGHT)
 
         if not isinstance(max_category_colors, int) or max_category_colors < 0:
             raise TypeError("max_category_colors should be a positive integer")
@@ -288,9 +295,11 @@ class Sigma(DOMWidget):
         self.layout_settings = layout_settings
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
-        self.selected_node = str(selected_node) if selected_node else None
+        self.selected_node = str(selected_node) if selected_node is not None else None
         self.selected_edge = (
-            (str(selected_edge[0]), str(selected_edge[1])) if selected_edge else None
+            (str(selected_edge[0]), str(selected_edge[1]))
+            if selected_edge is not None
+            else None
         )
         self.selected_node_category_values = (
             list(selected_node_category_values)
@@ -445,10 +454,14 @@ class Sigma(DOMWidget):
 
         visual_variables["nodeSize"]["default"] = default_node_size
 
-        if node_label is not None:
+        raw_node_label = node_label or raw_node_label
+
+        if raw_node_label is not None:
             variable = {"type": "raw"}
 
-            variable["attribute"] = resolve_variable("node_label", nodes, node_label)
+            variable["attribute"] = resolve_variable(
+                "raw_node_label", nodes, raw_node_label
+            )
 
             visual_variables["nodeLabel"] = variable
 
@@ -515,13 +528,15 @@ class Sigma(DOMWidget):
 
             visual_variables["edgeSize"] = variable
 
-        if edge_label is not None:
+        raw_edge_label = edge_label or raw_edge_label
+
+        if raw_edge_label is not None:
             variable = {"type": "raw"}
 
             variable["attribute"] = resolve_variable(
-                "edge_label",
+                "raw_edge_label",
                 edges,
-                edge_label,
+                raw_edge_label,
                 item_type="edge",
                 is_directed=self.graph_interface.is_directed(),
             )

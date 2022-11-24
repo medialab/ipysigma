@@ -15,9 +15,7 @@ import { collectLayout, assignLayout } from 'graphology-layout/utils';
 
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
-import {
-  Settings as SigmaSettings
-} from 'sigma/settings';
+import { Settings as SigmaSettings } from 'sigma/settings';
 import { NodeProgramConstructor } from 'sigma/rendering/webgl/programs/common/node';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
