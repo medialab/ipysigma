@@ -4349,10 +4349,10 @@ graphology-indices@^0.17.0:
     graphology-utils "^2.4.2"
     mnemonist "^0.39.0"
 
-graphology-layout-forceatlas2@0.9.1-zeroweights2:
-  version "0.9.1-zeroweights2"
-  resolved "https://registry.yarnpkg.com/graphology-layout-forceatlas2/-/graphology-layout-forceatlas2-0.9.1-zeroweights2.tgz#b308b0be6bab104f0f0f715ecd8fa0fe7aa736bb"
-  integrity sha512-q9xcoNNsl0GMRqC9A2F1oej53mVNBfGwoY6TTMrfw68RBcqKAQ4PgtoZfFXJn/Y/6HKIHhdPglhVKq5Pn0/5jg==
+graphology-layout-forceatlas2@0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/graphology-layout-forceatlas2/-/graphology-layout-forceatlas2-0.10.1.tgz#741842135609d82d12db5a5fdf74672062c28205"
+  integrity sha512-ogzBeF1FvWzjkikrIFwxhlZXvD2+wlY54lqhsrWprcdPjopM2J9HoMweUmIgwaTvY4bUYVimpSsOdvDv1gPRFQ==
   dependencies:
     graphology-utils "^2.1.0"
 
