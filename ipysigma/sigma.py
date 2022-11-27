@@ -221,7 +221,9 @@ class Sigma(DOMWidget):
         default_edge_type=None,
         # Edge size
         edge_size="size",
+        raw_edge_size=None,
         edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
+        default_edge_size=DEFAULT_EDGE_SIZE_RANGE[0],
         # Edge label
         raw_edge_label="label",
         edge_label=None,
@@ -484,7 +486,7 @@ class Sigma(DOMWidget):
                 edges,
                 edge_color,
                 item_type="edge",
-                is_directed=self.graph_interface.is_directed(),
+                is_directed=is_directed,
             )
 
             visual_variables["edgeColor"] = variable
@@ -503,7 +505,7 @@ class Sigma(DOMWidget):
                 variable["range"] = edge_color_gradient
 
         elif edge_color_from is not None:
-            if not self.graph_interface.is_directed():
+            if not is_directed:
                 raise TypeError("edge_color_from only works with directed graphs")
 
             if edge_color_from not in ["source", "target"]:
@@ -525,7 +527,20 @@ class Sigma(DOMWidget):
 
         visual_variables["edgeColor"]["default"] = default_edge_color
 
-        if edge_size is not None:
+        if raw_edge_size is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                "raw_edge_size",
+                edges,
+                raw_edge_size,
+                item_type="edge",
+                is_directed=is_directed,
+            )
+
+            visual_variables["edgeSize"] = variable
+
+        elif edge_size is not None:
             variable = {"type": "continuous", "range": edge_size_range}
 
             variable["attribute"] = resolve_variable(
@@ -533,10 +548,12 @@ class Sigma(DOMWidget):
                 edges,
                 edge_size,
                 item_type="edge",
-                is_directed=self.graph_interface.is_directed(),
+                is_directed=is_directed,
             )
 
             visual_variables["edgeSize"] = variable
+
+        visual_variables["edgeSize"]["default"] = default_edge_size
 
         raw_edge_label = edge_label or raw_edge_label
 
@@ -548,7 +565,7 @@ class Sigma(DOMWidget):
                 edges,
                 raw_edge_label,
                 item_type="edge",
-                is_directed=self.graph_interface.is_directed(),
+                is_directed=is_directed,
             )
 
             visual_variables["edgeLabel"] = variable
@@ -561,7 +578,7 @@ class Sigma(DOMWidget):
                 edges,
                 edge_weight,
                 item_type="edge",
-                is_directed=self.graph_interface.is_directed(),
+                is_directed=is_directed,
             )
 
             self.edge_weight = variable["attribute"]
@@ -590,7 +607,7 @@ class Sigma(DOMWidget):
             "enableEdgeHoverEvents": clickable_edges,
             "labelDensity": label_density,
             "labelGridCellSize": label_grid_cell_size,
-            "renderEdgeLabels": True
+            "renderEdgeLabels": True,
         }
 
         if label_rendered_size_threshold is not None:
