@@ -22,7 +22,7 @@ from ipysigma.utils import (
 )
 from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
 from ipysigma.constants import (
-    MAX_CATEGORY_COLORS,
+    DEFAULT_MAX_CATEGORY_COLORS,
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
     DEFAULT_NODE_SIZE_RANGE,
@@ -100,6 +100,7 @@ class Sigma(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     default_height = DEFAULT_HEIGHT
+    default_max_category_colors = DEFAULT_MAX_CATEGORY_COLORS
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(DEFAULT_HEIGHT).tag(sync=True)
@@ -122,7 +123,7 @@ class Sigma(DOMWidget):
             "labelDensity": 1,
         }
     ).tag(sync=True)
-    max_category_colors = Int(MAX_CATEGORY_COLORS).tag(sync=True)
+    max_category_colors = Int(DEFAULT_MAX_CATEGORY_COLORS).tag(sync=True)
     program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
     visual_variables = Dict(
         {
@@ -145,7 +146,7 @@ class Sigma(DOMWidget):
     ).tag(sync=True)
 
     @classmethod
-    def set_defaults(cls, height=None):
+    def set_defaults(cls, height=None, max_category_colors=None):
         if height is not None:
             if height < MIN_HEIGHT:
                 raise TypeError(
@@ -153,6 +154,12 @@ class Sigma(DOMWidget):
                 )
 
             cls.default_height = height
+
+        if max_category_colors is not None:
+            if not isinstance(max_category_colors, int) or max_category_colors < 0:
+                raise TypeError("max_category_colors should be a positive integer")
+
+            cls.default_max_category_colors = max_category_colors
 
     def __init__(
         self,
@@ -165,7 +172,7 @@ class Sigma(DOMWidget):
         layout_settings=None,
         clickable_edges=False,
         process_gexf_viz=True,
-        max_category_colors=MAX_CATEGORY_COLORS,
+        max_category_colors=None,
         sync_key=None,
         # Widget state
         camera_state=DEFAULT_CAMERA_STATE,
@@ -228,6 +235,9 @@ class Sigma(DOMWidget):
         # Resolving overridable defaults
         if height is None:
             height = self.default_height
+
+        if max_category_colors is None:
+            max_category_colors = self.default_max_category_colors
 
         # Validation
         if height < MIN_HEIGHT:
