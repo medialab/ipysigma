@@ -130,6 +130,15 @@ class TestResolveVariable(object):
             {"key": "two", "attributes": {"ipysigma_kwarg_node_value": "two_value"}},
         ]
 
+    def test_iterable(self):
+        name, items = self.resolve_variable("node_size", range(2))
+
+        assert name == "ipysigma_kwarg_node_size"
+        assert items == [
+            {"key": "one", "attributes": {"ipysigma_kwarg_node_size": 0}},
+            {"key": "two", "attributes": {"ipysigma_kwarg_node_size": 1}},
+        ]
+
     # TODO: edges (partitions)
 
 

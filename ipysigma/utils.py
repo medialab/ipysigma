@@ -1,5 +1,5 @@
 from inspect import signature, Parameter
-from collections import Mapping, Sequence
+from collections import Mapping, Sequence, Iterable
 
 from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import SUPPORTED_RANGE_BOUNDS
@@ -38,16 +38,6 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
     if isinstance(target, str):
         return target
 
-    # Range mapping
-    elif isinstance(target, list):
-        mapping = target
-        target = "ipysigma_kwarg_%s" % name
-
-        for item, value in zip(items, mapping):
-            item["attributes"][target] = value
-
-        return target
-
     # Arbitrary mapping
     # NOTE: must be used before callable to handle stuff like g.degree
     elif isinstance(target, Mapping) or is_networkx_degree_view(target):
@@ -76,6 +66,16 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
                 continue
 
             item["attributes"][target] = v
+
+        return target
+
+    # Iterable range
+    elif isinstance(target, Iterable):
+        mapping = target
+        target = "ipysigma_kwarg_%s" % name
+
+        for item, value in zip(items, mapping):
+            item["attributes"][target] = value
 
         return target
 

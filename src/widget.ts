@@ -19,6 +19,7 @@ import { Settings as SigmaSettings } from 'sigma/settings';
 import { NodeProgramConstructor } from 'sigma/rendering/webgl/programs/common/node';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
+import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
 import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
 
@@ -578,7 +579,6 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      const clickableEdges: boolean = this.model.get('clickable_edges');
       const programSettings = this.model.get(
         'program_settings'
       ) as IPysigmaProgramSettings;
@@ -591,6 +591,7 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.nodeBorderColor.type !== 'disabled';
 
       const edgeProgramClasses = {
+        rectangle: EdgeRectangleProgram,
         slim: EdgeLineProgram,
         triangle: EdgeTriangleProgram,
       };
@@ -606,18 +607,12 @@ export class SigmaView extends DOMWidgetView {
       ) as Partial<SigmaSettings>;
 
       rendererSettings = {
-        zIndex: true,
-        enableEdgeClickEvents: clickableEdges,
-        enableEdgeHoverEvents: clickableEdges,
         hoverRenderer: drawHover,
         edgeProgramClasses,
         nodeProgramClasses,
+        defaultEdgeType: 'rectangle',
         ...rendererSettings,
       };
-
-      if (!rendererSettings.defaultEdgeType)
-        rendererSettings.defaultEdgeType =
-          graph.type !== 'undirected' ? 'arrow' : 'line';
 
       // Gathering info about the graph to build reducers correctly
       const maxCategoryColors = this.model.get('max_category_colors') as number;

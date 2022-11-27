@@ -585,8 +585,12 @@ class Sigma(DOMWidget):
 
         # Building renderer settings
         renderer_settings = {
+            "zIndex": True,
+            "enableEdgeClickEvents": clickable_edges,
+            "enableEdgeHoverEvents": clickable_edges,
             "labelDensity": label_density,
             "labelGridCellSize": label_grid_cell_size,
+            "renderEdgeLabels": True
         }
 
         if label_rendered_size_threshold is not None:
@@ -610,6 +614,11 @@ class Sigma(DOMWidget):
                 )
 
             renderer_settings["defaultEdgeType"] = default_edge_type
+
+        else:
+            renderer_settings["defaultEdgeType"] = (
+                "arrow" if is_directed else "rectangle"
+            )
 
         self.renderer_settings = renderer_settings
 
