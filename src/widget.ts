@@ -1504,14 +1504,20 @@ export class SigmaView extends DOMWidgetView {
   }
 
   bindSyncEvents(syncEmitter: EventEmitter) {
-    let lock = false;
+    let locks = {
+      camera: false,
+      nodeAttributesUpdated: false,
+      eachNodeAttributesUpdated: false,
+      selectItem: false,
+      clearSelectedItem: false,
+    };
 
     // From the broadcaster's standpoint
     const camera = this.renderer.getCamera();
 
     camera.on('updated', (state) => {
-      if (lock) {
-        lock = false;
+      if (locks.camera) {
+        locks.camera = false;
         return;
       }
 
@@ -1521,8 +1527,8 @@ export class SigmaView extends DOMWidgetView {
     const graph = this.renderer.getGraph();
 
     graph.on('nodeAttributesUpdated', ({ key, attributes }) => {
-      if (lock) {
-        lock = false;
+      if (locks.nodeAttributesUpdated) {
+        locks.nodeAttributesUpdated = false;
         return;
       }
 
@@ -1534,8 +1540,8 @@ export class SigmaView extends DOMWidgetView {
     });
 
     graph.on('eachNodeAttributesUpdated', () => {
-      if (lock) {
-        lock = false;
+      if (locks.eachNodeAttributesUpdated) {
+        locks.eachNodeAttributesUpdated = false;
         return;
       }
 
@@ -1546,8 +1552,8 @@ export class SigmaView extends DOMWidgetView {
     });
 
     this.emitter.on('selectItem', (payload) => {
-      if (lock) {
-        lock = false;
+      if (locks.selectItem) {
+        locks.selectItem = false;
         return;
       }
 
@@ -1555,8 +1561,8 @@ export class SigmaView extends DOMWidgetView {
     });
 
     this.emitter.on('clearSelectedItem', () => {
-      if (lock) {
-        lock = false;
+      if (locks.clearSelectedItem) {
+        locks.clearSelectedItem = false;
         return;
       }
 
@@ -1575,21 +1581,32 @@ export class SigmaView extends DOMWidgetView {
     this.syncListeners.camera = ({ state, renderer }) => {
       if (renderer === this.renderer) return;
 
-      lock = true;
+      // NOTE: to avoid deadlock, we ensure the camera will update
+      const currentState = camera.getState();
+
+      if (
+        currentState.x === state.x &&
+        currentState.y === state.y &&
+        currentState.angle === state.angle &&
+        currentState.ratio === state.ratio
+      )
+        return;
+
+      locks.camera = true;
       camera.setState(state);
     };
 
     this.syncListeners.layout = ({ layout, renderer }) => {
       if (renderer === this.renderer) return;
 
-      lock = true;
+      locks.eachNodeAttributesUpdated = true;
       assignLayout(graph, layout);
     };
 
     this.syncListeners.nodePosition = ({ node, position, renderer }) => {
       if (renderer === this.renderer) return;
 
-      lock = true;
+      locks.nodeAttributesUpdated = true;
       graph.mergeNodeAttributes(node, position);
     };
 
@@ -1610,14 +1627,14 @@ export class SigmaView extends DOMWidgetView {
     this.syncListeners.selectItem = ({ renderer, key, type }) => {
       if (renderer === this.renderer) return;
 
-      lock = true;
+      locks.selectItem = true;
       this.selectItem(type, key);
     };
 
     this.syncListeners.clearSelectedItem = ({ renderer }) => {
       if (renderer === this.renderer) return;
 
-      lock = true;
+      locks.clearSelectedItem = true;
       this.clearSelectedItem();
     };
 
