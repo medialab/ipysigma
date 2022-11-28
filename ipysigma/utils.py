@@ -311,6 +311,9 @@ class VisualVariableBuilder(object):
             )
             variable = {"type": "continuous", "range": range}
 
+            if default is None:
+                default = range[0]
+
             variable["attribute"] = resolve_variable(
                 self.template(kind, prefix=variable_prefix, item_type=item_type),
                 items,
@@ -379,6 +382,9 @@ class VisualVariableBuilder(object):
 
                 variable["type"] = "continuous"
                 variable["range"] = gradient
+
+                if default is None:
+                    default = gradient[0]
 
         elif mapped_from is not None:
             self.variables[name] = {

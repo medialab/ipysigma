@@ -9,7 +9,7 @@ from ipywidgets import DOMWidget, Output
 from ipywidgets.embed import embed_minimal_html
 from IPython.display import Image, display
 from traitlets import Unicode, Dict, Int, Bool, Tuple, List
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable
 from ._frontend import module_name, module_version
 
 from ipysigma.interfaces import get_graph_interface
@@ -101,6 +101,8 @@ class Sigma(DOMWidget):
 
     default_height = DEFAULT_HEIGHT
     default_max_category_colors = DEFAULT_MAX_CATEGORY_COLORS
+    default_node_size_range = DEFAULT_NODE_SIZE_RANGE
+    default_edge_size_range = DEFAULT_EDGE_SIZE_RANGE
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(DEFAULT_HEIGHT).tag(sync=True)
@@ -128,7 +130,13 @@ class Sigma(DOMWidget):
     visual_variables = Dict(VisualVariableBuilder.get_default()).tag(sync=True)
 
     @classmethod
-    def set_defaults(cls, height=None, max_category_colors=None):
+    def set_defaults(
+        cls,
+        height=None,
+        max_category_colors=None,
+        node_size_range=None,
+        edge_size_range=None,
+    ):
         if height is not None:
             if height < MIN_HEIGHT:
                 raise TypeError(
@@ -142,6 +150,12 @@ class Sigma(DOMWidget):
                 raise TypeError("max_category_colors should be a positive integer")
 
             cls.default_max_category_colors = max_category_colors
+
+        if node_size_range is not None:
+            cls.default_node_size_range = node_size_range
+
+        if edge_size_range is not None:
+            cls.default_edge_size_range = edge_size_range
 
     def __init__(
         self,
@@ -185,8 +199,8 @@ class Sigma(DOMWidget):
         # Node size
         node_size="size",
         raw_node_size=None,
-        node_size_range=DEFAULT_NODE_SIZE_RANGE,
-        default_node_size=DEFAULT_NODE_SIZE_RANGE[0],
+        node_size_range=None,
+        default_node_size=None,
         # Node label
         raw_node_label="label",
         node_label=None,
@@ -204,8 +218,8 @@ class Sigma(DOMWidget):
         # Edge size
         edge_size="size",
         raw_edge_size=None,
-        edge_size_range=DEFAULT_EDGE_SIZE_RANGE,
-        default_edge_size=DEFAULT_EDGE_SIZE_RANGE[0],
+        edge_size_range=None,
+        default_edge_size=None,
         # Edge label
         raw_edge_label="label",
         edge_label=None,
@@ -222,6 +236,12 @@ class Sigma(DOMWidget):
 
         if max_category_colors is None:
             max_category_colors = self.default_max_category_colors
+
+        if node_size_range is None:
+            node_size_range = self.default_node_size_range
+
+        if edge_size_range is None:
+            edge_size_range = self.default_edge_size_range
 
         # Validation
         if height < MIN_HEIGHT:
