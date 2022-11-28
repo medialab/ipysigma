@@ -1529,8 +1529,6 @@ export class SigmaView extends DOMWidgetView {
       }, 0);
     };
 
-    console.log('reset 2');
-
     const lock = (name: keyof typeof locks) => {
       locks[name] = true;
       scheduleResetLocks();
@@ -1541,7 +1539,6 @@ export class SigmaView extends DOMWidgetView {
 
     camera.on('updated', (state) => {
       if (locks.camera) {
-        console.log('camera is locked');
         locks.camera = false;
         return;
       }

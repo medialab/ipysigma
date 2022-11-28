@@ -28,6 +28,10 @@
   border-left: none;
 }
 
+.widget-hbox ~ .widget-hbox .ipysigma-widget {
+  border-top: none;
+}
+
 .ipysigma-widget hr {
   height: 1px;
   border: none;
