@@ -16,7 +16,6 @@ from ipysigma.interfaces import get_graph_interface
 from ipysigma.utils import (
     pretty_print_int,
     resolve_metrics,
-    resolve_range,
     resolve_variable,
     sort_items_per_zindex,
     VisualVariableBuilder,
@@ -268,14 +267,6 @@ class Sigma(DOMWidget):
             raise TypeError(
                 "selected_edge_category_values should be an iterable of edge keys"
             )
-
-        node_size_range = resolve_range("node_size_range", node_size_range)
-        node_color_gradient = resolve_range("node_color_gradient", node_color_gradient)
-        node_border_color_gradient = resolve_range(
-            "node_border_color_gradient", node_border_color_gradient
-        )
-        edge_size_range = resolve_range("edge_size_range", edge_size_range)
-        edge_color_gradient = resolve_range("edge_color_gradient", edge_color_gradient)
 
         # Own
         self.graph = graph

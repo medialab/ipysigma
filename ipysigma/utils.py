@@ -303,6 +303,12 @@ class VisualVariableBuilder(object):
             self.variables[name] = variable
 
         elif mapped is not None:
+            range = resolve_range(
+                self.template(
+                    kind, prefix=variable_prefix, suffix="range", item_type=item_type
+                ),
+                range,
+            )
             variable = {"type": "continuous", "range": range}
 
             variable["attribute"] = resolve_variable(
@@ -348,7 +354,7 @@ class VisualVariableBuilder(object):
             if palette is not None:
                 if not isinstance(palette, Mapping):
                     raise TypeError(
-                        "node_color_palette should be a mapping (i.e. a dict)".format(
+                        "{} should be a mapping (i.e. a dict)".format(
                             self.template(
                                 kind,
                                 prefix=variable_prefix,
@@ -361,6 +367,16 @@ class VisualVariableBuilder(object):
                 variable["palette"] = list(palette.items())
 
             elif gradient is not None:
+                gradient = resolve_range(
+                    self.template(
+                        kind,
+                        prefix=variable_prefix,
+                        suffix="gradient",
+                        item_type=item_type,
+                    ),
+                    gradient,
+                )
+
                 variable["type"] = "continuous"
                 variable["range"] = gradient
 
