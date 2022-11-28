@@ -2,7 +2,11 @@ from inspect import signature, Parameter
 from collections import Mapping, Sequence, Iterable
 
 from ipysigma.interfaces import is_networkx_degree_view
-from ipysigma.constants import SUPPORTED_RANGE_BOUNDS
+from ipysigma.constants import (
+    SUPPORTED_RANGE_BOUNDS,
+    DEFAULT_NODE_SIZE_RANGE,
+    DEFAULT_EDGE_SIZE_RANGE,
+)
 
 
 def count_arity(fn) -> int:
@@ -211,3 +215,174 @@ def sort_items_per_zindex(name, items, sorter, item_type="node", is_directed=Tru
         return item["attributes"].get(zindex_attr_name, 0)
 
     items.sort(key=item_key)
+
+
+class VisualVariableBuilder(object):
+    @staticmethod
+    def get_default():
+        return {
+            "nodeLabel": {"type": "raw", "attribute": "label"},
+            "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
+            "nodeBorderColor": {"type": "disabled"},
+            "nodeSize": {
+                "type": "continuous",
+                "attribute": "size",
+                "range": DEFAULT_NODE_SIZE_RANGE,
+            },
+            "edgeLabel": {"type": "disabled"},
+            "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},
+            "edgeSize": {
+                "type": "continuous",
+                "attribute": "size",
+                "range": DEFAULT_EDGE_SIZE_RANGE,
+            },
+        }
+
+    def __init__(self, nodes, edges, is_directed):
+        self.nodes = nodes
+        self.edges = edges
+        self.is_directed = is_directed
+        self.variables = VisualVariableBuilder.get_default()
+
+    def build(self):
+        return self.variables
+
+    def template(self, name, prefix=None, suffix=None, item_type="node", raw=False):
+        return "{}{}_{}{}{}".format(
+            "raw_" if raw else "",
+            item_type,
+            "_" + (prefix or ""),
+            name,
+            "_" + (suffix or ""),
+        )
+
+    def build_raw(self, name, mapped, raw, kind="label", variable_prefix=None):
+        raw = mapped or raw
+        item_type = "node" if name.startswith("node") else "edge"
+        items = self.nodes if item_type == "node" else self.edges
+
+        if raw is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                self.template(kind, prefix=variable_prefix, item_type=item_type),
+                items,
+                raw,
+                item_type=item_type,
+                is_directed=self.is_directed,
+            )
+
+            self.variables[name] = variable
+
+    def build_continuous(
+        self,
+        name,
+        mapped,
+        raw,
+        default=None,
+        kind="size",
+        range=None,
+        variable_prefix=None,
+    ):
+        item_type = "node" if name.startswith("node") else "edge"
+        items = self.nodes if item_type == "node" else self.edges
+
+        if raw is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                self.template(
+                    kind, prefix=variable_prefix, raw=True, item_type=item_type
+                ),
+                items,
+                raw,
+                item_type=item_type,
+                is_directed=self.is_directed,
+            )
+
+            self.variables[name] = variable
+
+        elif mapped is not None:
+            variable = {"type": "continuous", "range": range}
+
+            variable["attribute"] = resolve_variable(
+                self.template(kind, prefix=variable_prefix, item_type=item_type),
+                items,
+                mapped,
+                item_type=item_type,
+                is_directed=self.is_directed,
+            )
+
+            self.variables[name] = variable
+
+        self.variables[name]["default"] = default
+
+    def build_categorical_or_continuous(
+        self,
+        name,
+        mapped,
+        raw,
+        default=None,
+        mapped_from=None,
+        kind="color",
+        palette=None,
+        gradient=None,
+        variable_prefix=None,
+    ):
+        item_type = "node" if name.startswith("node") else "edge"
+        items = self.nodes if item_type == "node" else self.edges
+
+        if mapped is not None:
+            variable = {"type": "category"}
+
+            variable["attribute"] = resolve_variable(
+                self.template(kind, prefix=variable_prefix, item_type=item_type),
+                items,
+                mapped,
+                item_type=item_type,
+                is_directed=self.is_directed,
+            )
+
+            self.variables[name] = variable
+
+            if palette is not None:
+                if not isinstance(palette, Mapping):
+                    raise TypeError(
+                        "node_color_palette should be a mapping (i.e. a dict)".format(
+                            self.template(
+                                kind,
+                                prefix=variable_prefix,
+                                suffix="palette",
+                                item_type=item_type,
+                            )
+                        )
+                    )
+
+                variable["palette"] = list(palette.items())
+
+            elif gradient is not None:
+                variable["type"] = "continuous"
+                variable["range"] = gradient
+
+        elif mapped_from is not None:
+            self.variables[name] = {
+                "type": "dependent",
+                "value": mapped_from,
+            }
+
+        elif raw is not None:
+            variable = {"type": "raw"}
+
+            variable["attribute"] = resolve_variable(
+                self.template(
+                    kind, prefix=variable_prefix, raw=True, item_type=item_type
+                ),
+                items,
+                raw,
+                item_type=item_type,
+                is_directed=self.is_directed,
+            )
+
+            self.variables[name] = variable
+
+        self.variables[name]["default"] = default

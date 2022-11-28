@@ -19,6 +19,7 @@ from ipysigma.utils import (
     resolve_range,
     resolve_variable,
     sort_items_per_zindex,
+    VisualVariableBuilder,
 )
 from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
 from ipysigma.constants import (
@@ -125,25 +126,7 @@ class Sigma(DOMWidget):
     ).tag(sync=True)
     max_category_colors = Int(DEFAULT_MAX_CATEGORY_COLORS).tag(sync=True)
     program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
-    visual_variables = Dict(
-        {
-            "nodeLabel": {"type": "raw", "attribute": "label"},
-            "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
-            "nodeBorderColor": {"type": "disabled"},
-            "nodeSize": {
-                "type": "continuous",
-                "attribute": "size",
-                "range": DEFAULT_NODE_SIZE_RANGE,
-            },
-            "edgeLabel": {"type": "disabled"},
-            "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},
-            "edgeSize": {
-                "type": "continuous",
-                "attribute": "size",
-                "range": DEFAULT_EDGE_SIZE_RANGE,
-            },
-        }
-    ).tag(sync=True)
+    visual_variables = Dict(VisualVariableBuilder.get_default()).tag(sync=True)
 
     @classmethod
     def set_defaults(cls, height=None, max_category_colors=None):
@@ -382,210 +365,98 @@ class Sigma(DOMWidget):
             edges.append(serialized_edge)
 
         # Serializing visual variables
-        visual_variables = self.visual_variables.copy()
+        visual_variables_builder = VisualVariableBuilder(nodes, edges, is_directed)
 
         # Nodes
-        if node_color is not None:
-            variable = {"type": "category"}
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodeColor",
+            node_color,
+            raw_node_color,
+            default=default_node_color,
+            palette=node_color_palette,
+            gradient=node_color_gradient,
+        )
+        visual_variables_builder.build_continuous(
+            "nodeSize",
+            node_size,
+            raw_node_size,
+            default=default_node_size,
+            range=node_size_range,
+        )
+        visual_variables_builder.build_raw("nodeLabel", node_label, raw_node_label)
 
-            variable["attribute"] = resolve_variable("node_color", nodes, node_color)
+        # if node_borders:
+        #     if node_border_color is not None:
+        #         variable = {"type": "category"}
 
-            visual_variables["nodeColor"] = variable
+        #         variable["attribute"] = resolve_variable(
+        #             "node_border_color", nodes, node_border_color
+        #         )
 
-            if node_color_palette is not None:
-                if not isinstance(node_color_palette, Mapping):
-                    raise TypeError(
-                        "node_color_palette should be a mapping (i.e. a dict)"
-                    )
+        #         visual_variables["nodeBorderColor"] = variable
 
-                variable["palette"] = list(node_color_palette.items())
+        #         if node_border_color_palette is not None:
+        #             if not isinstance(node_border_color_palette, Mapping):
+        #                 raise TypeError(
+        #                     "node_border_color_palette should be a mapping (i.e. a dict)"
+        #                 )
 
-            elif node_color_gradient is not None:
-                variable["type"] = "continuous"
-                variable["range"] = node_color_gradient
+        #             variable["palette"] = list(node_border_color_palette.items())
 
-        elif raw_node_color is not None:
-            variable = {"type": "raw"}
+        #         elif node_border_color_gradient is not None:
+        #             variable["type"] = "continuous"
+        #             variable["range"] = node_border_color_gradient
 
-            variable["attribute"] = resolve_variable(
-                "raw_node_color", nodes, raw_node_color
-            )
+        #     elif raw_node_border_color is not None:
+        #         variable = {"type": "raw"}
 
-            visual_variables["nodeColor"] = variable
+        #         variable["attribute"] = resolve_variable(
+        #             "raw_node_border_color", nodes, raw_node_border_color
+        #         )
 
-        visual_variables["nodeColor"]["default"] = default_node_color
+        #         visual_variables["nodeBorderColor"] = variable
 
-        if node_borders:
-            if node_border_color is not None:
-                variable = {"type": "category"}
-
-                variable["attribute"] = resolve_variable(
-                    "node_border_color", nodes, node_border_color
-                )
-
-                visual_variables["nodeBorderColor"] = variable
-
-                if node_border_color_palette is not None:
-                    if not isinstance(node_border_color_palette, Mapping):
-                        raise TypeError(
-                            "node_border_color_palette should be a mapping (i.e. a dict)"
-                        )
-
-                    variable["palette"] = list(node_border_color_palette.items())
-
-                elif node_border_color_gradient is not None:
-                    variable["type"] = "continuous"
-                    variable["range"] = node_border_color_gradient
-
-            elif raw_node_border_color is not None:
-                variable = {"type": "raw"}
-
-                variable["attribute"] = resolve_variable(
-                    "raw_node_border_color", nodes, raw_node_border_color
-                )
-
-                visual_variables["nodeBorderColor"] = variable
-
-            visual_variables["nodeBorderColor"]["default"] = default_node_border_color
-
-        if raw_node_size is not None:
-            variable = {"type": "raw"}
-
-            variable["attribute"] = resolve_variable(
-                "raw_node_size", nodes, raw_node_size
-            )
-
-            visual_variables["nodeSize"] = variable
-
-        elif node_size is not None:
-            variable = {"type": "continuous", "range": node_size_range}
-
-            variable["attribute"] = resolve_variable("node_size", nodes, node_size)
-
-            visual_variables["nodeSize"] = variable
-
-        visual_variables["nodeSize"]["default"] = default_node_size
-
-        raw_node_label = node_label or raw_node_label
-
-        if raw_node_label is not None:
-            variable = {"type": "raw"}
-
-            variable["attribute"] = resolve_variable(
-                "raw_node_label", nodes, raw_node_label
-            )
-
-            visual_variables["nodeLabel"] = variable
+        #     visual_variables["nodeBorderColor"]["default"] = default_node_border_color
 
         # Edges
-        if edge_color is not None:
-            variable = {"type": "category"}
-
-            variable["attribute"] = resolve_variable(
-                "edge_color",
-                edges,
-                edge_color,
-                item_type="edge",
-                is_directed=is_directed,
-            )
-
-            visual_variables["edgeColor"] = variable
-
-            # Palette?
-            if edge_color_palette is not None:
-                if not isinstance(edge_color_palette, Mapping):
-                    raise TypeError(
-                        "edge_color_palette should be a mapping (i.e. a dict)"
-                    )
-
-                variable["palette"] = list(edge_color_palette.items())
-
-            elif edge_color_gradient is not None:
-                variable["type"] = "continuous"
-                variable["range"] = edge_color_gradient
-
-        elif edge_color_from is not None:
+        if edge_color_from is not None:
             if not is_directed:
                 raise TypeError("edge_color_from only works with directed graphs")
 
             if edge_color_from not in ["source", "target"]:
                 raise TypeError('edge_color_from should be "source" or "target"')
 
-            visual_variables["edgeColor"] = {
-                "type": "dependent",
-                "value": edge_color_from,
-            }
+        visual_variables_builder.build_categorical_or_continuous(
+            "edgeColor",
+            edge_color,
+            raw_edge_color,
+            default=default_edge_color,
+            mapped_from=edge_color_from,
+            palette=edge_color_palette,
+            gradient=edge_color_gradient,
+        )
+        visual_variables_builder.build_continuous(
+            "edgeSize",
+            edge_size,
+            raw_edge_size,
+            default=default_edge_size,
+            range=edge_size_range,
+        )
+        visual_variables_builder.build_raw("edgeLabel", edge_label, raw_edge_label)
 
-        elif raw_edge_color is not None:
-            variable = {"type": "raw"}
+        self.visual_variables = visual_variables_builder.build()
 
-            variable["attribute"] = resolve_variable(
-                "raw_edge_color", nodes, raw_edge_color
-            )
-
-            visual_variables["edgeColor"] = variable
-
-        visual_variables["edgeColor"]["default"] = default_edge_color
-
-        if raw_edge_size is not None:
-            variable = {"type": "raw"}
-
-            variable["attribute"] = resolve_variable(
-                "raw_edge_size",
-                edges,
-                raw_edge_size,
-                item_type="edge",
-                is_directed=is_directed,
-            )
-
-            visual_variables["edgeSize"] = variable
-
-        elif edge_size is not None:
-            variable = {"type": "continuous", "range": edge_size_range}
-
-            variable["attribute"] = resolve_variable(
-                "edge_size",
-                edges,
-                edge_size,
-                item_type="edge",
-                is_directed=is_directed,
-            )
-
-            visual_variables["edgeSize"] = variable
-
-        visual_variables["edgeSize"]["default"] = default_edge_size
-
-        raw_edge_label = edge_label or raw_edge_label
-
-        if raw_edge_label is not None:
-            variable = {"type": "raw"}
-
-            variable["attribute"] = resolve_variable(
-                "raw_edge_label",
-                edges,
-                raw_edge_label,
-                item_type="edge",
-                is_directed=is_directed,
-            )
-
-            visual_variables["edgeLabel"] = variable
+        # Handling edge weight
+        self.edge_weight = None
 
         if edge_weight is not None:
-            variable = {"type": "raw"}
-
-            variable["attribute"] = resolve_variable(
+            self.edge_weight = resolve_variable(
                 "edge_weight",
                 edges,
                 edge_weight,
                 item_type="edge",
                 is_directed=is_directed,
             )
-
-            self.edge_weight = variable["attribute"]
-        else:
-            self.edge_weight = None
-
-        self.visual_variables = visual_variables
 
         # Handling z-index
         if node_zindex is not None:
