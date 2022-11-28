@@ -18,10 +18,11 @@ import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
 import { NodeProgramConstructor } from 'sigma/rendering/webgl/programs/common/node';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
+import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
-import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
+import EdgeCurveProgram from '@yomguithereal/sigma-experiments-renderers/edge/edge.curve';
 
 import EventEmitter from 'events';
 import seedrandom from 'seedrandom';
@@ -590,8 +591,9 @@ export class SigmaView extends DOMWidgetView {
 
       const edgeProgramClasses = {
         rectangle: EdgeRectangleProgram,
-        slim: EdgeLineProgram,
+        line: EdgeLineProgram,
         triangle: EdgeTriangleProgram,
+        curve: EdgeCurveProgram,
       };
 
       const nodeProgramClasses = {} as Record<string, NodeProgramConstructor>;

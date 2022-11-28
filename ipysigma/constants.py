@@ -8,5 +8,5 @@ DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
 SUPPORTED_NODE_TYPES = (int, str, float)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain"}
-SUPPORTED_UNDIRECTED_EDGE_TYPES = {"line", "slim"}
+SUPPORTED_UNDIRECTED_EDGE_TYPES = {"rectangle", "line", "curve"}
 SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
