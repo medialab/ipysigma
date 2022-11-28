@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from .sigma import Sigma
+from .grid import SigmaGrid
 from ._version import __version__, version_info
 
 

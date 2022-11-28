@@ -88,6 +88,11 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
 
 // type IPysigmaProgramSettings = {};
 
+type IPysigmaUISettings = {
+  hideInfoPanel: boolean;
+  hideSearch: boolean;
+};
+
 /**
  * Template.
  */
@@ -769,6 +774,8 @@ export class SigmaView extends DOMWidgetView {
 
       this.renderer = new Sigma(graph, this.container, rendererSettings);
 
+      const uiSettings = this.model.get('ui_settings') as IPysigmaUISettings;
+
       const initialCameraState = this.model.get('camera_state') as CameraState;
       this.renderer.getCamera().setState(initialCameraState);
 
@@ -786,6 +793,12 @@ export class SigmaView extends DOMWidgetView {
           graph.edge(selectedEdge[0], selectedEdge[1]) as string
         );
       else this.clearSelectedItem();
+
+      if (uiSettings.hideInfoPanel) this.toggleInformationDisplay();
+      if (uiSettings.hideSearch) {
+        this.choices.destroy();
+        hide(searchContainer);
+      }
 
       this.bindMessageHandlers();
       this.bindRendererHandlers();

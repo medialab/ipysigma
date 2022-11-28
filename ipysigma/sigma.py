@@ -120,6 +120,7 @@ class Sigma(DOMWidget):
     selected_node_category_values = List(allow_none=True).tag(sync=True)
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
     sync_key = Unicode(allow_none=True).tag(sync=True)
+    ui_settings = Dict({"hideInfoPanel": False, "hideSearch": False}).tag(sync=True)
     renderer_settings = Dict(
         {
             "labelGridCellSize": 250,
@@ -170,6 +171,8 @@ class Sigma(DOMWidget):
         clickable_edges=False,
         process_gexf_viz=True,
         max_category_colors=None,
+        hide_info_panel=False,
+        hide_search=False,
         sync_key=None,
         # Widget state
         camera_state=DEFAULT_CAMERA_STATE,
@@ -303,6 +306,7 @@ class Sigma(DOMWidget):
         self.snapshot = None
         self.layout = None
         self.layout_settings = layout_settings
+        self.ui_settings = {"hideInfoPanel": hide_info_panel, "hideSearch": hide_search}
         self.clickable_edges = clickable_edges
         self.camera_state = camera_state
         self.selected_node = str(selected_node) if selected_node is not None else None
