@@ -224,6 +224,7 @@ class VisualVariableBuilder(object):
             "nodeLabel": {"type": "raw", "attribute": "label"},
             "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
             "nodeBorderColor": {"type": "disabled"},
+            "nodeBorderRatio": {"type": "disabled"},
             "nodeSize": {
                 "type": "continuous",
                 "attribute": "size",
@@ -251,12 +252,14 @@ class VisualVariableBuilder(object):
         return "{}{}_{}{}{}".format(
             "raw_" if raw else "",
             item_type,
-            "_" + (prefix or ""),
+            (prefix + "_" if prefix else ""),
             name,
-            "_" + (suffix or ""),
+            ("_" + suffix if suffix else ""),
         )
 
-    def build_raw(self, name, mapped, raw, kind="label", variable_prefix=None):
+    def build_raw(
+        self, name, mapped, raw, default=None, kind="label", variable_prefix=None
+    ):
         raw = mapped or raw
         item_type = "node" if name.startswith("node") else "edge"
         items = self.nodes if item_type == "node" else self.edges
@@ -273,6 +276,11 @@ class VisualVariableBuilder(object):
             )
 
             self.variables[name] = variable
+
+        else:
+            self.variables[name] = {"type": "constant"}
+
+        self.variables[name]["default"] = default
 
     def build_continuous(
         self,
@@ -323,6 +331,9 @@ class VisualVariableBuilder(object):
             )
 
             self.variables[name] = variable
+
+        else:
+            self.variables[name] = {"type": "constant"}
 
         self.variables[name]["default"] = default
 
@@ -406,5 +417,8 @@ class VisualVariableBuilder(object):
             )
 
             self.variables[name] = variable
+
+        else:
+            self.variables[name] = {"type": "constant"}
 
         self.variables[name]["default"] = default

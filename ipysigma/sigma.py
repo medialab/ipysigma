@@ -26,6 +26,7 @@ from ipysigma.constants import (
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
     DEFAULT_NODE_SIZE_RANGE,
+    DEFAULT_NODE_BORDER_RATIO_RANGE,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
     SUPPORTED_NODE_TYPES,
@@ -191,11 +192,14 @@ class Sigma(DOMWidget):
         # Node borders
         node_borders=False,
         node_border_color=None,
-        raw_node_border_color="border_color",
+        raw_node_border_color=None,
         node_border_color_gradient=None,
         node_border_color_palette=None,
         default_node_border_color="#fff",
-        node_border_ratio=0.1,
+        node_border_ratio=None,
+        raw_node_border_ratio=None,
+        node_border_ratio_range=DEFAULT_NODE_BORDER_RATIO_RANGE,
+        default_node_border_ratio=0.1,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -396,38 +400,23 @@ class Sigma(DOMWidget):
         )
         visual_variables_builder.build_raw("nodeLabel", node_label, raw_node_label)
 
-        # if node_borders:
-        #     if node_border_color is not None:
-        #         variable = {"type": "category"}
-
-        #         variable["attribute"] = resolve_variable(
-        #             "node_border_color", nodes, node_border_color
-        #         )
-
-        #         visual_variables["nodeBorderColor"] = variable
-
-        #         if node_border_color_palette is not None:
-        #             if not isinstance(node_border_color_palette, Mapping):
-        #                 raise TypeError(
-        #                     "node_border_color_palette should be a mapping (i.e. a dict)"
-        #                 )
-
-        #             variable["palette"] = list(node_border_color_palette.items())
-
-        #         elif node_border_color_gradient is not None:
-        #             variable["type"] = "continuous"
-        #             variable["range"] = node_border_color_gradient
-
-        #     elif raw_node_border_color is not None:
-        #         variable = {"type": "raw"}
-
-        #         variable["attribute"] = resolve_variable(
-        #             "raw_node_border_color", nodes, raw_node_border_color
-        #         )
-
-        #         visual_variables["nodeBorderColor"] = variable
-
-        #     visual_variables["nodeBorderColor"]["default"] = default_node_border_color
+        if node_borders:
+            visual_variables_builder.build_categorical_or_continuous(
+                "nodeBorderColor",
+                node_border_color,
+                raw_node_border_color,
+                default=default_node_border_color,
+                palette=node_border_color_palette,
+                gradient=node_border_color_gradient,
+                variable_prefix="border",
+            )
+            visual_variables_builder.build_continuous(
+                "nodeBorderRatio",
+                node_border_ratio,
+                raw_node_border_ratio,
+                default=default_node_border_ratio,
+                range=node_border_ratio_range,
+            )
 
         # Edges
         if edge_color_from is not None:
@@ -522,7 +511,7 @@ class Sigma(DOMWidget):
         self.renderer_settings = renderer_settings
 
         # Building webgl program settings
-        self.program_settings = {"nodeBorderRatio": node_border_ratio}
+        self.program_settings = {}
 
         self.data = {
             "nodes": nodes,

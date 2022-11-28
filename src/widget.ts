@@ -85,9 +85,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   borderRatio?: number;
 }
 
-type IPysigmaProgramSettings = {
-  nodeBorderRatio: number;
-};
+// type IPysigmaProgramSettings = {};
 
 /**
  * Template.
@@ -579,9 +577,9 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
-      const programSettings = this.model.get(
-        'program_settings'
-      ) as IPysigmaProgramSettings;
+      // const programSettings = this.model.get(
+      //   'program_settings'
+      // ) as IPysigmaProgramSettings;
 
       const visualVariables = this.model.get(
         'visual_variables'
@@ -677,7 +675,7 @@ export class SigmaView extends DOMWidgetView {
         displayData.label = (scales.nodeLabel(data) || node) as string;
 
         if (nodeBordersEnabled) {
-          displayData.borderRatio = programSettings.nodeBorderRatio;
+          displayData.borderRatio = scales.nodeBorderRatio(data) as number;
           displayData.borderColor = scales.nodeBorderColor(data) as string;
         }
 
@@ -888,7 +886,8 @@ export class SigmaView extends DOMWidgetView {
       summary?: CategorySummary,
       defaultColor?: string
     ) {
-      if (variable.type === 'disabled') return null;
+      if (variable.type === 'disabled' || variable.type === 'constant')
+        return null;
 
       let html = `<b>${title}</b><br>`;
 

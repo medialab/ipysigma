@@ -24,6 +24,11 @@ export interface AttributeScale {
   summary?: CategorySummary;
 }
 
+export type ConstantVisualVariable = {
+  type: 'constant';
+  default: string;
+};
+
 export type RawVisualVariable = {
   type: 'raw';
   attribute: string;
@@ -54,6 +59,7 @@ export type DisabledVisualVariable = {
 };
 
 export type VisualVariable =
+  | ConstantVisualVariable
   | RawVisualVariable
   | CategoryVisualVariable
   | ContinuousVisualVariable
@@ -70,6 +76,7 @@ export type VisualVariables = {
     | ContinuousVisualVariable
     | CategoryVisualVariable
     | DisabledVisualVariable;
+  nodeBorderRatio: RawVisualVariable | ContinuousVisualVariable;
   nodeSize: RawVisualVariable | ContinuousVisualVariable;
   nodeLabel: RawVisualVariable;
   edgeColor:
@@ -259,6 +266,11 @@ export class VisualVariableScalesBuilder {
       // Raw variables
       if (variable.type === 'raw') {
         scale = (attr) => attr[variable.attribute] || variable.default;
+      }
+
+      // Constant variables
+      else if (variable.type === 'constant') {
+        scale = () => variable.default;
       }
 
       // Category variables
