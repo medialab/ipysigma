@@ -798,6 +798,7 @@ export class SigmaView extends DOMWidgetView {
       if (uiSettings.hideSearch) {
         this.choices.destroy();
         hide(searchContainer);
+        this.informationDisplayElement.classList.add('full');
       }
 
       this.bindMessageHandlers();
@@ -871,11 +872,15 @@ export class SigmaView extends DOMWidgetView {
       // Hiding
       hide(this.informationDisplayElement);
       show(this.informationShadowDisplayElement);
+      this.el.querySelector('.ipysigma-right-panel')?.classList.add('hidden');
       this.isInformationShown = false;
     } else {
       // Showing
       show(this.informationDisplayElement);
       hide(this.informationShadowDisplayElement);
+      this.el
+        .querySelector('.ipysigma-right-panel')
+        ?.classList.remove('hidden');
       this.isInformationShown = true;
     }
   }
