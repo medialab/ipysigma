@@ -483,6 +483,7 @@ class Sigma(DOMWidget):
             "labelDensity": label_density,
             "labelGridCellSize": label_grid_cell_size,
             "renderEdgeLabels": True,
+            "defaultNodeType": "border" if node_borders else  'point'
         }
 
         if label_rendered_size_threshold is not None:

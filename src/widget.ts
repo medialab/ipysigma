@@ -16,8 +16,8 @@ import { collectLayout, assignLayout } from 'graphology-layout/utils';
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
-import { NodeProgramConstructor } from 'sigma/rendering/webgl/programs/common/node';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
+import NodePointProgram from 'sigma/rendering/webgl/programs/node.point';
 import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
@@ -601,11 +601,10 @@ export class SigmaView extends DOMWidgetView {
         curve: EdgeCurveProgram,
       };
 
-      const nodeProgramClasses = {} as Record<string, NodeProgramConstructor>;
-
-      if (nodeBordersEnabled) {
-        nodeProgramClasses.circle = NodePointWithBorderProgram;
-      }
+      const nodeProgramClasses = {
+        point: NodePointProgram,
+        border: NodePointWithBorderProgram,
+      };
 
       let rendererSettings = this.model.get(
         'renderer_settings'
@@ -615,6 +614,7 @@ export class SigmaView extends DOMWidgetView {
         hoverRenderer: drawHover,
         edgeProgramClasses,
         nodeProgramClasses,
+        defaultNodeType: 'point',
         defaultEdgeType: 'rectangle',
         ...rendererSettings,
       };
