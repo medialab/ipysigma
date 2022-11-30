@@ -12,7 +12,7 @@ from traitlets import Unicode, Dict, Int, Bool, Tuple, List
 from collections.abc import Iterable
 from ._frontend import module_name, module_version
 
-from ipysigma.interfaces import get_graph_interface
+from ipysigma.interfaces import get_graph_interface, check_graph_is_valid
 from ipysigma.utils import (
     pretty_print_int,
     resolve_metrics,
@@ -254,6 +254,8 @@ class Sigma(DOMWidget):
         edge_zindex=None,
     ):
         super(Sigma, self).__init__()
+
+        check_graph_is_valid(graph)
 
         # Resolving overridable defaults
         if height is None:

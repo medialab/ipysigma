@@ -1,14 +1,21 @@
 from itertools import count
 from ipywidgets import VBox, HBox
 from IPython.display import display
+from collections.abc import Iterable
 
 from ipysigma.sigma import Sigma
+from ipysigma.interfaces import check_graph_is_valid
 
 GRID_COUNTER = count(1)
 
 
 class SigmaGrid(object):
-    def __init__(self, graph, columns=2, sync_key=None, **kwargs):
+    def __init__(self, graph, columns=2, sync_key=None, views=None, **kwargs):
+        check_graph_is_valid(graph)
+
+        if not isinstance(columns, int) or columns < 1:
+            raise TypeError("columns should be an int >= 1")
+
         self.__graph = graph
         self.__views = []
         self.__columns = columns
@@ -23,6 +30,18 @@ class SigmaGrid(object):
 
         self.__default_kwargs = default_kwargs
 
+        if views is not None:
+            if not isinstance(views, Iterable):
+                raise TypeError("views should be iterable")
+
+            for view in views:
+                if not isinstance(view, dict):
+                    raise TypeError(
+                        "a view should be a dict of kwargs to pass to a Sigma view"
+                    )
+
+                self.add(**view)
+
     def add(self, **kwargs):
         self.__views.append(Sigma(self.__graph, **self.__default_kwargs, **kwargs))
         return self
@@ -30,7 +49,7 @@ class SigmaGrid(object):
     def _ipython_display_(self) -> None:
         if not self.__views:
             raise TypeError(
-                "SigmaGrid: there are no views to display. You should use #.add at least once."
+                "SigmaGrid: there are no views to display. You should use #.add at least once or instanciate SigmaGrid with a non-empty views kwarg."
             )
 
         hboxes = []

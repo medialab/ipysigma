@@ -32,6 +32,15 @@ def is_igraph_graph(v):
     return IGRAPH_INSTALLED and isinstance(v, ig.GraphBase)
 
 
+def is_valid_graph(v):
+    return is_networkx_graph(v) or is_igraph_graph(v)
+
+
+def check_graph_is_valid(v):
+    if not is_valid_graph(v):
+        raise TypeError("graph should be a networkx or igraph instance")
+
+
 class IPySigmaGraphInterface(object):
     def __init__(self, graph):
         self.graph = graph
