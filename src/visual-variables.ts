@@ -333,9 +333,9 @@ export class VisualVariableScalesBuilder {
     const variable = this.variables.nodeSize;
 
     if (variable.type === 'continuous') {
-      const extent = this.nodeExtents.attributes[variable.attribute];
+      const range = variable.range;
 
-      return Math.min(6, extent.max);
+      return Math.min(6, range[0] as number);
     }
 
     return 6;

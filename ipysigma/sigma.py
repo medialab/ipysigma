@@ -200,6 +200,7 @@ class Sigma(DOMWidget):
         label_density=1,
         label_grid_cell_size=250,
         label_rendered_size_threshold=None,
+        show_all_labels=False,
         # Node layout
         layout=None,
         # Node color
@@ -617,6 +618,10 @@ class Sigma(DOMWidget):
                 item_type="edge",
                 is_directed=is_directed,
             )
+
+        if show_all_labels:
+            label_rendered_size_threshold = 0
+            label_density = 10_000
 
         # Building renderer settings
         renderer_settings = {
