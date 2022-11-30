@@ -135,7 +135,7 @@ const TEMPLATE = `
     <option value="">Search a node...</option>
   </select>
   <div class="ipysigma-information-shadow-display" style="display: none;">
-    <span class="ipysigma-information-show-button">show legend</span>
+    <span class="ipysigma-information-show-button">show info</span>
   </div>
   <div class="ipysigma-information-display">
     <div class="ipysigma-information-display-tabs">

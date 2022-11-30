@@ -21,9 +21,9 @@ export default function drawHover(
   data: PartialButFor<NodeDisplayData, 'x' | 'y' | 'size' | 'label' | 'color'>,
   settings: Settings
 ): void {
-  const size = data.labelSize || settings.labelSize,
-    font = settings.labelFont,
-    weight = settings.labelWeight;
+  const size = data.labelSize || settings.labelSize;
+  const font = settings.labelFont;
+  const weight = settings.labelWeight;
 
   data = { ...data, label: data.label || data.hoverLabel };
 
@@ -39,10 +39,10 @@ export default function drawHover(
   const PADDING = 2;
 
   if (typeof data.label === 'string') {
-    const textWidth = context.measureText(data.label).width,
-      boxWidth = Math.round(textWidth + 5),
-      boxHeight = Math.round(size + 2 * PADDING),
-      radius = Math.max(data.size, size / 2) + PADDING;
+    const textWidth = context.measureText(data.label).width;
+    const boxWidth = Math.round(textWidth + 5);
+    const boxHeight = Math.round(size + 2 * PADDING);
+    const radius = Math.max(data.size, size / 2) + PADDING;
 
     const angleRadian = Math.asin(boxHeight / 2 / radius);
     const xDeltaCoord = Math.sqrt(

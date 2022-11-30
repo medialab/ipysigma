@@ -26,10 +26,13 @@ from ipysigma.constants import (
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
     DEFAULT_LABEL_FONT,
-    DEFAULT_LABEL_SIZE,
-    DEFAULT_LABEL_SIZE_RANGE,
+    DEFAULT_NODE_COLOR,
+    DEFAULT_NODE_BORDER_COLOR,
+    DEFAULT_NODE_LABEL_SIZE,
+    DEFAULT_NODE_LABEL_SIZE_RANGE,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_NODE_BORDER_RATIO_RANGE,
+    DEFAULT_EDGE_COLOR,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
     SUPPORTED_NODE_TYPES,
@@ -195,14 +198,14 @@ class Sigma(DOMWidget):
         raw_node_color="color",
         node_color_gradient=None,
         node_color_palette=None,
-        default_node_color="#999",
+        default_node_color=DEFAULT_NODE_COLOR,
         # Node borders
         node_borders=False,
         node_border_color=None,
         raw_node_border_color=None,
         node_border_color_gradient=None,
         node_border_color_palette=None,
-        default_node_border_color="#fff",
+        default_node_border_color=DEFAULT_NODE_BORDER_COLOR,
         node_border_ratio=None,
         raw_node_border_ratio=None,
         node_border_ratio_range=DEFAULT_NODE_BORDER_RATIO_RANGE,
@@ -218,8 +221,8 @@ class Sigma(DOMWidget):
         # Node label size
         node_label_size=None,
         raw_node_label_size=None,
-        node_label_size_range=DEFAULT_LABEL_SIZE_RANGE,
-        default_node_label_size=DEFAULT_LABEL_SIZE,
+        node_label_size_range=DEFAULT_NODE_LABEL_SIZE_RANGE,
+        default_node_label_size=DEFAULT_NODE_LABEL_SIZE,
         # Node z index
         node_zindex=None,
         # Edge color
@@ -228,7 +231,7 @@ class Sigma(DOMWidget):
         edge_color_palette=None,
         edge_color_gradient=None,
         edge_color_from=None,
-        default_edge_color="#ccc",
+        default_edge_color=DEFAULT_EDGE_COLOR,
         # Edge type
         default_edge_type=None,
         # Edge size
