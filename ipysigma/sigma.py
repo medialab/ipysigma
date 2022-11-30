@@ -252,6 +252,7 @@ class Sigma(DOMWidget):
         # Node label
         raw_node_label="label",
         node_label=None,
+        default_node_label=None,
         # Node label size
         node_label_size=None,
         raw_node_label_size=None,
@@ -281,6 +282,7 @@ class Sigma(DOMWidget):
         # Edge label
         raw_edge_label="label",
         edge_label=None,
+        default_edge_label=None,
         # Edge weight
         edge_weight="weight",
         # Edge z index
@@ -455,7 +457,9 @@ class Sigma(DOMWidget):
             default=default_node_size,
             range=node_size_range,
         )
-        visual_variables_builder.build_raw("nodeLabel", node_label, raw_node_label)
+        visual_variables_builder.build_raw(
+            "nodeLabel", node_label, raw_node_label, default=default_node_label
+        )
         visual_variables_builder.build_continuous(
             "nodeLabelSize",
             node_label_size,
@@ -572,7 +576,9 @@ class Sigma(DOMWidget):
             default=default_edge_size,
             range=edge_size_range,
         )
-        visual_variables_builder.build_raw("edgeLabel", edge_label, raw_edge_label)
+        visual_variables_builder.build_raw(
+            "edgeLabel", edge_label, raw_edge_label, default=default_edge_label
+        )
 
         self.visual_variables = visual_variables_builder.build()
 
