@@ -235,6 +235,7 @@ class VisualVariableBuilder(object):
                 "attribute": "size",
                 "range": DEFAULT_NODE_SIZE_RANGE,
             },
+            "nodePictogram": {"type": "disabled"},
             "edgeLabel": {"type": "disabled"},
             "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},
             "edgeSize": {
@@ -282,8 +283,11 @@ class VisualVariableBuilder(object):
 
             self.variables[name] = variable
 
-        else:
+        elif default is not None:
             self.variables[name] = {"type": "constant"}
+
+        else:
+            self.variables[name] = {"type": "disabled"}
 
         self.variables[name]["default"] = default
 
@@ -337,8 +341,11 @@ class VisualVariableBuilder(object):
 
             self.variables[name] = variable
 
-        else:
+        elif default is not None:
             self.variables[name] = {"type": "constant"}
+
+        else:
+            self.variables[name] = {"type": "disabled"}
 
         self.variables[name]["default"] = default
 
@@ -423,7 +430,10 @@ class VisualVariableBuilder(object):
 
             self.variables[name] = variable
 
-        else:
+        elif default is not None:
             self.variables[name] = {"type": "constant"}
+
+        else:
+            self.variables[name] = {"type": "disabled"}
 
         self.variables[name]["default"] = default

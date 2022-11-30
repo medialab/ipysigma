@@ -218,6 +218,9 @@ class Sigma(DOMWidget):
         raw_node_border_size=None,
         node_border_size_range=DEFAULT_NODE_BORDER_SIZE_RANGE,
         default_node_border_size=DEFAULT_NODE_BORDER_SIZE,
+        # Node pictograms
+        raw_node_pictogram=None,
+        default_node_pictogram=None,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -481,6 +484,14 @@ class Sigma(DOMWidget):
                     'node_borders should be True (same as passing "size"), "size" or "ratio"'
                 )
 
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodePictogram",
+            None,
+            raw_node_pictogram,
+            default=default_node_pictogram,
+            kind="pictogram",
+        )
+
         # Edges
         if edge_color_from is not None:
             if not is_directed:
@@ -542,7 +553,6 @@ class Sigma(DOMWidget):
             "labelDensity": label_density,
             "labelGridCellSize": label_grid_cell_size,
             "renderEdgeLabels": True,
-            "defaultNodeType": "border" if node_borders else "point",
             "labelFont": label_font,
         }
 
@@ -550,6 +560,23 @@ class Sigma(DOMWidget):
             renderer_settings[
                 "labelRenderedSizeThreshold"
             ] = label_rendered_size_threshold
+
+        need_to_render_pictograms = (
+            self.visual_variables["nodePictogram"]["type"] != "disabled"
+        )
+
+        default_node_type = "point"
+
+        if node_borders:
+            default_node_type = "border"
+
+            if need_to_render_pictograms:
+                default_node_type = "border+picto"
+
+        elif need_to_render_pictograms:
+            default_node_type = "picto"
+
+        renderer_settings["defaultNodeType"] = default_node_type
 
         if default_edge_type is not None:
             if is_directed and default_edge_type not in SUPPORTED_DIRECTED_EDGE_TYPES:

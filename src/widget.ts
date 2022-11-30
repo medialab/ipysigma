@@ -17,8 +17,10 @@ import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
 import { Settings as SigmaSettings } from 'sigma/settings';
 import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
+import { createNodeCompoundProgram } from 'sigma/rendering/webgl/programs/common/node';
 import NodePointProgram from 'sigma/rendering/webgl/programs/node.point';
 import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
+import createNodePictogramProgram from '@yomguithereal/sigma-experiments-renderers/node/node.pictogram';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
@@ -47,6 +49,7 @@ import {
   saveAsGEXF,
   saveAsJSON,
   saveAsSVG,
+  pictogramToUrl,
 } from './utils';
 import {
   zoomIcon,
@@ -88,6 +91,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   borderSize?: number;
   labelSize?: number;
   labelColor?: string;
+  pictogram?: string;
 }
 
 // type IPysigmaProgramSettings = {};
@@ -597,6 +601,8 @@ export class SigmaView extends DOMWidgetView {
 
       const nodeBordersEnabled =
         visualVariables.nodeBorderColor.type !== 'disabled';
+      const nodePictogramsEnabled =
+        visualVariables.nodePictogram.type !== 'disabled';
 
       const edgeProgramClasses = {
         rectangle: EdgeRectangleProgram,
@@ -605,9 +611,23 @@ export class SigmaView extends DOMWidgetView {
         curve: EdgeCurveProgram,
       };
 
+      const NodePictogramProgram = createNodePictogramProgram({
+        correctCentering: true,
+        forcedSvgSize: 384,
+        keepWithinCircle: true,
+      });
+
       const nodeProgramClasses = {
         point: NodePointProgram,
         border: NodePointWithBorderProgram,
+        picto: createNodeCompoundProgram([
+          NodePointProgram,
+          NodePictogramProgram,
+        ]),
+        'border+picto': createNodeCompoundProgram([
+          NodePointWithBorderProgram,
+          NodePictogramProgram,
+        ]),
       };
 
       let rendererSettings = this.model.get(
@@ -691,9 +711,18 @@ export class SigmaView extends DOMWidgetView {
         if (nodeBordersEnabled) {
           if (visualVariables.nodeBorderRatio.type !== 'disabled')
             displayData.borderRatio = scales.nodeBorderRatio(data) as number;
-          else displayData.borderSize = scales.nodeBorderSize(data) as number;
+          else {
+            displayData.borderSize = scales.nodeBorderSize(data) as number;
+            displayData.size += displayData.borderSize;
+          }
 
           displayData.borderColor = scales.nodeBorderColor(data) as string;
+        }
+
+        if (nodePictogramsEnabled) {
+          displayData.pictogram = pictogramToUrl(
+            scales.nodePictogram(data) as string
+          );
         }
 
         // Transient state
@@ -706,15 +735,12 @@ export class SigmaView extends DOMWidgetView {
           (this.selectedNodeCategoryValues &&
             !this.selectedNodeCategoryValues.has(categoryValue))
         ) {
+          displayData.type = 'point';
           displayData.color = MUTED_NODE_COLOR;
           displayData.zIndex = 0;
           displayData.size = displayData.size ? displayData.size / 2 : 1;
           displayData.hoverLabel = displayData.label;
           displayData.label = '';
-
-          if (nodeBordersEnabled) {
-            displayData.borderColor = MUTED_NODE_COLOR;
-          }
         } else {
           displayData.zIndex = 1;
         }

@@ -131,3 +131,9 @@ export function saveAsSVG(renderer: Sigma): void {
   const data = renderAsSVG(renderer.getGraph(), settings);
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
 }
+
+export function pictogramToUrl(picto: string): string {
+  if (picto.startsWith('http')) return picto;
+
+  return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/default/48px.svg`;
+}
