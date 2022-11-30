@@ -28,6 +28,7 @@ from ipysigma.constants import (
     DEFAULT_LABEL_FONT,
     DEFAULT_NODE_COLOR,
     DEFAULT_NODE_BORDER_COLOR,
+    DEFAULT_NODE_LABEL_COLOR,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_SIZE_RANGE,
     DEFAULT_NODE_SIZE_RANGE,
@@ -223,6 +224,11 @@ class Sigma(DOMWidget):
         raw_node_label_size=None,
         node_label_size_range=DEFAULT_NODE_LABEL_SIZE_RANGE,
         default_node_label_size=DEFAULT_NODE_LABEL_SIZE,
+        # Node label color
+        node_label_color=None,
+        raw_node_label_color=None,
+        node_label_color_palette=None,
+        default_node_label_color=DEFAULT_NODE_LABEL_COLOR,
         # Node z index
         node_zindex=None,
         # Edge color
@@ -421,6 +427,15 @@ class Sigma(DOMWidget):
             raw_node_label_size,
             default=default_node_label_size,
             range=node_label_size_range,
+            variable_prefix="label",
+        )
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodeLabelColor",
+            node_label_color,
+            raw_node_label_color,
+            default=default_node_label_color,
+            palette=node_label_color_palette,
+            variable_prefix="label",
         )
 
         if node_borders:
