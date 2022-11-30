@@ -92,6 +92,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   labelSize?: number;
   labelColor?: string;
   pictogram?: string;
+  pictogramColor?: string;
 }
 
 // type IPysigmaProgramSettings = {};
@@ -723,6 +724,10 @@ export class SigmaView extends DOMWidgetView {
           displayData.pictogram = pictogramToUrl(
             scales.nodePictogram(data) as string
           );
+
+          displayData.pictogramColor = scales.nodePictogramColor(
+            data
+          ) as string;
         }
 
         // Transient state

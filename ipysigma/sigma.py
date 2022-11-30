@@ -36,6 +36,7 @@ from ipysigma.constants import (
     DEFAULT_NODE_BORDER_RATIO_RANGE,
     DEFAULT_NODE_BORDER_SIZE,
     DEFAULT_NODE_BORDER_SIZE_RANGE,
+    DEFAULT_NODE_PICTOGRAM_COLOR,
     DEFAULT_EDGE_COLOR,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
@@ -203,7 +204,7 @@ class Sigma(DOMWidget):
         node_color_gradient=None,
         node_color_palette=None,
         default_node_color=DEFAULT_NODE_COLOR,
-        # Node borders
+        # Node border
         node_borders=False,
         node_border_color=None,
         raw_node_border_color=None,
@@ -218,9 +219,14 @@ class Sigma(DOMWidget):
         raw_node_border_size=None,
         node_border_size_range=DEFAULT_NODE_BORDER_SIZE_RANGE,
         default_node_border_size=DEFAULT_NODE_BORDER_SIZE,
-        # Node pictograms
+        # Node pictogram
         raw_node_pictogram=None,
         default_node_pictogram=None,
+        # Node pictogram color
+        node_pictogram_color=None,
+        raw_node_pictogram_color=None,
+        node_pictogram_color_palette=None,
+        default_node_pictogram_color=DEFAULT_NODE_PICTOGRAM_COLOR,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -490,6 +496,15 @@ class Sigma(DOMWidget):
             raw_node_pictogram,
             default=default_node_pictogram,
             kind="pictogram",
+        )
+
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodePictogramColor",
+            node_pictogram_color,
+            raw_node_pictogram_color,
+            default=default_node_pictogram_color,
+            variable_prefix="pictogram",
+            kind="color",
         )
 
         # Edges
