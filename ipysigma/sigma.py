@@ -187,6 +187,7 @@ class Sigma(DOMWidget):
         max_category_colors=None,
         hide_info_panel=False,
         hide_search=False,
+        hide_edges_on_move=False,
         sync_key=None,
         # Widget state
         camera_state=DEFAULT_CAMERA_STATE,
@@ -626,6 +627,7 @@ class Sigma(DOMWidget):
             "labelGridCellSize": label_grid_cell_size,
             "renderEdgeLabels": True,
             "labelFont": label_font,
+            "hideEdgesOnMove": hide_edges_on_move,
         }
 
         if label_rendered_size_threshold is not None:
