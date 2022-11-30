@@ -67,25 +67,15 @@ export type VisualVariable =
   | DisabledVisualVariable;
 
 export type VisualVariables = {
-  nodeColor:
-    | RawVisualVariable
-    | ContinuousVisualVariable
-    | CategoryVisualVariable;
-  nodeBorderColor:
-    | RawVisualVariable
-    | ContinuousVisualVariable
-    | CategoryVisualVariable
-    | DisabledVisualVariable;
-  nodeBorderRatio: RawVisualVariable | ContinuousVisualVariable;
-  nodeSize: RawVisualVariable | ContinuousVisualVariable;
-  nodeLabel: RawVisualVariable;
-  edgeColor:
-    | RawVisualVariable
-    | ContinuousVisualVariable
-    | CategoryVisualVariable
-    | DependentVisualVariable;
-  edgeSize: ContinuousVisualVariable;
-  edgeLabel: RawVisualVariable | DisabledVisualVariable;
+  nodeColor: VisualVariable;
+  nodeBorderColor: VisualVariable;
+  nodeBorderRatio: VisualVariable;
+  nodeSize: VisualVariable;
+  nodeLabel: VisualVariable;
+  nodeLabelSize: VisualVariable;
+  edgeColor: VisualVariable;
+  edgeSize: VisualVariable;
+  edgeLabel: VisualVariable;
   [name: string]: VisualVariable;
 };
 
@@ -333,9 +323,14 @@ export class VisualVariableScalesBuilder {
   }
 
   inferLabelRenderedSizeThreshold(): number {
-    const attribute = this.variables.nodeSize.attribute;
-    const extent = this.nodeExtents.attributes[attribute];
+    const variable = this.variables.nodeSize;
 
-    return Math.min(6, extent.max);
+    if (variable.type === 'continuous') {
+      const extent = this.nodeExtents.attributes[variable.attribute];
+
+      return Math.min(6, extent.max);
+    }
+
+    return 6;
   }
 }

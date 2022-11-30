@@ -8,7 +8,7 @@
  */
 import { Settings } from 'sigma/settings';
 import { NodeDisplayData, PartialButFor } from 'sigma/types';
-import drawLabel from 'sigma/rendering/canvas/label';
+import drawLabel from './custom-label';
 
 /**
  * Draw an hovered node.
@@ -21,7 +21,7 @@ export default function drawHover(
   data: PartialButFor<NodeDisplayData, 'x' | 'y' | 'size' | 'label' | 'color'>,
   settings: Settings
 ): void {
-  const size = settings.labelSize,
+  const size = data.labelSize || settings.labelSize,
     font = settings.labelFont,
     weight = settings.labelWeight;
 

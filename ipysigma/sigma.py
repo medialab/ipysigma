@@ -25,6 +25,9 @@ from ipysigma.constants import (
     DEFAULT_MAX_CATEGORY_COLORS,
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
+    DEFAULT_LABEL_FONT,
+    DEFAULT_LABEL_SIZE,
+    DEFAULT_LABEL_SIZE_RANGE,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_NODE_BORDER_RATIO_RANGE,
     DEFAULT_EDGE_SIZE_RANGE,
@@ -181,6 +184,7 @@ class Sigma(DOMWidget):
         selected_node_category_values=None,
         selected_edge_category_values=None,
         # Label display options
+        label_font=DEFAULT_LABEL_FONT,
         label_density=1,
         label_grid_cell_size=250,
         label_rendered_size_threshold=None,
@@ -211,6 +215,11 @@ class Sigma(DOMWidget):
         # Node label
         raw_node_label="label",
         node_label=None,
+        # Node label size
+        node_label_size=None,
+        raw_node_label_size=None,
+        node_label_size_range=DEFAULT_LABEL_SIZE_RANGE,
+        default_node_label_size=DEFAULT_LABEL_SIZE,
         # Node z index
         node_zindex=None,
         # Edge color
@@ -403,6 +412,13 @@ class Sigma(DOMWidget):
             range=node_size_range,
         )
         visual_variables_builder.build_raw("nodeLabel", node_label, raw_node_label)
+        visual_variables_builder.build_continuous(
+            "nodeLabelSize",
+            node_label_size,
+            raw_node_label_size,
+            default=default_node_label_size,
+            range=node_label_size_range,
+        )
 
         if node_borders:
             visual_variables_builder.build_categorical_or_continuous(
@@ -483,7 +499,8 @@ class Sigma(DOMWidget):
             "labelDensity": label_density,
             "labelGridCellSize": label_grid_cell_size,
             "renderEdgeLabels": True,
-            "defaultNodeType": "border" if node_borders else  'point'
+            "defaultNodeType": "border" if node_borders else "point",
+            "labelFont": label_font,
         }
 
         if label_rendered_size_threshold is not None:

@@ -34,6 +34,7 @@ import debounce from 'debounce';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import drawHover from './custom-hover';
+import drawLabel from './custom-label';
 import {
   CategorySummary,
   VisualVariableScalesBuilder,
@@ -84,6 +85,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   categoryValue?: string;
   borderColor?: string;
   borderRatio?: number;
+  labelSize?: number;
 }
 
 // type IPysigmaProgramSettings = {};
@@ -612,6 +614,7 @@ export class SigmaView extends DOMWidgetView {
 
       rendererSettings = {
         hoverRenderer: drawHover,
+        labelRenderer: drawLabel,
         edgeProgramClasses,
         nodeProgramClasses,
         defaultNodeType: 'point',
@@ -680,6 +683,7 @@ export class SigmaView extends DOMWidgetView {
         displayData.color = scales.nodeColor(data) as string;
         displayData.size = scales.nodeSize(data) as number;
         displayData.label = (scales.nodeLabel(data) || node) as string;
+        displayData.labelSize = scales.nodeLabelSize(data) as number;
 
         if (nodeBordersEnabled) {
           displayData.borderRatio = scales.nodeBorderRatio(data) as number;

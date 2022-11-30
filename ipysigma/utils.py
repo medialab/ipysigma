@@ -6,6 +6,7 @@ from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_EDGE_SIZE_RANGE,
+    DEFAULT_LABEL_SIZE
 )
 
 
@@ -222,6 +223,7 @@ class VisualVariableBuilder(object):
     def get_default():
         return {
             "nodeLabel": {"type": "raw", "attribute": "label"},
+            "nodeLabelSize": {"type": "constant", "default": DEFAULT_LABEL_SIZE},
             "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
             "nodeBorderColor": {"type": "disabled"},
             "nodeBorderRatio": {"type": "disabled"},
