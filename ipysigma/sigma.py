@@ -37,6 +37,9 @@ from ipysigma.constants import (
     DEFAULT_NODE_BORDER_SIZE,
     DEFAULT_NODE_BORDER_SIZE_RANGE,
     DEFAULT_NODE_PICTOGRAM_COLOR,
+    DEFAULT_NODE_HALO_SIZE,
+    DEFAULT_NODE_HALO_SIZE_RANGE,
+    DEFAULT_NODE_HALO_COLOR,
     DEFAULT_EDGE_COLOR,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
@@ -230,6 +233,17 @@ class Sigma(DOMWidget):
         # Node shape
         raw_node_shape=None,
         default_node_shape=None,
+        # Node halo
+        node_halos=False,
+        node_halo_size=None,
+        raw_node_halo_size=None,
+        node_halo_size_range=DEFAULT_NODE_HALO_SIZE_RANGE,
+        default_node_halo_size=DEFAULT_NODE_HALO_SIZE,
+        node_halo_color=None,
+        raw_node_halo_color=None,
+        node_halo_color_gradient=None,
+        node_halo_color_palette=None,
+        default_node_halo_color=DEFAULT_NODE_HALO_COLOR,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -493,6 +507,25 @@ class Sigma(DOMWidget):
                     'node_borders should be True (same as passing "size"), "size" or "ratio"'
                 )
 
+        if node_halos:
+            visual_variables_builder.build_categorical_or_continuous(
+                "nodeHaloColor",
+                node_halo_color,
+                raw_node_halo_color,
+                default=default_node_halo_color,
+                palette=node_halo_color_palette,
+                gradient=node_halo_color_gradient,
+                variable_prefix="halo",
+            )
+            visual_variables_builder.build_continuous(
+                "nodeHaloSize",
+                node_halo_size,
+                raw_node_halo_size,
+                default=default_node_halo_size,
+                range=node_halo_size_range,
+                variable_prefix="halo",
+            )
+
         visual_variables_builder.build_categorical_or_continuous(
             "nodePictogram",
             None,
@@ -545,10 +578,13 @@ class Sigma(DOMWidget):
 
         if self.visual_variables["nodeShape"]["type"] != "disabled":
             if node_borders:
-                raise TypeError("cannot use node borders with node shapes")
+                raise TypeError("cannot use node borders with node shapes together")
+
+            if node_halos:
+                raise TypeError("cannot use node halos and node shapes together")
 
             if self.visual_variables["nodePictogram"]["type"] != "disabled":
-                raise TypeError("cannot use both node pictograms and node shapes")
+                raise TypeError("cannot use node pictograms and node shapes together")
 
         # Handling edge weight
         self.edge_weight = None
@@ -605,11 +641,23 @@ class Sigma(DOMWidget):
             if need_to_render_pictograms:
                 default_node_type = "border+picto"
 
+                if node_halos:
+                    default_node_type = "border+halo+picto"
+
+            elif node_halos:
+                default_node_type = "border+halo"
+
         elif need_to_render_pictograms:
             default_node_type = "picto"
 
+            if node_halos:
+                default_node_type = "halo+picto"
+
         elif need_to_render_shapes:
             default_node_type = "shape"
+
+        elif node_halos:
+            default_node_type = "halo"
 
         renderer_settings["defaultNodeType"] = default_node_type
 

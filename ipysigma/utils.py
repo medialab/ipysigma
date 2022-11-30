@@ -241,6 +241,8 @@ class VisualVariableBuilder(object):
                 "type": "constant",
                 "default": DEFAULT_NODE_PICTOGRAM_COLOR,
             },
+            "nodeHaloSize": {"type": "disabled"},
+            "nodeHaloColor": {"type": "disabled"},
             "nodeShape": {"type": "disabled"},
             "edgeLabel": {"type": "disabled"},
             "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},

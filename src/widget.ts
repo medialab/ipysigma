@@ -20,6 +20,7 @@ import { CameraState, NodeDisplayData, EdgeDisplayData } from 'sigma/types';
 import { createNodeCompoundProgram } from 'sigma/rendering/webgl/programs/common/node';
 import NodePointProgram from 'sigma/rendering/webgl/programs/node.point';
 import NodePointWithBorderProgram from '@yomguithereal/sigma-experiments-renderers/node/node.point.border';
+import NodeHaloProgram from '@yomguithereal/sigma-experiments-renderers/node/node.halo';
 import createNodePictogramProgram from '@yomguithereal/sigma-experiments-renderers/node/node.pictogram';
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
@@ -95,6 +96,8 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   labelColor?: string;
   pictogram?: string;
   pictogramColor?: string;
+  haloSize?: number;
+  haloColor?: string;
 }
 
 // type IPysigmaProgramSettings = {};
@@ -607,6 +610,7 @@ export class SigmaView extends DOMWidgetView {
       const nodePictogramsEnabled =
         visualVariables.nodePictogram.type !== 'disabled';
       const nodeShapeEnabled = visualVariables.nodeShape.type !== 'disabled';
+      const nodeHaloEnabled = visualVariables.nodeHaloSize.type !== 'disabled';
 
       const edgeProgramClasses = {
         rectangle: EdgeRectangleProgram,
@@ -629,6 +633,7 @@ export class SigmaView extends DOMWidgetView {
 
       const nodeProgramClasses = {
         point: NodePointProgram,
+        halo: createNodeCompoundProgram([NodeHaloProgram, NodePointProgram]),
         border: NodePointWithBorderProgram,
         picto: createNodeCompoundProgram([
           NodePointProgram,
@@ -637,6 +642,33 @@ export class SigmaView extends DOMWidgetView {
         shape: NodeShapeProgram,
         'border+picto': createNodeCompoundProgram([
           NodePointWithBorderProgram,
+          NodePictogramProgram,
+        ]),
+        'border+halo': createNodeCompoundProgram([
+          NodeHaloProgram,
+          NodePointWithBorderProgram,
+        ]),
+        'border+halo+picto': createNodeCompoundProgram([
+          NodeHaloProgram,
+          NodePointWithBorderProgram,
+          NodePictogramProgram,
+        ]),
+        'halo+picto': createNodeCompoundProgram([
+          NodeHaloProgram,
+          NodePointProgram,
+          NodePictogramProgram,
+        ]),
+      };
+
+      const nodeHoverProgramClasses = {
+        halo: NodePointProgram,
+        'border+halo': NodePointWithBorderProgram,
+        'border+halo+picto': createNodeCompoundProgram([
+          NodePointWithBorderProgram,
+          NodePictogramProgram,
+        ]),
+        'halo+picto': createNodeCompoundProgram([
+          NodePointProgram,
           NodePictogramProgram,
         ]),
       };
@@ -650,6 +682,7 @@ export class SigmaView extends DOMWidgetView {
         labelRenderer: drawLabel,
         edgeProgramClasses,
         nodeProgramClasses,
+        nodeHoverProgramClasses,
         defaultNodeType: 'point',
         defaultEdgeType: 'rectangle',
         ...rendererSettings,
@@ -745,6 +778,18 @@ export class SigmaView extends DOMWidgetView {
             shapeToPicto(scales.nodeShape(data) as string) || 'circle'
           );
           displayData.pictogramColor = displayData.color;
+        }
+
+        if (nodeHaloEnabled) {
+          const haloSize = scales.nodeHaloSize(data) as number;
+
+          if (haloSize !== 0) {
+            displayData.haloSize = displayData.size + haloSize;
+          } else {
+            displayData.haloSize = 0;
+          }
+
+          displayData.haloColor = scales.nodeHaloColor(data) as string;
         }
 
         // Transient state
