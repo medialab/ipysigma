@@ -83,6 +83,7 @@ export type VisualVariables = {
   edgeColor: VisualVariable;
   edgeSize: VisualVariable;
   edgeLabel: VisualVariable;
+  edgeCurveness: VisualVariable;
   [name: string]: VisualVariable;
 };
 

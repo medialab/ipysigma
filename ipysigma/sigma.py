@@ -42,6 +42,7 @@ from ipysigma.constants import (
     DEFAULT_NODE_HALO_COLOR,
     DEFAULT_EDGE_COLOR,
     DEFAULT_EDGE_SIZE_RANGE,
+    DEFAULT_EDGE_CURVENESS,
     DEFAULT_CAMERA_STATE,
     SUPPORTED_NODE_TYPES,
     SUPPORTED_NODE_METRICS,
@@ -282,6 +283,8 @@ class Sigma(DOMWidget):
         raw_edge_size=None,
         edge_size_range=None,
         default_edge_size=None,
+        # Edge curveness
+        default_edge_curveness=DEFAULT_EDGE_CURVENESS,
         # Edge label
         raw_edge_label="label",
         edge_label=None,
@@ -586,6 +589,9 @@ class Sigma(DOMWidget):
         )
         visual_variables_builder.build_raw(
             "edgeLabel", edge_label, raw_edge_label, default=default_edge_label
+        )
+        visual_variables_builder.build_continuous(
+            "edgeCurveness", None, None, default=default_edge_curveness
         )
 
         self.visual_variables = visual_variables_builder.build()

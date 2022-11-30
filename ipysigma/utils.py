@@ -5,9 +5,10 @@ from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
     DEFAULT_NODE_SIZE_RANGE,
-    DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_COLOR,
+    DEFAULT_EDGE_CURVENESS,
+    DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_NODE_PICTOGRAM_COLOR,
 )
 
@@ -257,6 +258,7 @@ class VisualVariableBuilder(object):
                 "attribute": "size",
                 "range": DEFAULT_EDGE_SIZE_RANGE,
             },
+            "edgeCurveness": {"type": "constant", "default": DEFAULT_EDGE_CURVENESS},
         }
 
     def __init__(self, nodes, edges, is_directed):

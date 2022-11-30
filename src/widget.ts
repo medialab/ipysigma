@@ -100,6 +100,10 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   haloColor?: string;
 }
 
+interface IPysigmaEdgeDisplayData extends EdgeDisplayData {
+  curveness?: number;
+}
+
 // type IPysigmaProgramSettings = {};
 
 type IPysigmaUISettings = {
@@ -824,7 +828,7 @@ export class SigmaView extends DOMWidgetView {
 
       // Edge reducer
       rendererSettings.edgeReducer = (edge, data) => {
-        const displayData: Partial<EdgeDisplayData> = {};
+        const displayData: Partial<IPysigmaEdgeDisplayData> = {};
 
         const [source, target] = graph.extremities(edge);
 
@@ -846,6 +850,10 @@ export class SigmaView extends DOMWidgetView {
 
         if (scales.edgeLabel)
           displayData.label = scales.edgeLabel(data) as string;
+
+        if (rendererSettings.defaultEdgeType === 'curve') {
+          displayData.curveness = scales.edgeCurveness(data) as number;
+        }
 
         // Transient state
         if (this.selectedNode && this.focusedNodes) {
