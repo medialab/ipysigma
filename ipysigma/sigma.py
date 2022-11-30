@@ -227,6 +227,9 @@ class Sigma(DOMWidget):
         raw_node_pictogram_color=None,
         node_pictogram_color_palette=None,
         default_node_pictogram_color=DEFAULT_NODE_PICTOGRAM_COLOR,
+        # Node shape
+        raw_node_shape=None,
+        default_node_shape=None,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -503,8 +506,13 @@ class Sigma(DOMWidget):
             node_pictogram_color,
             raw_node_pictogram_color,
             default=default_node_pictogram_color,
+            palette=node_pictogram_color_palette,
             variable_prefix="pictogram",
             kind="color",
+        )
+
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodeShape", None, raw_node_shape, default=default_node_shape, kind="shape"
         )
 
         # Edges
@@ -534,6 +542,13 @@ class Sigma(DOMWidget):
         visual_variables_builder.build_raw("edgeLabel", edge_label, raw_edge_label)
 
         self.visual_variables = visual_variables_builder.build()
+
+        if self.visual_variables["nodeShape"]["type"] != "disabled":
+            if node_borders:
+                raise TypeError("cannot use node borders with node shapes")
+
+            if self.visual_variables["nodePictogram"]["type"] != "disabled":
+                raise TypeError("cannot use both node pictograms and node shapes")
 
         # Handling edge weight
         self.edge_weight = None
@@ -580,6 +595,8 @@ class Sigma(DOMWidget):
             self.visual_variables["nodePictogram"]["type"] != "disabled"
         )
 
+        need_to_render_shapes = self.visual_variables["nodeShape"]["type"] != "disabled"
+
         default_node_type = "point"
 
         if node_borders:
@@ -590,6 +607,9 @@ class Sigma(DOMWidget):
 
         elif need_to_render_pictograms:
             default_node_type = "picto"
+
+        elif need_to_render_shapes:
+            default_node_type = "shape"
 
         renderer_settings["defaultNodeType"] = default_node_type
 

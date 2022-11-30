@@ -241,6 +241,7 @@ class VisualVariableBuilder(object):
                 "type": "constant",
                 "default": DEFAULT_NODE_PICTOGRAM_COLOR,
             },
+            "nodeShape": {"type": "disabled"},
             "edgeLabel": {"type": "disabled"},
             "edgeColor": {"type": "raw", "attribute": "color", "default": "#ccc"},
             "edgeSize": {

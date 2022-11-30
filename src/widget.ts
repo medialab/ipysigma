@@ -50,7 +50,9 @@ import {
   saveAsJSON,
   saveAsSVG,
   pictogramToUrl,
+  shapeToUrl,
 } from './utils';
+import { shapeToPicto } from './shapes';
 import {
   zoomIcon,
   unzoomIcon,
@@ -604,6 +606,7 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.nodeBorderColor.type !== 'disabled';
       const nodePictogramsEnabled =
         visualVariables.nodePictogram.type !== 'disabled';
+      const nodeShapeEnabled = visualVariables.nodeShape.type !== 'disabled';
 
       const edgeProgramClasses = {
         rectangle: EdgeRectangleProgram,
@@ -618,6 +621,12 @@ export class SigmaView extends DOMWidgetView {
         keepWithinCircle: true,
       });
 
+      const NodeShapeProgram = createNodePictogramProgram({
+        correctCentering: true,
+        forcedSvgSize: 384,
+        keepWithinCircle: false,
+      });
+
       const nodeProgramClasses = {
         point: NodePointProgram,
         border: NodePointWithBorderProgram,
@@ -625,6 +634,7 @@ export class SigmaView extends DOMWidgetView {
           NodePointProgram,
           NodePictogramProgram,
         ]),
+        shape: NodeShapeProgram,
         'border+picto': createNodeCompoundProgram([
           NodePointWithBorderProgram,
           NodePictogramProgram,
@@ -730,6 +740,13 @@ export class SigmaView extends DOMWidgetView {
           ) as string;
         }
 
+        if (nodeShapeEnabled) {
+          displayData.pictogram = shapeToUrl(
+            shapeToPicto(scales.nodeShape(data) as string) || 'circle'
+          );
+          displayData.pictogramColor = displayData.color;
+        }
+
         // Transient state
         if (node === this.selectedNode || node === this.syncHoveredNode) {
           displayData.highlighted = true;
@@ -740,8 +757,13 @@ export class SigmaView extends DOMWidgetView {
           (this.selectedNodeCategoryValues &&
             !this.selectedNodeCategoryValues.has(categoryValue))
         ) {
-          displayData.type = 'point';
-          displayData.color = MUTED_NODE_COLOR;
+          if (!nodeShapeEnabled) {
+            displayData.type = 'point';
+            displayData.color = MUTED_NODE_COLOR;
+          } else {
+            displayData.pictogramColor = MUTED_NODE_COLOR;
+          }
+
           displayData.zIndex = 0;
           displayData.size = displayData.size ? displayData.size / 2 : 1;
           displayData.hoverLabel = displayData.label;

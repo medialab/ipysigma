@@ -137,3 +137,9 @@ export function pictogramToUrl(picto: string): string {
 
   return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/default/48px.svg`;
 }
+
+export function shapeToUrl(picto: string): string {
+  if (picto.startsWith('http')) return picto;
+
+  return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/wght700fill1/48px.svg`;
+}
