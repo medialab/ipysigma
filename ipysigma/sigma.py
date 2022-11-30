@@ -8,7 +8,7 @@
 from ipywidgets import DOMWidget, Output
 from ipywidgets.embed import embed_minimal_html
 from IPython.display import Image, display
-from traitlets import Unicode, Dict, Int, Bool, Tuple, List
+from traitlets import Unicode, Dict, Int, Bool, Tuple, List, Float
 from collections.abc import Iterable
 from ._frontend import module_name, module_version
 
@@ -122,6 +122,7 @@ class Sigma(DOMWidget):
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(DEFAULT_HEIGHT).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
+    start_layout_for_seconds = Float(allow_none=True).tag(sync=True)
     clickable_edges = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
@@ -359,7 +360,12 @@ class Sigma(DOMWidget):
         # Traits
         self.height = height
         self.max_category_colors = max_category_colors
-        self.start_layout = start_layout
+        self.start_layout = bool(start_layout)
+        self.start_layout_for_seconds = None
+
+        if isinstance(start_layout, (int, float)):
+            self.start_layout_for_seconds = float(start_layout)
+
         self.snapshot = None
         self.layout = None
         self.layout_settings = layout_settings

@@ -1536,7 +1536,12 @@ export class SigmaView extends DOMWidgetView {
 
     hide(this.resetLayoutButton);
 
+    let layoutStoppingTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const stopLayout = () => {
+      if (layoutStoppingTimeout) clearTimeout(layoutStoppingTimeout);
+      layoutStoppingTimeout = null;
+
       if (this.layoutSpinner) {
         this.layoutControls.removeChild(this.layoutSpinner[0]);
         this.layoutSpinner[1]();
@@ -1593,7 +1598,19 @@ export class SigmaView extends DOMWidgetView {
       animateNodes(graph, this.originalLayoutPositions, { duration: 250 });
     };
 
-    if (this.model.get('start_layout')) startLayout();
+    if (this.model.get('start_layout')) {
+      const seconds = this.model.get('start_layout_for_seconds') as
+        | number
+        | undefined;
+
+      if (seconds) {
+        layoutStoppingTimeout = setTimeout(() => {
+          stopLayout();
+        }, seconds * 1000);
+      }
+
+      startLayout();
+    }
 
     this.layoutButton.onclick = () => {
       if (this.layout.isRunning()) {
