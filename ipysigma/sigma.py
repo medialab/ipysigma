@@ -32,7 +32,10 @@ from ipysigma.constants import (
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_SIZE_RANGE,
     DEFAULT_NODE_SIZE_RANGE,
+    DEFAULT_NODE_BORDER_RATIO,
     DEFAULT_NODE_BORDER_RATIO_RANGE,
+    DEFAULT_NODE_BORDER_SIZE,
+    DEFAULT_NODE_BORDER_SIZE_RANGE,
     DEFAULT_EDGE_COLOR,
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_CAMERA_STATE,
@@ -210,7 +213,11 @@ class Sigma(DOMWidget):
         node_border_ratio=None,
         raw_node_border_ratio=None,
         node_border_ratio_range=DEFAULT_NODE_BORDER_RATIO_RANGE,
-        default_node_border_ratio=0.1,
+        default_node_border_ratio=DEFAULT_NODE_BORDER_RATIO,
+        node_border_size=None,
+        raw_node_border_size=None,
+        node_border_size_range=DEFAULT_NODE_BORDER_SIZE_RANGE,
+        default_node_border_size=DEFAULT_NODE_BORDER_SIZE,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -450,13 +457,29 @@ class Sigma(DOMWidget):
                 gradient=node_border_color_gradient,
                 variable_prefix="border",
             )
-            visual_variables_builder.build_continuous(
-                "nodeBorderRatio",
-                node_border_ratio,
-                raw_node_border_ratio,
-                default=default_node_border_ratio,
-                range=node_border_ratio_range,
-            )
+
+            if node_borders is True or node_borders == "size":
+                visual_variables_builder.build_continuous(
+                    "nodeBorderSize",
+                    node_border_size,
+                    raw_node_border_size,
+                    default=default_node_border_size,
+                    range=node_border_size_range,
+                    variable_prefix="border",
+                )
+            elif node_borders == "ratio":
+                visual_variables_builder.build_continuous(
+                    "nodeBorderRatio",
+                    node_border_ratio,
+                    raw_node_border_ratio,
+                    default=default_node_border_ratio,
+                    range=node_border_ratio_range,
+                    variable_prefix="border",
+                )
+            else:
+                raise TypeError(
+                    'node_borders should be True (same as passing "size"), "size" or "ratio"'
+                )
 
         # Edges
         if edge_color_from is not None:

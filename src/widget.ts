@@ -85,6 +85,7 @@ interface IPysigmaNodeDisplayData extends NodeDisplayData {
   categoryValue?: string;
   borderColor?: string;
   borderRatio?: number;
+  borderSize?: number;
   labelSize?: number;
   labelColor?: string;
 }
@@ -688,7 +689,10 @@ export class SigmaView extends DOMWidgetView {
         displayData.labelColor = scales.nodeLabelColor(data) as string;
 
         if (nodeBordersEnabled) {
-          displayData.borderRatio = scales.nodeBorderRatio(data) as number;
+          if (visualVariables.nodeBorderRatio.type !== 'disabled')
+            displayData.borderRatio = scales.nodeBorderRatio(data) as number;
+          else displayData.borderSize = scales.nodeBorderSize(data) as number;
+
           displayData.borderColor = scales.nodeBorderColor(data) as string;
         }
 

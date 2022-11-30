@@ -229,6 +229,7 @@ class VisualVariableBuilder(object):
             "nodeColor": {"type": "raw", "attribute": "color", "default": "#999"},
             "nodeBorderColor": {"type": "disabled"},
             "nodeBorderRatio": {"type": "disabled"},
+            "nodeBorderSize": {"type": "disabled"},
             "nodeSize": {
                 "type": "continuous",
                 "attribute": "size",
