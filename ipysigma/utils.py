@@ -93,13 +93,13 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
 
         arity = count_arity(fn)
 
-        if item_type == "node" and arity not in [1, 2]:
+        if item_type == "node" and arity > 2:
             raise TypeError(
                 "%s is expecting a function taking node or node and attributes as arguments"
                 % name
             )
 
-        elif item_type == "edge" and arity not in [2, 3]:
+        elif item_type == "edge" and arity > 3:
             raise TypeError(
                 "%s is expecting a function taking source, target or source, target and attributes as arguments"
                 % name
@@ -107,12 +107,18 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
 
         for item in items:
             if item_type == "node":
-                if arity == 1:
+                if arity == 0:
+                    v = fn()
+                elif arity == 1:
                     v = fn(item["key"])
                 else:
                     v = fn(item["key"], item["attributes"])
             else:
-                if arity == 2:
+                if arity == 0:
+                    v = fn()
+                elif arity == 1:
+                    v = fn(item["source"])
+                elif arity == 2:
                     v = fn(item["source"], item["target"])
                 else:
                     v = fn(item["source"], item["target"], item["attributes"])

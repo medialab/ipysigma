@@ -99,6 +99,24 @@ class TestResolveVariable(object):
             {"key": 1, "attributes": {"ipysigma_kwarg_node_size": 1}},
         ]
 
+    def test_node_callable_without_args(self):
+        def getter():
+            return "value"
+
+        name, items = self.resolve_variable("node_value", getter)
+
+        assert name == "ipysigma_kwarg_node_value"
+        assert items == [
+            {
+                "key": "one",
+                "attributes": {"ipysigma_kwarg_node_value": "value"},
+            },
+            {
+                "key": "two",
+                "attributes": {"ipysigma_kwarg_node_value": "value"},
+            },
+        ]
+
     def test_node_callable(self):
         def getter(node):
             return node + "_single_value"
