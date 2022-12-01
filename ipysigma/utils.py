@@ -6,6 +6,7 @@ from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
     SUPPORTED_SCALE_TYPES,
     SUPPORTED_NAMED_GRADIENTS,
+    SUPPORTED_NAMED_PALETTES,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_COLOR,
@@ -33,6 +34,7 @@ def is_partition(value):
     )
 
 
+# TODO: name in error
 def resolve_scale(value):
     if value is None:
         return None
@@ -53,6 +55,18 @@ def resolve_scale(value):
         raise TypeError("scale param should be a number")
 
     return value
+
+
+def resolve_palette(name, value):
+    if isinstance(value, str):
+        if value not in SUPPORTED_NAMED_PALETTES:
+            raise TypeError('unknown named palette scheme "%s"' % value)
+        return value
+
+    if not isinstance(value, Mapping):
+        raise TypeError("{} should be a mapping (i.e. a dict)".format(name))
+
+    return list(value.items())
 
 
 def resolve_variable(name, items, target, item_type="node", is_directed=False):
@@ -454,19 +468,17 @@ class VisualVariableBuilder(object):
                 variable["kind"] = kind
 
             if palette is not None:
-                if not isinstance(palette, Mapping):
-                    raise TypeError(
-                        "{} should be a mapping (i.e. a dict)".format(
-                            self.template(
-                                kind,
-                                prefix=variable_prefix,
-                                suffix="palette",
-                                item_type=item_type,
-                            )
-                        )
-                    )
+                palette = resolve_palette(
+                    self.template(
+                        kind,
+                        prefix=variable_prefix,
+                        suffix="palette",
+                        item_type=item_type,
+                    ),
+                    palette,
+                )
 
-                variable["palette"] = list(palette.items())
+                variable["palette"] = palette
 
             elif gradient is not None:
                 gradient = resolve_range(

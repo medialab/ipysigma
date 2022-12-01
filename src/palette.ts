@@ -1,4 +1,8 @@
 import iwanthue from 'iwanthue';
+import * as d3Chromatic from 'd3-scale-chromatic';
+import { createShuffleInPlace } from 'pandemonium/shuffle-in-place';
+import seedrandom from 'seedrandom';
+
 import { USEFUL_SHAPES, UNKNOWN_SHAPE } from './shapes';
 
 export type PaletteKind = 'color' | 'shape';
@@ -44,6 +48,50 @@ export default class Palette<K> {
   static getMacroDefault(kind: PaletteKind) {
     if (kind === 'color') return '#ccc';
     else return UNKNOWN_SHAPE;
+  }
+
+  static fromScheme<T>(
+    name: string,
+    kind: PaletteKind,
+    scheme: string,
+    values: Array<T>,
+    defaultValue?: string
+  ): Palette<T> {
+    const target = (
+      d3Chromatic as unknown as Record<
+        string,
+        Array<string> | Array<Array<string | undefined>>
+      >
+    )['scheme' + scheme];
+
+    let colors: Array<string>;
+
+    if (Array.isArray(target[target.length - 1])) {
+      const firstValidCount = target.findIndex((c) => Array.isArray(c));
+      colors = target[
+        Math.min(Math.max(firstValidCount, values.length), target.length)
+      ] as Array<string>;
+    } else {
+      colors = (target as Array<string>).slice();
+
+      const shuffleInPlace = createShuffleInPlace(seedrandom(name));
+      shuffleInPlace(colors);
+
+      colors = colors.slice(0, Math.min(values.length, colors.length));
+    }
+
+    const map = new Map();
+
+    values.slice(0, colors.length).forEach((v, i) => {
+      map.set(v, colors[i]);
+    });
+
+    return new Palette(
+      name,
+      kind,
+      map,
+      defaultValue || getDefaultDefaultValue(kind)
+    );
   }
 
   static fromEntries<T>(

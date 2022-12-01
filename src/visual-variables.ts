@@ -42,7 +42,7 @@ export type RawVisualVariable = {
 export type CategoryVisualVariable = {
   type: 'category';
   attribute: string;
-  palette?: Entries<string>;
+  palette?: Entries<string> | string;
   default?: string;
   kind?: PaletteKind;
 };
@@ -212,6 +212,7 @@ export class CategorySummary {
     kind: PaletteKind,
     frequencies: MultiSet<string>,
     defaultValue: string | undefined,
+    scheme?: string,
     maxCount = CATEGORY_MAX_COUNT
   ) {
     const count = Math.min(maxCount, frequencies.dimension);
@@ -219,12 +220,11 @@ export class CategorySummary {
     const overflowing = count < frequencies.dimension;
 
     const values = topValues.map((item) => item[0]);
-    const palette = Palette.generateFromValues(
-      name,
-      kind,
-      values,
-      defaultValue
-    );
+
+    const palette =
+      !scheme || scheme === 'IWantHue'
+        ? Palette.generateFromValues(name, kind, values, defaultValue)
+        : Palette.fromScheme(name, kind, scheme, values, defaultValue);
 
     return new CategorySummary(name, kind, palette, overflowing);
   }
@@ -270,7 +270,7 @@ export class VisualVariableScalesBuilder {
 
       if (variableName.startsWith('node')) {
         if (variable.type === 'category') {
-          if (!variable.palette)
+          if (!variable.palette || typeof variable.palette === 'string')
             nodeCategoryAttributes.push(variable.attribute);
         } else if (
           variable.type === 'continuous' ||
@@ -282,7 +282,7 @@ export class VisualVariableScalesBuilder {
         }
       } else if (variableName.startsWith('edge')) {
         if (variable.type === 'category') {
-          if (!variable.palette)
+          if (!variable.palette || typeof variable.palette === 'string')
             edgeCategoryAttributes.push(variable.attribute);
         } else if (variable.type === 'continuous') {
           edgeExtentAttributes.push(variable.attribute);
@@ -331,20 +331,22 @@ export class VisualVariableScalesBuilder {
           ? this.nodeCategories
           : this.edgeCategories;
 
-        const summary = variable.palette
-          ? CategorySummary.fromEntries(
-              variable.attribute,
-              variable.kind || 'color',
-              variable.palette,
-              variable.default
-            )
-          : CategorySummary.fromTopValues(
-              variable.attribute,
-              variable.kind || 'color',
-              categories.attributes[variable.attribute],
-              variable.default,
-              this.maxCategories
-            );
+        const summary =
+          variable.palette && typeof variable.palette !== 'string'
+            ? CategorySummary.fromEntries(
+                variable.attribute,
+                variable.kind || 'color',
+                variable.palette,
+                variable.default
+              )
+            : CategorySummary.fromTopValues(
+                variable.attribute,
+                variable.kind || 'color',
+                categories.attributes[variable.attribute],
+                variable.default,
+                variable.palette,
+                this.maxCategories
+              );
 
         const palette = summary.palette;
 
