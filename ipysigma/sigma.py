@@ -805,7 +805,7 @@ class Sigma(DOMWidget):
 
         return out
 
-    def save_as_html(self, path, **kwargs):
+    def to_html(self, path, **kwargs):
 
         # Snapshot data unnecessarily adds weight here, let's drop it
         current_snapshot = self.snapshot
@@ -814,3 +814,7 @@ class Sigma(DOMWidget):
         embed_minimal_html(path, views=[self], **kwargs)
 
         self.snapshot = current_snapshot
+
+    @classmethod
+    def write_html(cls, graph, path, **kwargs):
+        return cls(graph, **kwargs).save_as_html(path)
