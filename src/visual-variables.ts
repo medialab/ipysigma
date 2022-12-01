@@ -3,7 +3,7 @@
  */
 import Graph, { Attributes } from 'graphology-types';
 import MultiSet from 'mnemonist/multi-set';
-import Palette from 'iwanthue/palette';
+import ColorPalette from 'iwanthue/palette';
 import { scaleLinear } from 'd3-scale';
 
 /**
@@ -16,7 +16,7 @@ const CATEGORY_MAX_COUNT = 10;
  */
 export type Bound = number | string;
 export type Range = [Bound, Bound];
-export type ColorEntries<T> = Array<[key: T, value: string]>;
+export type Entries<T> = Array<[key: T, value: string]>;
 export type EdgeColorDependency = 'source' | 'target';
 
 export interface AttributeScale {
@@ -38,7 +38,7 @@ export type RawVisualVariable = {
 export type CategoryVisualVariable = {
   type: 'category';
   attribute: string;
-  palette?: ColorEntries<string>;
+  palette?: Entries<string>;
   default?: string;
 };
 
@@ -147,12 +147,12 @@ export class AttributeCategories {
 
 export class CategorySummary {
   name: string;
-  palette: Palette<string>;
+  palette: ColorPalette<string>;
   overflowing: boolean;
 
   constructor(
     name: string,
-    palette: Palette<string>,
+    palette: ColorPalette<string>,
     overflowing: boolean = false
   ) {
     this.name = name;
@@ -163,7 +163,7 @@ export class CategorySummary {
   static fromTopValues(
     name: string,
     frequencies: MultiSet<string>,
-    defaultColor: string,
+    defaultValue: string,
     maxCount = CATEGORY_MAX_COUNT
   ) {
     const count = Math.min(maxCount, frequencies.dimension);
@@ -171,17 +171,19 @@ export class CategorySummary {
     const overflowing = count < frequencies.dimension;
 
     const values = topValues.map((item) => item[0]);
-    const palette = Palette.generateFromValues(name, values, { defaultColor });
+    const palette = ColorPalette.generateFromValues(name, values, {
+      defaultColor: defaultValue,
+    });
 
     return new CategorySummary(name, palette, overflowing);
   }
 
-  static fromColorEntries(
+  static fromEntries(
     name: string,
-    entries: ColorEntries<string>,
-    defaultColor: string
+    entries: Entries<string>,
+    defaultValue: string
   ) {
-    const palette = Palette.fromEntries(name, entries, defaultColor);
+    const palette = ColorPalette.fromEntries(name, entries, defaultValue);
 
     return new CategorySummary(name, palette);
   }
@@ -278,7 +280,7 @@ export class VisualVariableScalesBuilder {
           : this.edgeCategories;
 
         const summary = variable.palette
-          ? CategorySummary.fromColorEntries(
+          ? CategorySummary.fromEntries(
               variable.attribute,
               variable.palette,
               variable.default || '#ccc'
