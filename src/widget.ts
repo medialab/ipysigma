@@ -1058,7 +1058,7 @@ export class SigmaView extends DOMWidgetView {
 
           const paletteItems: string[] = [];
 
-          if (summary) {
+          if (summary && summary.kind === 'color') {
             const values: string[] = [];
             categoryMap.set(dataId, { type, values });
             let i = 0;
@@ -1074,7 +1074,7 @@ export class SigmaView extends DOMWidgetView {
 
             if (summary.overflowing) {
               paletteItems.push(
-                `<span style="color: ${summary.palette.defaultColor}">■</span> ...`
+                `<span style="color: ${summary.palette.defaultValue}">■</span> ...`
               );
             }
           } else {

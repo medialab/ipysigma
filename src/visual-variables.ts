@@ -3,7 +3,7 @@
  */
 import Graph, { Attributes } from 'graphology-types';
 import MultiSet from 'mnemonist/multi-set';
-import ColorPalette from 'iwanthue/palette';
+import Palette, { Entries, PaletteKind } from './palette';
 import { scaleLinear } from 'd3-scale';
 
 /**
@@ -16,9 +16,7 @@ const CATEGORY_MAX_COUNT = 10;
  */
 export type Bound = number | string;
 export type Range = [Bound, Bound];
-export type Entries<T> = Array<[key: T, value: string]>;
 export type EdgeColorDependency = 'source' | 'target';
-export type CategoryKind = 'color' | 'shape';
 
 export interface AttributeScale {
   (value: Attributes): string | number;
@@ -41,7 +39,7 @@ export type CategoryVisualVariable = {
   attribute: string;
   palette?: Entries<string>;
   default?: string;
-  kind?: CategoryKind;
+  kind?: PaletteKind;
 };
 
 export type ContinuousVisualVariable = {
@@ -149,23 +147,27 @@ export class AttributeCategories {
 
 export class CategorySummary {
   name: string;
-  palette: ColorPalette<string>;
+  kind: PaletteKind;
+  palette: Palette<string>;
   overflowing: boolean;
 
   constructor(
     name: string,
-    palette: ColorPalette<string>,
+    kind: PaletteKind,
+    palette: Palette<string>,
     overflowing: boolean = false
   ) {
     this.name = name;
+    this.kind = kind;
     this.palette = palette;
     this.overflowing = overflowing;
   }
 
   static fromTopValues(
     name: string,
+    kind: PaletteKind,
     frequencies: MultiSet<string>,
-    defaultValue: string,
+    defaultValue: string | undefined,
     maxCount = CATEGORY_MAX_COUNT
   ) {
     const count = Math.min(maxCount, frequencies.dimension);
@@ -173,21 +175,25 @@ export class CategorySummary {
     const overflowing = count < frequencies.dimension;
 
     const values = topValues.map((item) => item[0]);
-    const palette = ColorPalette.generateFromValues(name, values, {
-      defaultColor: defaultValue,
-    });
+    const palette = Palette.generateFromValues(
+      name,
+      kind,
+      values,
+      defaultValue
+    );
 
-    return new CategorySummary(name, palette, overflowing);
+    return new CategorySummary(name, kind, palette, overflowing);
   }
 
   static fromEntries(
     name: string,
+    kind: PaletteKind,
     entries: Entries<string>,
-    defaultValue: string
+    defaultValue: string | undefined
   ) {
-    const palette = ColorPalette.fromEntries(name, entries, defaultValue);
+    const palette = Palette.fromEntries(name, kind, entries, defaultValue);
 
-    return new CategorySummary(name, palette);
+    return new CategorySummary(name, kind, palette);
   }
 }
 
@@ -201,14 +207,14 @@ export class VisualVariableScalesBuilder {
   edgeExtents: AttributeExtents;
   nodeCategories: AttributeCategories;
   edgeCategories: AttributeCategories;
-  maxCategoryColors: number;
+  maxCategories: number;
 
   constructor(
     visualVariables: VisualVariables,
-    maxCategoryColors = CATEGORY_MAX_COUNT
+    maxCategories = CATEGORY_MAX_COUNT
   ) {
     this.variables = visualVariables;
-    this.maxCategoryColors = maxCategoryColors;
+    this.maxCategories = maxCategories;
 
     const nodeExtentAttributes: Array<string> = [];
     const nodeCategoryAttributes: Array<string> = [];
@@ -284,14 +290,16 @@ export class VisualVariableScalesBuilder {
         const summary = variable.palette
           ? CategorySummary.fromEntries(
               variable.attribute,
+              variable.kind || 'color',
               variable.palette,
-              variable.default || '#ccc'
+              variable.default
             )
           : CategorySummary.fromTopValues(
               variable.attribute,
+              variable.kind || 'color',
               categories.attributes[variable.attribute],
-              variable.default || '#ccc',
-              this.maxCategoryColors
+              variable.default,
+              this.maxCategories
             );
 
         const palette = summary.palette;

@@ -77,6 +77,26 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
 
         return target
 
+    # Sets
+    elif isinstance(target, (set, frozenset)):
+        mapping = target
+        target = "ipysigma_kwarg_%s" % name
+
+        for item in items:
+            v = False
+
+            if item_type == "node":
+                v = item["key"] in mapping
+            else:
+                v = (item["source"], item["target"]) in mapping
+
+                if not v and is_directed:
+                    v = (item["target"], item["source"]) in mapping
+
+            item["attributes"][target] = v
+
+        return target
+
     # Iterable range
     elif isinstance(target, Iterable):
         mapping = target
@@ -392,6 +412,9 @@ class VisualVariableBuilder(object):
             )
 
             self.variables[name] = variable
+
+            if kind != "color":
+                variable["kind"] = kind
 
             if palette is not None:
                 if not isinstance(palette, Mapping):

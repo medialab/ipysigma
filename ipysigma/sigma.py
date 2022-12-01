@@ -235,7 +235,9 @@ class Sigma(DOMWidget):
         node_pictogram_color_palette=None,
         default_node_pictogram_color=DEFAULT_NODE_PICTOGRAM_COLOR,
         # Node shape
+        node_shape=None,
         raw_node_shape=None,
+        node_shape_mapping=None,
         default_node_shape=None,
         # Node halo
         node_halos=False,
@@ -560,7 +562,12 @@ class Sigma(DOMWidget):
         )
 
         visual_variables_builder.build_categorical_or_continuous(
-            "nodeShape", None, raw_node_shape, default=default_node_shape, kind="shape"
+            "nodeShape",
+            node_shape,
+            raw_node_shape,
+            default=default_node_shape,
+            palette=node_shape_mapping,
+            kind="shape",
         )
 
         # Edges
