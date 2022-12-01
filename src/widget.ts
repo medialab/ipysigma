@@ -1077,7 +1077,9 @@ export class SigmaView extends DOMWidgetView {
             name
           )}</span> ${source} `;
 
-          if (typeof variable.range[0] === 'number') {
+          if (typeof variable.range === 'string') {
+            html += `(using the <span class="ipysigma-keyword">${variable.range}</span> color scheme)`;
+          } else if (typeof variable.range[0] === 'number') {
             html += `(scaled to <span class="ipysigma-number">${variable.range[0]}</span>-<span class="ipysigma-number">${variable.range[1]}</span> px)`;
           } else {
             html += `(from <span style="color: ${variable.range[0]}">■</span> ${variable.range[0]} to <span style="color: ${variable.range[1]}">■</span> ${variable.range[1]})`;

@@ -5,6 +5,7 @@ from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
     SUPPORTED_SCALE_TYPES,
+    SUPPORTED_NAMED_GRADIENTS,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_COLOR,
@@ -224,9 +225,15 @@ def resolve_metrics(name, target, supported):
     return metrics
 
 
-def resolve_range(name, target):
+def resolve_range(name, target, allow_named=False):
     if target is None:
         return
+
+    if allow_named and isinstance(target, str):
+        if target not in SUPPORTED_NAMED_GRADIENTS:
+            raise TypeError("unknown named gradient")
+
+        return target
 
     if isinstance(target, SUPPORTED_RANGE_BOUNDS):
         return (target, target)
@@ -470,6 +477,7 @@ class VisualVariableBuilder(object):
                         item_type=item_type,
                     ),
                     gradient,
+                    allow_named=True,
                 )
 
                 variable["type"] = "continuous"

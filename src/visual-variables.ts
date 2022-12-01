@@ -5,6 +5,7 @@ import Graph, { Attributes } from 'graphology-types';
 import MultiSet from 'mnemonist/multi-set';
 import Palette, { Entries, PaletteKind } from './palette';
 import { scaleLinear, scaleLog, scalePow, scaleSqrt } from 'd3-scale';
+import * as d3Chromatic from 'd3-scale-chromatic';
 
 /**
  * Constants.
@@ -49,7 +50,7 @@ export type CategoryVisualVariable = {
 export type ContinuousVisualVariable = {
   type: 'continuous';
   attribute: string;
-  range: Range;
+  range: Range | string;
   default?: number;
   scale?: ScaleDefinition;
 };
@@ -359,7 +360,27 @@ export class VisualVariableScalesBuilder {
 
         const extent = extents.attributes[variable.attribute];
 
-        if (variable.range[0] === variable.range[1] || extent.isConstant()) {
+        if (typeof variable.range === 'string') {
+          const continuousScale = createD3Scale(variable.scale).domain([
+            extent.min as number,
+            extent.max as number,
+          ]);
+
+          const chromatic = (
+            d3Chromatic as unknown as Record<string, (value: number) => string>
+          )['interpolate' + variable.range];
+
+          scale = (attr) => {
+            const value = attr[variable.attribute];
+
+            if (!isValidNumber(value)) return variable.default || 2;
+
+            return chromatic(continuousScale(value));
+          };
+        } else if (
+          variable.range[0] === variable.range[1] ||
+          extent.isConstant()
+        ) {
           scale = () =>
             isValidNumber(variable.default)
               ? variable.default
