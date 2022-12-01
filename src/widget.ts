@@ -750,9 +750,9 @@ export class SigmaView extends DOMWidgetView {
         // Visual variables
         const categoryValue = nodeCategoryAttribute
           ? data[nodeCategoryAttribute]
-          : null;
+          : undefined;
 
-        if (categoryValue) {
+        if (categoryValue !== undefined) {
           displayData.categoryValue = categoryValue;
         }
 
