@@ -132,14 +132,8 @@ export function saveAsSVG(renderer: Sigma): void {
   FileSaver.saveAs(new Blob([data], { type: 'image/svg+xml' }), 'graph.svg');
 }
 
-export function pictogramToUrl(picto: string): string {
+export function pictogramToUrl(picto: string, qualifier = 'default'): string {
   if (picto.startsWith('http')) return picto;
 
-  return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/default/48px.svg`;
-}
-
-export function shapeToUrl(picto: string): string {
-  if (picto.startsWith('http')) return picto;
-
-  return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/wght700fill1/48px.svg`;
+  return `https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/${picto}/${qualifier}/48px.svg`;
 }

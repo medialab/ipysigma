@@ -51,7 +51,6 @@ import {
   saveAsJSON,
   saveAsSVG,
   pictogramToUrl,
-  shapeToUrl,
 } from './utils';
 import { shapeToPicto } from './shapes';
 import {
@@ -778,8 +777,9 @@ export class SigmaView extends DOMWidgetView {
         }
 
         if (nodeShapeEnabled) {
-          displayData.pictogram = shapeToUrl(
-            shapeToPicto(scales.nodeShape(data) as string) || 'circle'
+          displayData.pictogram = pictogramToUrl(
+            shapeToPicto(scales.nodeShape(data) as string) || 'circle',
+            'wght700fill1'
           );
           displayData.pictogramColor = displayData.color;
         }

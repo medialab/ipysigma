@@ -18,6 +18,7 @@ export type Bound = number | string;
 export type Range = [Bound, Bound];
 export type Entries<T> = Array<[key: T, value: string]>;
 export type EdgeColorDependency = 'source' | 'target';
+export type CategoryKind = 'color' | 'shape';
 
 export interface AttributeScale {
   (value: Attributes): string | number;
@@ -40,6 +41,7 @@ export type CategoryVisualVariable = {
   attribute: string;
   palette?: Entries<string>;
   default?: string;
+  kind?: CategoryKind;
 };
 
 export type ContinuousVisualVariable = {
