@@ -85,6 +85,7 @@ type RNGFunction = () => number;
 type InformationDisplayTab = 'legend' | 'info';
 type Position = { x: number; y: number };
 type LayoutMapping = Record<string, Position>;
+type SyncTarget = 'layout' | 'camera' | 'selection' | 'hover';
 
 interface IPysigmaNodeDisplayData extends NodeDisplayData {
   hoverLabel?: string | null;
@@ -1660,6 +1661,10 @@ export class SigmaView extends DOMWidgetView {
       clearSelectedItem: false,
     };
 
+    const syncTargets = new Set(
+      this.model.get('sync_targets') as Array<SyncTarget>
+    );
+
     // NOTE: all of this is very sketchy. This is here to make suuuure we
     // don't encounter a dead lock.
     const resetLocks = () => {
@@ -1682,131 +1687,141 @@ export class SigmaView extends DOMWidgetView {
       scheduleResetLocks();
     };
 
-    // From the broadcaster's standpoint
     const camera = this.renderer.getCamera();
-
-    camera.on('updated', (state) => {
-      if (locks.camera) {
-        locks.camera = false;
-        return;
-      }
-
-      syncEmitter.emit('camera', { state, renderer: this.renderer });
-    });
-
     const graph = this.renderer.getGraph();
 
-    graph.on('nodeAttributesUpdated', ({ key, attributes }) => {
-      if (locks.nodeAttributesUpdated) {
-        locks.nodeAttributesUpdated = false;
-        return;
-      }
+    // Camera
+    if (syncTargets.has('camera')) {
+      camera.on('updated', (state) => {
+        if (locks.camera) {
+          locks.camera = false;
+          return;
+        }
 
-      syncEmitter.emit('nodePosition', {
-        node: key,
-        position: { x: attributes.x, y: attributes.y },
-        renderer: this.renderer,
+        syncEmitter.emit('camera', { state, renderer: this.renderer });
       });
-    });
 
-    graph.on('eachNodeAttributesUpdated', () => {
-      if (locks.eachNodeAttributesUpdated) {
-        locks.eachNodeAttributesUpdated = false;
-        return;
-      }
+      this.syncListeners.camera = ({ state, renderer }) => {
+        if (renderer === this.renderer) return;
 
-      syncEmitter.emit('layout', {
-        layout: collectLayout(graph),
-        renderer: this.renderer,
+        lock('camera');
+        camera.setState(state);
+      };
+    }
+
+    // Layout
+    if (syncTargets.has('layout')) {
+      graph.on('nodeAttributesUpdated', ({ key, attributes }) => {
+        if (locks.nodeAttributesUpdated) {
+          locks.nodeAttributesUpdated = false;
+          return;
+        }
+
+        syncEmitter.emit('nodePosition', {
+          node: key,
+          position: { x: attributes.x, y: attributes.y },
+          renderer: this.renderer,
+        });
       });
-    });
 
-    this.emitter.on('selectItem', (payload) => {
-      if (locks.selectItem) {
-        locks.selectItem = false;
-        return;
-      }
+      graph.on('eachNodeAttributesUpdated', () => {
+        if (locks.eachNodeAttributesUpdated) {
+          locks.eachNodeAttributesUpdated = false;
+          return;
+        }
 
-      const type = payload.type;
-      let key = payload.key;
+        syncEmitter.emit('layout', {
+          layout: collectLayout(graph),
+          renderer: this.renderer,
+        });
+      });
 
-      if (type === 'edge') {
-        key = this.graph.extremities(key);
-      }
+      this.syncListeners.layout = ({ layout, renderer }) => {
+        if (renderer === this.renderer) return;
 
-      syncEmitter.emit('selectItem', { type, key, renderer: this.renderer });
-    });
+        lock('eachNodeAttributesUpdated');
+        assignLayout(graph, layout);
+      };
 
-    this.emitter.on('clearSelectedItem', () => {
-      if (locks.clearSelectedItem) {
-        locks.clearSelectedItem = false;
-        return;
-      }
+      this.syncListeners.nodePosition = ({ node, position, renderer }) => {
+        if (renderer === this.renderer) return;
 
-      syncEmitter.emit('clearSelectedItem', { renderer: this.renderer });
-    });
+        lock('nodeAttributesUpdated');
+        graph.mergeNodeAttributes(node, position);
+      };
+    }
 
-    this.renderer.on('enterNode', ({ node }) => {
-      syncEmitter.emit('enterNode', { node, renderer: this.renderer });
-    });
+    // Selection
+    if (syncTargets.has('selection')) {
+      this.emitter.on('selectItem', (payload) => {
+        if (locks.selectItem) {
+          locks.selectItem = false;
+          return;
+        }
 
-    this.renderer.on('leaveNode', ({ node }) => {
-      syncEmitter.emit('leaveNode', { node, renderer: this.renderer });
-    });
+        const type = payload.type;
+        let key = payload.key;
 
-    // From the receiver's end
-    this.syncListeners.camera = ({ state, renderer }) => {
-      if (renderer === this.renderer) return;
+        if (type === 'edge') {
+          key = this.graph.extremities(key);
+        }
 
-      lock('camera');
-      camera.setState(state);
-    };
+        syncEmitter.emit('selectItem', { type, key, renderer: this.renderer });
+      });
 
-    this.syncListeners.layout = ({ layout, renderer }) => {
-      if (renderer === this.renderer) return;
+      this.emitter.on('clearSelectedItem', () => {
+        if (locks.clearSelectedItem) {
+          locks.clearSelectedItem = false;
+          return;
+        }
 
-      lock('eachNodeAttributesUpdated');
-      assignLayout(graph, layout);
-    };
+        syncEmitter.emit('clearSelectedItem', { renderer: this.renderer });
+      });
 
-    this.syncListeners.nodePosition = ({ node, position, renderer }) => {
-      if (renderer === this.renderer) return;
+      this.syncListeners.selectItem = ({ renderer, key, type }) => {
+        if (renderer === this.renderer) return;
 
-      lock('nodeAttributesUpdated');
-      graph.mergeNodeAttributes(node, position);
-    };
+        lock('selectItem');
 
-    this.syncListeners.enterNode = ({ node, renderer }) => {
-      if (renderer === this.renderer) return;
+        if (type === 'edge') key = this.graph.edge(key[0], key[1]);
 
-      this.syncHoveredNode = node;
-      this.renderer.scheduleRefresh();
-    };
+        this.selectItem(type, key);
+      };
 
-    this.syncListeners.leaveNode = ({ renderer }) => {
-      if (renderer === this.renderer) return;
+      this.syncListeners.clearSelectedItem = ({ renderer }) => {
+        if (renderer === this.renderer) return;
 
-      this.syncHoveredNode = null;
-      this.renderer.scheduleRefresh();
-    };
+        lock('clearSelectedItem');
+        this.clearSelectedItem();
+      };
+    }
 
-    this.syncListeners.selectItem = ({ renderer, key, type }) => {
-      if (renderer === this.renderer) return;
+    // Hover
+    if (syncTargets.has('hover')) {
+      this.renderer.on('enterNode', ({ node }) => {
+        syncEmitter.emit('enterNode', { node, renderer: this.renderer });
+      });
 
-      lock('selectItem');
+      this.renderer.on('leaveNode', ({ node }) => {
+        syncEmitter.emit('leaveNode', { node, renderer: this.renderer });
+      });
 
-      if (type === 'edge') key = this.graph.edge(key[0], key[1]);
+      this.syncListeners.enterNode = ({ node, renderer }) => {
+        if (renderer === this.renderer) return;
 
-      this.selectItem(type, key);
-    };
+        this.syncHoveredNode = node;
+        this.renderer.scheduleRefresh();
+      };
 
-    this.syncListeners.clearSelectedItem = ({ renderer }) => {
-      if (renderer === this.renderer) return;
+      this.syncListeners.leaveNode = ({ renderer }) => {
+        if (renderer === this.renderer) return;
 
-      lock('clearSelectedItem');
-      this.clearSelectedItem();
-    };
+        this.syncHoveredNode = null;
+        this.renderer.scheduleRefresh();
+      };
+    }
 
+    // Registering events
     for (const eventName in this.syncListeners) {
       syncEmitter.on(eventName, this.syncListeners[eventName]);
     }

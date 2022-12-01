@@ -48,6 +48,7 @@ from ipysigma.constants import (
     SUPPORTED_NODE_METRICS,
     SUPPORTED_UNDIRECTED_EDGE_TYPES,
     SUPPORTED_DIRECTED_EDGE_TYPES,
+    SUPPORTED_SYNC_TARGETS,
 )
 
 
@@ -136,6 +137,7 @@ class Sigma(DOMWidget):
     selected_node_category_values = List(allow_none=True).tag(sync=True)
     selected_edge_category_values = List(allow_none=True).tag(sync=True)
     sync_key = Unicode(allow_none=True).tag(sync=True)
+    sync_targets = List(SUPPORTED_SYNC_TARGETS).tag(sync=True)
     ui_settings = Dict({"hideInfoPanel": False, "hideSearch": False}).tag(sync=True)
     renderer_settings = Dict(
         {
@@ -191,6 +193,7 @@ class Sigma(DOMWidget):
         hide_search=False,
         hide_edges_on_move=False,
         sync_key=None,
+        sync_targets=SUPPORTED_SYNC_TARGETS,
         # Widget state
         camera_state=DEFAULT_CAMERA_STATE,
         selected_node=None,
@@ -735,6 +738,11 @@ class Sigma(DOMWidget):
         }
 
         self.sync_key = sync_key
+        self.sync_targets = list(sync_targets)
+
+        for target in self.sync_targets:
+            if target not in SUPPORTED_SYNC_TARGETS:
+                raise TypeError('unsupported sync target "%s"' % target)
 
     def __repr__(self):
         return "Sigma(%s with %s nodes and %s edges)" % (

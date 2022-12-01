@@ -25,3 +25,4 @@ SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain"}
 SUPPORTED_UNDIRECTED_EDGE_TYPES = {"rectangle", "line", "curve"}
 SUPPORTED_DIRECTED_EDGE_TYPES = SUPPORTED_UNDIRECTED_EDGE_TYPES | {"arrow", "triangle"}
+SUPPORTED_SYNC_TARGETS = {"layout", "camera", "selection", "hover"}
