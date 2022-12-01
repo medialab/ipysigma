@@ -218,6 +218,7 @@ class Sigma(DOMWidget):
         node_border_color_gradient=None,
         node_border_color_palette=None,
         default_node_border_color=DEFAULT_NODE_BORDER_COLOR,
+        node_border_color_from=None,
         node_border_ratio=None,
         raw_node_border_ratio=None,
         node_border_ratio_range=DEFAULT_NODE_BORDER_RATIO_RANGE,
@@ -491,6 +492,9 @@ class Sigma(DOMWidget):
         )
 
         if node_borders:
+            if node_border_color_from is not None and node_border_color_from != "node":
+                raise TypeError('node_border_color_from can only be from "node"')
+
             visual_variables_builder.build_categorical_or_continuous(
                 "nodeBorderColor",
                 node_border_color,
@@ -499,6 +503,7 @@ class Sigma(DOMWidget):
                 palette=node_border_color_palette,
                 gradient=node_border_color_gradient,
                 variable_prefix="border",
+                mapped_from=node_border_color_from,
             )
 
             if node_borders is True or node_borders == "size":

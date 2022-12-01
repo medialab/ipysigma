@@ -12,6 +12,7 @@ import forceAtlas2 from 'graphology-layout-forceatlas2';
 import type { ForceAtlas2Settings } from 'graphology-layout-forceatlas2';
 import louvain from 'graphology-communities-louvain';
 import { collectLayout, assignLayout } from 'graphology-layout/utils';
+import chroma from 'chroma-js';
 
 import Sigma from 'sigma';
 import { animateNodes } from 'sigma/utils/animate';
@@ -733,6 +734,11 @@ export class SigmaView extends DOMWidgetView {
           ? visualVariables.edgeColor.value
           : null;
 
+      const nodeBorderColorFrom =
+        visualVariables.nodeBorderColor.type === 'dependent'
+          ? visualVariables.nodeBorderColor.value
+          : undefined;
+
       // Node reducer
       rendererSettings.nodeReducer = (node, data) => {
         const displayData: Partial<IPysigmaNodeDisplayData> = {
@@ -763,7 +769,11 @@ export class SigmaView extends DOMWidgetView {
             displayData.size += displayData.borderSize;
           }
 
-          displayData.borderColor = scales.nodeBorderColor(data) as string;
+          if (nodeBorderColorFrom) {
+            displayData.borderColor = chroma(displayData.color).darken().hex();
+          } else {
+            displayData.borderColor = scales.nodeBorderColor(data) as string;
+          }
         }
 
         if (nodePictogramsEnabled) {

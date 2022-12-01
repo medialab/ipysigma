@@ -16,7 +16,6 @@ const CATEGORY_MAX_COUNT = 10;
  */
 export type Bound = number | string;
 export type Range = [Bound, Bound];
-export type EdgeColorDependency = 'source' | 'target';
 
 export interface AttributeScale {
   (value: Attributes): string | number;
@@ -51,7 +50,7 @@ export type ContinuousVisualVariable = {
 
 export type DependentVisualVariable = {
   type: 'dependent';
-  value: EdgeColorDependency;
+  value: string;
 };
 
 export type DisabledVisualVariable = {
