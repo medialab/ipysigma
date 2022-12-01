@@ -4,6 +4,7 @@ from collections import Mapping, Sequence, Iterable
 from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
+    SUPPORTED_SCALE_TYPES,
     DEFAULT_NODE_SIZE_RANGE,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_COLOR,
@@ -29,6 +30,28 @@ def is_partition(value):
         and len(value) > 0
         and isinstance(value[0], (set, frozenset, list))
     )
+
+
+def resolve_scale(value):
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        value = (value, None)
+    elif isinstance(value, Iterable):
+        try:
+            value = iter(value)
+            value = (next(value), next(value))
+        except StopIteration:
+            raise TypeError("scale should be a type or a (type, param) tuple")
+
+    if value[0] not in SUPPORTED_SCALE_TYPES:
+        raise TypeError('unknown scale type "%s"' % value[0])
+
+    if value[1] is not None and not isinstance(value[1], (int, float)):
+        raise TypeError("scale param should be a number")
+
+    return value
 
 
 def resolve_variable(name, items, target, item_type="node", is_directed=False):
@@ -336,6 +359,7 @@ class VisualVariableBuilder(object):
         kind="size",
         range=None,
         variable_prefix=None,
+        scale=None,
     ):
         item_type = "node" if name.startswith("node") else "edge"
         items = self.nodes if item_type == "node" else self.edges
@@ -363,6 +387,10 @@ class VisualVariableBuilder(object):
                 range,
             )
             variable = {"type": "continuous", "range": range}
+
+            if scale is not None:
+                scale = resolve_scale(scale)
+                variable["scale"] = scale
 
             if default is None:
                 default = range[0]
@@ -396,6 +424,7 @@ class VisualVariableBuilder(object):
         palette=None,
         gradient=None,
         variable_prefix=None,
+        scale=None,
     ):
         item_type = "node" if name.startswith("node") else "edge"
         items = self.nodes if item_type == "node" else self.edges
@@ -444,6 +473,10 @@ class VisualVariableBuilder(object):
 
                 variable["type"] = "continuous"
                 variable["range"] = gradient
+
+                if scale is not None:
+                    scale = resolve_scale(scale)
+                    variable["scale"] = scale
 
                 if default is None:
                     default = gradient[0]

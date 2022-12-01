@@ -337,14 +337,20 @@ function createSpinner(): [HTMLElement, () => void] {
   return [span, () => frame !== null && clearTimeout(frame)];
 }
 
-function getGraphDescription(graph: Graph): string {
-  let graphTitle = `${graph.multi ? 'Multi ' : ''}${
+function getGraphDescription(name: string | undefined, graph: Graph): string {
+  let html = '';
+
+  if (name) {
+    html += `<u>${escapeHtml(name)}</u><br>`;
+  }
+
+  const graphTitle = `${graph.multi ? 'Multi ' : ''}${
     graph.type === 'undirected' ? 'Undirected' : 'Directed'
   } Graph`;
 
-  let html = `<u>${graphTitle}</u><br><b>${comma(
-    graph.order
-  )}</b> nodes<br><b>${comma(graph.size)}</b> edges`;
+  html += `${graphTitle}<br><b>${comma(graph.order)}</b> nodes<br><b>${comma(
+    graph.size
+  )}</b> edges`;
 
   return html;
 }
@@ -416,6 +422,7 @@ export class SigmaView extends DOMWidgetView {
     this.el.classList.add('ipysigma-widget');
 
     const height = this.model.get('height');
+    const name = this.model.get('name');
     const data = this.model.get('data');
 
     const graph = buildGraph(data, createRng());
@@ -495,7 +502,7 @@ export class SigmaView extends DOMWidgetView {
     const description = this.el.querySelector(
       '.ipysigma-graph-description'
     ) as HTMLElement;
-    description.innerHTML = getGraphDescription(graph);
+    description.innerHTML = getGraphDescription(name, graph);
 
     // Camera controls
     this.zoomButton = this.el.querySelector(

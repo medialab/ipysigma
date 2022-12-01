@@ -4,7 +4,7 @@
 import Graph, { Attributes } from 'graphology-types';
 import MultiSet from 'mnemonist/multi-set';
 import Palette, { Entries, PaletteKind } from './palette';
-import { scaleLinear } from 'd3-scale';
+import { scaleLinear, scaleLog, scalePow, scaleSqrt } from 'd3-scale';
 
 /**
  * Constants.
@@ -16,6 +16,11 @@ const CATEGORY_MAX_COUNT = 10;
  */
 export type Bound = number | string;
 export type Range = [Bound, Bound];
+export type ScaleType = 'lin' | 'log' | 'pow' | 'sqrt';
+export type ScaleDefinition = [
+  type: ScaleType,
+  param: number | null | undefined
+];
 
 export interface AttributeScale {
   (value: Attributes): string | number;
@@ -46,6 +51,7 @@ export type ContinuousVisualVariable = {
   attribute: string;
   range: Range;
   default?: number;
+  scale?: ScaleDefinition;
 };
 
 export type DependentVisualVariable = {
@@ -91,6 +97,43 @@ export type VisualVariables = {
  */
 function isValidNumber(value: any): value is number {
   return typeof value === 'number' && !Number.isNaN(value);
+}
+
+function createD3Scale(definiton: ScaleDefinition | undefined | null) {
+  if (!definiton) return scaleLinear();
+
+  const [type, param] = definiton;
+
+  if (type === 'lin') {
+    return scaleLinear();
+  }
+
+  if (type === 'log') {
+    const scale = scaleLog();
+
+    if (param) scale.base(param);
+
+    return scale;
+  }
+
+  if (type === 'pow') {
+    const scale = scalePow();
+
+    if (param) scale.exponent(param);
+    else scale.exponent(2);
+
+    return scale;
+  }
+
+  if (type === 'sqrt') {
+    const scale = scaleSqrt();
+
+    if (param) scale.exponent(1 / param);
+
+    return scale;
+  }
+
+  throw new Error('unknown scale type');
 }
 
 /**
@@ -321,7 +364,7 @@ export class VisualVariableScalesBuilder {
               ? variable.default
               : variable.range[0];
         } else {
-          const continuousScale = scaleLinear()
+          const continuousScale = createD3Scale(variable.scale)
             .domain([extent.min as number, extent.max as number])
             .range(variable.range as [number, number]);
 

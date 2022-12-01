@@ -123,6 +123,7 @@ class Sigma(DOMWidget):
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Int(DEFAULT_HEIGHT).tag(sync=True)
+    name = Unicode(allow_none=True).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     start_layout_for_seconds = Float(allow_none=True).tag(sync=True)
     clickable_edges = Bool(False).tag(sync=True)
@@ -182,6 +183,7 @@ class Sigma(DOMWidget):
         graph,
         *,
         # Various options
+        name=None,
         height=None,
         start_layout=False,
         node_metrics=None,
@@ -212,6 +214,7 @@ class Sigma(DOMWidget):
         node_color=None,
         raw_node_color="color",
         node_color_gradient=None,
+        node_color_scale=None,
         node_color_palette=None,
         default_node_color=DEFAULT_NODE_COLOR,
         # Node border
@@ -248,16 +251,19 @@ class Sigma(DOMWidget):
         node_halo_size=None,
         raw_node_halo_size=None,
         node_halo_size_range=DEFAULT_NODE_HALO_SIZE_RANGE,
+        node_halo_size_scale=None,
         default_node_halo_size=DEFAULT_NODE_HALO_SIZE,
         node_halo_color=None,
         raw_node_halo_color=None,
         node_halo_color_gradient=None,
+        node_halo_color_scale=None,
         node_halo_color_palette=None,
         default_node_halo_color=DEFAULT_NODE_HALO_COLOR,
         # Node size
         node_size="size",
         raw_node_size=None,
         node_size_range=None,
+        node_size_scale=None,
         default_node_size=None,
         # Node label
         raw_node_label="label",
@@ -280,6 +286,7 @@ class Sigma(DOMWidget):
         raw_edge_color="color",
         edge_color_palette=None,
         edge_color_gradient=None,
+        edge_color_scale=None,
         edge_color_from=None,
         default_edge_color=DEFAULT_EDGE_COLOR,
         # Edge type
@@ -288,6 +295,7 @@ class Sigma(DOMWidget):
         edge_size="size",
         raw_edge_size=None,
         edge_size_range=None,
+        edge_size_scale=None,
         default_edge_size=None,
         # Edge curveness
         default_edge_curveness=DEFAULT_EDGE_CURVENESS,
@@ -368,6 +376,7 @@ class Sigma(DOMWidget):
 
         # Traits
         self.height = height
+        self.name = name
         self.max_category_colors = max_category_colors
         self.start_layout = bool(start_layout)
         self.start_layout_for_seconds = None
@@ -466,6 +475,7 @@ class Sigma(DOMWidget):
             default=default_node_color,
             palette=node_color_palette,
             gradient=node_color_gradient,
+            scale=node_color_scale,
         )
         visual_variables_builder.build_continuous(
             "nodeSize",
@@ -473,6 +483,7 @@ class Sigma(DOMWidget):
             raw_node_size,
             default=default_node_size,
             range=node_size_range,
+            scale=node_size_scale,
         )
         visual_variables_builder.build_raw(
             "nodeLabel", node_label, raw_node_label, default=default_node_label
@@ -541,6 +552,7 @@ class Sigma(DOMWidget):
                 palette=node_halo_color_palette,
                 gradient=node_halo_color_gradient,
                 variable_prefix="halo",
+                scale=node_halo_color_scale,
             )
             visual_variables_builder.build_continuous(
                 "nodeHaloSize",
@@ -548,6 +560,7 @@ class Sigma(DOMWidget):
                 raw_node_halo_size,
                 default=default_node_halo_size,
                 range=node_halo_size_range,
+                scale=node_halo_size_scale,
                 variable_prefix="halo",
             )
 
@@ -594,6 +607,7 @@ class Sigma(DOMWidget):
             mapped_from=edge_color_from,
             palette=edge_color_palette,
             gradient=edge_color_gradient,
+            scale=edge_color_scale,
         )
         visual_variables_builder.build_continuous(
             "edgeSize",
@@ -601,6 +615,7 @@ class Sigma(DOMWidget):
             raw_edge_size,
             default=default_edge_size,
             range=edge_size_range,
+            scale=edge_size_scale,
         )
         visual_variables_builder.build_raw(
             "edgeLabel", edge_label, raw_edge_label, default=default_edge_label
