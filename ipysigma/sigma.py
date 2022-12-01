@@ -27,6 +27,7 @@ from ipysigma.constants import (
     MIN_HEIGHT,
     DEFAULT_LABEL_FONT,
     DEFAULT_NODE_COLOR,
+    DEFAULT_NODE_COLOR_SATURATION_RANGE,
     DEFAULT_NODE_BORDER_COLOR,
     DEFAULT_NODE_LABEL_COLOR,
     DEFAULT_NODE_LABEL_SIZE,
@@ -217,6 +218,11 @@ class Sigma(DOMWidget):
         node_color_scale=None,
         node_color_palette=None,
         default_node_color=DEFAULT_NODE_COLOR,
+        node_color_saturation=None,
+        raw_node_color_saturation=None,
+        node_color_saturation_scale=None,
+        node_color_saturation_range=DEFAULT_NODE_COLOR_SATURATION_RANGE,
+        default_node_color_saturation=None,
         # Node border
         node_borders=False,
         node_border_color=None,
@@ -476,6 +482,15 @@ class Sigma(DOMWidget):
             palette=node_color_palette,
             gradient=node_color_gradient,
             scale=node_color_scale,
+        )
+        visual_variables_builder.build_continuous(
+            "nodeColorSaturation",
+            node_color_saturation,
+            raw_node_color_saturation,
+            default=default_node_color_saturation,
+            scale=node_color_saturation_scale,
+            kind="color_saturation",
+            range=node_color_saturation_range,
         )
         visual_variables_builder.build_continuous(
             "nodeSize",

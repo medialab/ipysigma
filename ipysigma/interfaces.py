@@ -144,7 +144,12 @@ def is_networkx_degree_view(target) -> bool:
         target,
         (
             nx.classes.reportviews.DegreeView,
+            nx.classes.reportviews.DiDegreeView,
             nx.classes.reportviews.InDegreeView,
             nx.classes.reportviews.OutDegreeView,
+            nx.classes.reportviews.MultiDegreeView,
+            nx.classes.reportviews.DiMultiDegreeView,
+            nx.classes.reportviews.InMultiDegreeView,
+            nx.classes.reportviews.OutMultiDegreeView,
         ),
     )

@@ -73,6 +73,7 @@ export type VisualVariable =
 
 export type VisualVariables = {
   nodeColor: VisualVariable;
+  nodeColorSaturation: VisualVariable;
   nodeBorderColor: VisualVariable;
   nodeBorderRatio: VisualVariable;
   nodeBorderSize: VisualVariable;

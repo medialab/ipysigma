@@ -617,6 +617,8 @@ export class SigmaView extends DOMWidgetView {
         'visual_variables'
       ) as VisualVariables;
 
+      const nodeColorSaturationEnabled =
+        visualVariables.nodeColorSaturation.type !== 'disabled';
       const nodeBordersEnabled =
         visualVariables.nodeBorderColor.type !== 'disabled';
       const nodePictogramsEnabled =
@@ -768,6 +770,17 @@ export class SigmaView extends DOMWidgetView {
         displayData.label = (scales.nodeLabel(data) || node) as string;
         displayData.labelSize = scales.nodeLabelSize(data) as number;
         displayData.labelColor = scales.nodeLabelColor(data) as string;
+
+        if (nodeColorSaturationEnabled) {
+          const color = chroma(displayData.color);
+
+          displayData.color = color
+            .set(
+              'lch.c',
+              color.get('lch.c') * (scales.nodeColorSaturation(data) as number)
+            )
+            .hex();
+        }
 
         if (nodeBordersEnabled) {
           if (visualVariables.nodeBorderRatio.type !== 'disabled')
