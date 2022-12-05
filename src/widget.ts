@@ -239,7 +239,7 @@ function escapeHtml(unsafe: string): string {
 }
 
 function renderTypedValue(value: any): string {
-  const safe = escapeHtml('' + value);
+  let safe = escapeHtml('' + value);
 
   let type = 'unknown';
 
@@ -249,6 +249,7 @@ function renderTypedValue(value: any): string {
     type = 'string';
   } else if (typeof value === 'boolean') {
     type = 'boolean';
+    safe = value ? 'True' : 'False';
   }
 
   return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;
@@ -620,11 +621,15 @@ export class SigmaView extends DOMWidgetView {
       const nodeColorSaturationEnabled =
         visualVariables.nodeColorSaturation.type !== 'disabled';
       const nodeBordersEnabled =
-        visualVariables.nodeBorderColor.type !== 'disabled';
+        visualVariables.nodeBorderColor.type !== 'disabled' &&
+        (visualVariables.nodeBorderSize.type !== 'disabled' ||
+          visualVariables.nodeBorderRatio.type !== 'disabled');
       const nodePictogramsEnabled =
         visualVariables.nodePictogram.type !== 'disabled';
       const nodeShapeEnabled = visualVariables.nodeShape.type !== 'disabled';
-      const nodeHaloEnabled = visualVariables.nodeHaloSize.type !== 'disabled';
+      const nodeHaloEnabled =
+        visualVariables.nodeHaloSize.type !== 'disabled' &&
+        visualVariables.nodeHaloColor.type !== 'disabled';
 
       const edgeProgramClasses = {
         rectangle: EdgeRectangleProgram,

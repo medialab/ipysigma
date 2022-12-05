@@ -28,17 +28,14 @@ from ipysigma.constants import (
     DEFAULT_LABEL_FONT,
     DEFAULT_NODE_COLOR,
     DEFAULT_NODE_COLOR_SATURATION_RANGE,
-    DEFAULT_NODE_BORDER_COLOR,
     DEFAULT_NODE_LABEL_COLOR,
     DEFAULT_NODE_LABEL_SIZE,
     DEFAULT_NODE_LABEL_SIZE_RANGE,
     DEFAULT_NODE_SIZE_RANGE,
-    DEFAULT_NODE_BORDER_RATIO,
     DEFAULT_NODE_BORDER_RATIO_RANGE,
     DEFAULT_NODE_BORDER_SIZE,
     DEFAULT_NODE_BORDER_SIZE_RANGE,
     DEFAULT_NODE_PICTOGRAM_COLOR,
-    DEFAULT_NODE_HALO_SIZE,
     DEFAULT_NODE_HALO_SIZE_RANGE,
     DEFAULT_NODE_HALO_COLOR,
     DEFAULT_EDGE_COLOR,
@@ -224,17 +221,16 @@ class Sigma(DOMWidget):
         node_color_saturation_range=DEFAULT_NODE_COLOR_SATURATION_RANGE,
         default_node_color_saturation=None,
         # Node border
-        node_borders=False,
         node_border_color=None,
         raw_node_border_color=None,
         node_border_color_gradient=None,
         node_border_color_palette=None,
-        default_node_border_color=DEFAULT_NODE_BORDER_COLOR,
+        default_node_border_color=None,
         node_border_color_from=None,
         node_border_ratio=None,
         raw_node_border_ratio=None,
         node_border_ratio_range=DEFAULT_NODE_BORDER_RATIO_RANGE,
-        default_node_border_ratio=DEFAULT_NODE_BORDER_RATIO,
+        default_node_border_ratio=None,
         node_border_size=None,
         raw_node_border_size=None,
         node_border_size_range=DEFAULT_NODE_BORDER_SIZE_RANGE,
@@ -253,18 +249,17 @@ class Sigma(DOMWidget):
         node_shape_mapping=None,
         default_node_shape=None,
         # Node halo
-        node_halos=False,
         node_halo_size=None,
         raw_node_halo_size=None,
         node_halo_size_range=DEFAULT_NODE_HALO_SIZE_RANGE,
         node_halo_size_scale=None,
-        default_node_halo_size=DEFAULT_NODE_HALO_SIZE,
-        node_halo_color=None,
+        default_node_halo_size=None,
+        node_halo_color=DEFAULT_NODE_HALO_COLOR,
         raw_node_halo_color=None,
         node_halo_color_gradient=None,
         node_halo_color_scale=None,
         node_halo_color_palette=None,
-        default_node_halo_color=DEFAULT_NODE_HALO_COLOR,
+        default_node_halo_color=None,
         # Node size
         node_size="size",
         raw_node_size=None,
@@ -520,64 +515,58 @@ class Sigma(DOMWidget):
             variable_prefix="label",
         )
 
-        if node_borders:
-            if node_border_color_from is not None and node_border_color_from != "node":
-                raise TypeError('node_border_color_from can only be from "node"')
+        if node_border_color_from is not None and node_border_color_from != "node":
+            raise TypeError('node_border_color_from can only be from "node"')
 
-            visual_variables_builder.build_categorical_or_continuous(
-                "nodeBorderColor",
-                node_border_color,
-                raw_node_border_color,
-                default=default_node_border_color,
-                palette=node_border_color_palette,
-                gradient=node_border_color_gradient,
-                variable_prefix="border",
-                mapped_from=node_border_color_from,
-            )
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodeBorderColor",
+            node_border_color,
+            raw_node_border_color,
+            default=default_node_border_color,
+            palette=node_border_color_palette,
+            gradient=node_border_color_gradient,
+            variable_prefix="border",
+            mapped_from=node_border_color_from,
+        )
 
-            if node_borders is True or node_borders == "size":
-                visual_variables_builder.build_continuous(
-                    "nodeBorderSize",
-                    node_border_size,
-                    raw_node_border_size,
-                    default=default_node_border_size,
-                    range=node_border_size_range,
-                    variable_prefix="border",
-                )
-            elif node_borders == "ratio":
-                visual_variables_builder.build_continuous(
-                    "nodeBorderRatio",
-                    node_border_ratio,
-                    raw_node_border_ratio,
-                    default=default_node_border_ratio,
-                    range=node_border_ratio_range,
-                    variable_prefix="border",
-                )
-            else:
-                raise TypeError(
-                    'node_borders should be True (same as passing "size"), "size" or "ratio"'
-                )
+        visual_variables_builder.build_continuous(
+            "nodeBorderSize",
+            node_border_size,
+            raw_node_border_size,
+            default=default_node_border_size,
+            range=node_border_size_range,
+            variable_prefix="border",
+        )
 
-        if node_halos:
-            visual_variables_builder.build_categorical_or_continuous(
-                "nodeHaloColor",
-                node_halo_color,
-                raw_node_halo_color,
-                default=default_node_halo_color,
-                palette=node_halo_color_palette,
-                gradient=node_halo_color_gradient,
-                variable_prefix="halo",
-                scale=node_halo_color_scale,
-            )
-            visual_variables_builder.build_continuous(
-                "nodeHaloSize",
-                node_halo_size,
-                raw_node_halo_size,
-                default=default_node_halo_size,
-                range=node_halo_size_range,
-                scale=node_halo_size_scale,
-                variable_prefix="halo",
-            )
+        visual_variables_builder.build_continuous(
+            "nodeBorderRatio",
+            node_border_ratio,
+            raw_node_border_ratio,
+            default=default_node_border_ratio,
+            range=node_border_ratio_range,
+            variable_prefix="border",
+            kind="ratio",
+        )
+
+        visual_variables_builder.build_categorical_or_continuous(
+            "nodeHaloColor",
+            node_halo_color,
+            raw_node_halo_color,
+            default=default_node_halo_color,
+            palette=node_halo_color_palette,
+            gradient=node_halo_color_gradient,
+            variable_prefix="halo",
+            scale=node_halo_color_scale,
+        )
+        visual_variables_builder.build_continuous(
+            "nodeHaloSize",
+            node_halo_size,
+            raw_node_halo_size,
+            default=default_node_halo_size,
+            range=node_halo_size_range,
+            scale=node_halo_size_scale,
+            variable_prefix="halo",
+        )
 
         visual_variables_builder.build_categorical_or_continuous(
             "nodePictogram",
@@ -641,11 +630,23 @@ class Sigma(DOMWidget):
 
         self.visual_variables = visual_variables_builder.build()
 
+        must_render_node_borders = self.visual_variables["nodeBorderColor"][
+            "type"
+        ] != "disabled" and (
+            self.visual_variables["nodeBorderSize"]["type"] != "disabled"
+            or self.visual_variables["nodeBorderRatio"]["type"] != "disabled"
+        )
+
+        must_render_node_halos = (
+            self.visual_variables["nodeHaloColor"]["type"] != "disabled"
+            and self.visual_variables["nodeHaloSize"]["type"] != "disabled"
+        )
+
         if self.visual_variables["nodeShape"]["type"] != "disabled":
-            if node_borders:
+            if must_render_node_borders:
                 raise TypeError("cannot use node borders with node shapes together")
 
-            if node_halos:
+            if must_render_node_halos:
                 raise TypeError("cannot use node halos and node shapes together")
 
             if self.visual_variables["nodePictogram"]["type"] != "disabled":
@@ -705,28 +706,28 @@ class Sigma(DOMWidget):
 
         default_node_type = "point"
 
-        if node_borders:
+        if must_render_node_borders:
             default_node_type = "border"
 
             if need_to_render_pictograms:
                 default_node_type = "border+picto"
 
-                if node_halos:
+                if must_render_node_halos:
                     default_node_type = "border+halo+picto"
 
-            elif node_halos:
+            elif must_render_node_halos:
                 default_node_type = "border+halo"
 
         elif need_to_render_pictograms:
             default_node_type = "picto"
 
-            if node_halos:
+            if must_render_node_halos:
                 default_node_type = "halo+picto"
 
         elif need_to_render_shapes:
             default_node_type = "shape"
 
-        elif node_halos:
+        elif must_render_node_halos:
             default_node_type = "halo"
 
         renderer_settings["defaultNodeType"] = default_node_type
