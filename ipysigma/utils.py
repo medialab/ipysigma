@@ -1,5 +1,5 @@
 from inspect import signature, Parameter
-from collections import Mapping, Sequence, Iterable
+from collections.abc import Mapping, Sequence, Iterable
 
 from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import (
