@@ -53,7 +53,6 @@ If you make a change to the python code then you will need to restart the notebo
 You need to make sure to update the version in the following files:
 
 - `package.json`
-- `package-lock.json`
 - `ipysigma/_frontend.py`
 - `ipysigma/_version.py`
 
