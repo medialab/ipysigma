@@ -4,10 +4,19 @@ A Jupyter widget using [sigma.js](https://www.sigmajs.org/) and [graphology](htt
 
 `ipysigma` has been designed to work with either [`networkx`](https://networkx.org/) or [`igraph`](https://igraph.readthedocs.io).
 
+![ipysigma](./docs/img/ipysigma.gif)
+
 ## Summary
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
+- [TODO: Examples](#)
+- [TODO: Available visual variables](#)
+- [TODO: What can be used as visual variable](#)
+- [TODO: Visual variables and kwarg naming rationale](#)
+- [TODO: API Reference](#)
+  - [Sigma](#)
+  - [SigmaGrid](#)
 - [Using in Google Colab](#using-in-google-colab)
 
 ## Installation
