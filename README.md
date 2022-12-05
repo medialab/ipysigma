@@ -1,17 +1,14 @@
 # ipysigma
 
-A Jupyter widget using sigma.js to render interactive networks.
+A Jupyter widget using [sigma.js](https://www.sigmajs.org/) and [graphology](https://graphology.github.io/) to render interactive networks directly within the result of a notebook cell.
+
+`ipysigma` has been designed to work with either [`networkx`](https://networkx.org/) or [`igraph`](https://igraph.readthedocs.io).
 
 ## Summary
 
 - [Installation](#installation)
-- [Usage](#usage)
-- [Development Installation](#development-installation)
-  - [How to see your changes](#how-to-see-your-changes)
-    - [Typescript](#typescript)
-    - [Python](#python)
-  - [How to bump version](#how-to-bump-version)
-  - [How to release](#how-to-release)
+- [Quick start](#quick-start)
+- [Using in Google Colab](#using-in-google-colab)
 
 ## Installation
 
@@ -21,8 +18,9 @@ You can install using `pip`:
 pip install ipysigma
 ```
 
-If you are using Jupyter Notebook 5.2 or earlier, you may also need to enable
-the nbextension:
+You will also need to install either `networkx` or `igraph` of course.
+
+If you are using an older version of Jupyter, you might also need to enable the nbextension likewise:
 
 ```bash
 jupyter nbextension enable --py --sys-prefix ipysigma
@@ -32,102 +30,49 @@ jupyter nbextension enable --py --user ipysigma
 jupyter nbextension enable --py --system ipysigma
 ```
 
-## Usage
+## Quick start
+
+*Using networkx*
 
 ```python
 import networkx as nx
 from ipysigma import Sigma
 
-# Creating a dummy graph to serve as example
-g = nx.karate_club_graph()
+# Importing a gexf graph
+g = nx.read_gexf('./my-graph.gexf')
 
-# Displaying the graph
-Sigma(g)
-
-# Tweaking height of widget
-Sigma(g, height=300)
-
-# Starting layout automatically
-Sigma(g, start_layout=True)
-
-# Displaying a gexf file
-g = nx.read_gexf('./path/to/file.gexf')
-Sigma(g)
+# Displaying the graph with a size mapped on degree and
+# a color mapped on a categorical attribute of the nodes
+Sigma(g, node_size=g.degree, node_color='category')
 ```
 
-## Development Installation
+*Using igraph*
 
-Be sure to have a working installation of Node.js >= 14.
+```python
+import igraph as ig
+from ipysigma import Sigma
 
-Create a dev environment using conda or pyenv:
+# Generating a graph
+g = ig.Graph.Famous('Zachary')
 
-```bash
-# Using pyenv
-pyenv virtualenv 3.6.10 ipysigma
-pyenv local ipysigma
-
-# Using conda
-conda create -n ipysigma-dev -c conda-forge nodejs yarn python jupyterlab
-conda activate ipysigma-dev
+# Displaying the graph with a size mapped on degree and
+# a color mapped on node betweenness centrality, using
+# the a continuous color scale named "Viridis"
+Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Viridis')
 ```
 
-Install the python package. This will also build the TS package.
+## Using in Google Colab
 
-```bash
-pip install -e ".[test, examples]"
+If you want to be able to use `ipysigma` on [Google Colab](https://colab.research.google.com), you will need to enable widget output using the following code:
+
+```python
+from google.colab import output
+
+output.enable_custom_widget_manager()
 ```
 
-When developing your extensions, you need to manually enable your extensions with the
-notebook / lab frontend. For lab, this is done by the command:
+Remember you can always install packages in Colab by executing the following command in a cell:
 
 ```
-jupyter labextension develop --overwrite .
-yarn run build
+!pip install networkx ipysigma
 ```
-
-For classic notebook, you need to run:
-
-```
-jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
-jupyter nbextension enable --sys-prefix --py ipysigma
-```
-
-Note that the `--symlink` flag doesn't work on Windows, so you will here have to run
-the `install` command every time that you rebuild your extension. For certain installations
-you might also need another flag instead of `--sys-prefix`, but we won't cover the meaning
-of those flags here.
-
-Alternatively you can also run `make deps` that will handle all of the above for you.
-
-### How to see your changes
-
-#### Typescript
-
-If you use JupyterLab to develop then you can watch the source directory and run JupyterLab at the same time in different
-terminals to watch for changes in the extension's source and automatically rebuild the widget.
-
-```bash
-# Watch the source directory in one terminal, automatically rebuilding when needed
-yarn run watch
-# Run JupyterLab in another terminal
-jupyter lab
-```
-
-After a change wait for the build to finish and then refresh your browser and the changes should take effect.
-
-#### Python
-
-If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
-
-### How to bump version
-
-You need to make sure to update the version in the following files:
-
-- `package.json`
-- `package-lock.json`
-- `ipysigma/_frontend.py`
-- `ipysigma/_version.py`
-
-### How to release
-
-Run `make release`.
