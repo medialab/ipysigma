@@ -1,6 +1,6 @@
 # ipysigma
 
-A Jupyter widget using [sigma.js](https://www.sigmajs.org/) and [graphology](https://graphology.github.io/) to render interactive networks directly within the result of a notebook cell.
+A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.org/) and [graphology](https://graphology.github.io/) to render interactive networks directly within the result of a notebook cell.
 
 `ipysigma` has been designed to work with either [`networkx`](https://networkx.org/) or [`igraph`](https://igraph.readthedocs.io).
 
@@ -16,6 +16,7 @@ A Jupyter widget using [sigma.js](https://www.sigmajs.org/) and [graphology](htt
 - [TODO: Available visual variables](#)
 - [TODO: What can be used as visual variable](#)
 - [TODO: Visual variables and kwarg naming rationale](#)
+- [TODO: Frequently asked questions](#)
 - [TODO: API Reference](#)
   - [Sigma](#)
   - [SigmaGrid](#)
