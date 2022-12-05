@@ -4,7 +4,9 @@ A Jupyter widget using [sigma.js](https://www.sigmajs.org/) and [graphology](htt
 
 `ipysigma` has been designed to work with either [`networkx`](https://networkx.org/) or [`igraph`](https://igraph.readthedocs.io).
 
-![ipysigma](./docs/img/ipysigma.gif)
+<p align="center">
+  <img alt="ipysigma" src="./docs/img/ipysigma.gif">
+</p>
 
 ## Summary
 
