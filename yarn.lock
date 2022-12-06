@@ -6462,16 +6462,9 @@ package-json@^6.5.0:
     registry-url "^5.0.0"
     semver "^6.2.0"
 
-pandemonium@^2.3.0, pandemonium@^2.4.0:
+pandemonium@^2.3.0, pandemonium@^2.4.0, pandemonium@^2.4.1:
   version "2.4.1"
   resolved "https://registry.npmjs.org/pandemonium/-/pandemonium-2.4.1.tgz"
-  integrity sha512-wRqjisUyiUfXowgm7MFH2rwJzKIr20rca5FsHXCMNm1W5YPP1hCtrZfgmQ62kP7OZ7Xt+cR858aB28lu5NX55g==
-  dependencies:
-    mnemonist "^0.39.2"
-
-pandemonium@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/pandemonium/-/pandemonium-2.4.1.tgz#bd51ca72184c6ae135f9049a33c8605bfdb9574d"
   integrity sha512-wRqjisUyiUfXowgm7MFH2rwJzKIr20rca5FsHXCMNm1W5YPP1hCtrZfgmQ62kP7OZ7Xt+cR858aB28lu5NX55g==
   dependencies:
     mnemonist "^0.39.2"
