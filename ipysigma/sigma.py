@@ -379,7 +379,7 @@ class Sigma(DOMWidget):
         self.start_layout = bool(start_layout)
         self.start_layout_for_seconds = None
 
-        if isinstance(start_layout, (int, float)):
+        if type(start_layout) in (int, float):
             self.start_layout_for_seconds = float(start_layout)
 
         self.snapshot = None
