@@ -10,7 +10,7 @@ import * as d3Chromatic from 'd3-scale-chromatic';
 /**
  * Constants.
  */
-const CATEGORY_MAX_COUNT = 10;
+const MAX_CATEGORICAL_COLORS = 10;
 
 /**
  * Types.
@@ -213,7 +213,7 @@ export class CategorySummary {
     frequencies: MultiSet<string>,
     defaultValue: string | undefined,
     scheme?: string,
-    maxCount = CATEGORY_MAX_COUNT
+    maxCount = MAX_CATEGORICAL_COLORS
   ) {
     const count = Math.min(maxCount, frequencies.dimension);
     const topValues = frequencies.top(count);
@@ -255,7 +255,7 @@ export class VisualVariableScalesBuilder {
 
   constructor(
     visualVariables: VisualVariables,
-    maxCategories = CATEGORY_MAX_COUNT
+    maxCategories = MAX_CATEGORICAL_COLORS
   ) {
     this.variables = visualVariables;
     this.maxCategories = maxCategories;

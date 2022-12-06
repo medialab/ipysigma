@@ -22,7 +22,7 @@ from ipysigma.utils import (
 )
 from ipysigma.gexf import process_node_gexf_viz, process_edge_gexf_viz
 from ipysigma.constants import (
-    DEFAULT_MAX_CATEGORY_COLORS,
+    DEFAULT_MAX_CATEGORICAL_COLORS,
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
     DEFAULT_LABEL_FONT,
@@ -55,56 +55,50 @@ from ipysigma.constants import (
 # =============================================================================
 class Sigma(DOMWidget):
     """
-    Jupyter widget displaying an interactive interface that can be used to
-    explore the given networkx graph using sigma.js.
+    A Jupyter widget using sigma.js and graphology to render interactive
+    networks directly within the result of a notebook cell.
 
     Args:
-        graph (nx.Graph or nx.DiGraph or nx.MultiGraph or nx.MultiDiGraph):
-            networkx graph to explore.
-        height (int, optional): height of the widget in pixels. Cannot be less
-            than 250px. Defaults to 500.
-        start_layout (bool, optional): whether to automatically start the
-            provided ForceAtlas2 layout when the widget is displayed.
-            Defaults to False.
-        node_color (str, optional): name of the node attribute that should
-            be interpreted as a category to be used for node color. Note that
-            a suitable color palette will be automatically generated for you.
-            Defaults to None, i.e. will read the "color" attribute of nodes
-            directly or use a grey color if none is to be found.
-        node_size (str, optional): name of the node attribute that should be
-            used for node size. Note the provided size is scaled using
-            the range provided by the `node_size_range` kwarg.
-            Defaults to "size".
-        node_size_range ((number, number), optional): range for node size
-            interpolation. Defaults to (2, 12).
-        node_label (str, optional): name of the node attribute that will be used
-            as node label. Defaults to "label".
-        edge_color (str, optional): name of the edge attribute that should
-            be interpreted as a category to be used for edge color. Note that
-            a suitable color palette will be automatically generated for you.
-            Defaults to None, i.e. will read the "color" attribute of edges
-            directly or use a light grey color if none is to be found.
-        edge_size (str, optional): name of the edge attribute that should be
-            used for edge size. Note the provided size is scaled using
-            the range provided by the `edge_size_range` kwarg.
-            Defaults to "size".
-        edge_size_range ((number, number), optional): range for edge size
-            interpolation. Defaults to (0.5, 10).
-        edge_label (str, optional): name of the edge attribute that will be used
-            as edge label. Defaults to None, i.e. no label.
-        camera_state (dict, optional): camera state of the widget, which is a dict
-            of shape {x, y, ratio, angle}. Can be retrieved using the `get_camera_state`
-            method. Defaults to {x: 0.65, y: 0.5, ratio: 1, angle: 0}.
-        layout (dict, optional): dict mapping nodes to {x, y} positions.
+        graph (nx.AnyGraph or ig.AnyGraph): networkx or igraph graph instance
+            to explore.
+        name (str, optional): name of the graph. Defaults to None.
+        height (int, optional): height of the widget container in pixels.
+            Defaults to 500.
+        start_layout (bool or float, optional): whether to automatically start
+            the layout algorithm when mounting the widget. If a number is given
+            instead, the layout algorithm will start and automatically stop
+            after this many seconds. Defaults to False.
+        node_metrics (Iterable or Mapping, optional): node metrics to be
+            computed by graphology by the widget's JavaScript code. Currently
+            only supports "louvain" for community detection.
             Defaults to None.
-        layout_settings (dict, optional): settings for ForceAtlas2 layout.
-            Defaults to None, i.e. using default settings.
-        clickable_edges (bool, optional): whether to enable edge events so you can
-            click on them to get information. This can be costly on large graphs.
-            Defaults to False.
-        process_gexf_viz (bool, optional): whether to process "viz" data typically
-            found in gexf files so they can be displayed correctly.
-            Defaults to True.
+        layout_settings (dict, optional): settings for the ForceAtlas2 layout
+            (listed here: https://graphology.github.io/standard-library/layout-forceatlas2#settings)
+            Defaults to None.
+        clickable_edges (bool, optional): whether to allow user to click on edges
+            to display their information. This can have a performance cost on
+            larger graphs. Defaults to False.
+        process_gexf_viz (bool, optional): whether to process gexf files viz
+            data for node & edges. Defaults to True.
+        max_categorical_colors (int, optional): max number of colors to be
+            generated for a categorical palette. Categories, ordered by
+            frequency, over this maximum will use the default color.
+            Defaults to 10.
+        hide_info_panel (bool, optional): whether to hide the information panel
+            to the right of the widget. Defaults to False.
+        hide_search (bool, optional): whether to hide the search bar to the
+            right of the widget. Defaults to False.
+        hide_edges_on_move (bool, optional): whether to hide the edges when the
+            graph is being moved. This can be useful to improve performance
+            when the graph is too large. Defaults to False.
+        sync_key (str, optional): Key used by the widget to synchronize events
+            between multiple instances of views of a same graph. Prefer using
+            `SigmaGrid` when able, it will handle this advanced aspect of the
+            widget for you.
+        sync_targets (Iterable[str], optional): Names of targets to synchronize
+            through the `sync_key` kwarg. Targets include "layout", "camera",
+            "selection" and "hover". Defaults to ("layout", "camera", "selection", "hover").
+
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
@@ -115,7 +109,7 @@ class Sigma(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     default_height = DEFAULT_HEIGHT
-    default_max_category_colors = DEFAULT_MAX_CATEGORY_COLORS
+    default_max_categorical_colors = DEFAULT_MAX_CATEGORICAL_COLORS
     default_node_size_range = DEFAULT_NODE_SIZE_RANGE
     default_edge_size_range = DEFAULT_EDGE_SIZE_RANGE
 
@@ -144,7 +138,7 @@ class Sigma(DOMWidget):
             "labelDensity": 1,
         }
     ).tag(sync=True)
-    max_category_colors = Int(DEFAULT_MAX_CATEGORY_COLORS).tag(sync=True)
+    max_categorical_colors = Int(DEFAULT_MAX_CATEGORICAL_COLORS).tag(sync=True)
     program_settings = Dict({"nodeBorderRatio": 0.1}).tag(sync=True)
     visual_variables = Dict(VisualVariableBuilder.get_default()).tag(sync=True)
 
@@ -152,7 +146,7 @@ class Sigma(DOMWidget):
     def set_defaults(
         cls,
         height=None,
-        max_category_colors=None,
+        max_categorical_colors=None,
         node_size_range=None,
         edge_size_range=None,
     ):
@@ -164,11 +158,14 @@ class Sigma(DOMWidget):
 
             cls.default_height = height
 
-        if max_category_colors is not None:
-            if not isinstance(max_category_colors, int) or max_category_colors < 0:
-                raise TypeError("max_category_colors should be a positive integer")
+        if max_categorical_colors is not None:
+            if (
+                not isinstance(max_categorical_colors, int)
+                or max_categorical_colors < 0
+            ):
+                raise TypeError("max_categorical_colors should be a positive integer")
 
-            cls.default_max_category_colors = max_category_colors
+            cls.default_max_categorical_colors = max_categorical_colors
 
         if node_size_range is not None:
             cls.default_node_size_range = node_size_range
@@ -188,7 +185,7 @@ class Sigma(DOMWidget):
         layout_settings=None,
         clickable_edges=False,
         process_gexf_viz=True,
-        max_category_colors=None,
+        max_categorical_colors=None,
         hide_info_panel=False,
         hide_search=False,
         hide_edges_on_move=False,
@@ -317,8 +314,8 @@ class Sigma(DOMWidget):
         if height is None:
             height = self.default_height
 
-        if max_category_colors is None:
-            max_category_colors = self.default_max_category_colors
+        if max_categorical_colors is None:
+            max_categorical_colors = self.default_max_categorical_colors
 
         if node_size_range is None:
             node_size_range = self.default_node_size_range
@@ -330,8 +327,8 @@ class Sigma(DOMWidget):
         if height < MIN_HEIGHT:
             raise TypeError("Sigma widget cannot have a height < %i px" % MIN_HEIGHT)
 
-        if not isinstance(max_category_colors, int) or max_category_colors < 0:
-            raise TypeError("max_category_colors should be a positive integer")
+        if not isinstance(max_categorical_colors, int) or max_categorical_colors < 0:
+            raise TypeError("max_categorical_colors should be a positive integer")
 
         if selected_node is not None and selected_edge is not None:
             raise TypeError(
@@ -378,7 +375,7 @@ class Sigma(DOMWidget):
         # Traits
         self.height = height
         self.name = name
-        self.max_category_colors = max_category_colors
+        self.max_categorical_colors = max_categorical_colors
         self.start_layout = bool(start_layout)
         self.start_layout_for_seconds = None
 

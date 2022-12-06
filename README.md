@@ -12,11 +12,11 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
-- [TODO: Examples](#)
+- [TODO: Examples](#examples)
 - [TODO: Available visual variables](#)
 - [TODO: What can be used as visual variable](#)
 - [TODO: Visual variables and kwarg naming rationale](#)
-- [TODO: Frequently asked questions](#)
+- [TODO: Frequently asked questions](#frequently-asked-questions)
 - [TODO: API Reference](#)
   - [Sigma](#)
   - [SigmaGrid](#)
@@ -72,6 +72,14 @@ g = ig.Graph.Famous('Zachary')
 # the a continuous color scale named "Viridis"
 Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Viridis')
 ```
+
+## Examples
+
+## Frequently asked questions
+
+*How can I display more labels?*
+
+TODO...
 
 ## Using in Google Colab
 
