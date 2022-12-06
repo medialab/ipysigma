@@ -95,10 +95,52 @@ class Sigma(DOMWidget):
             between multiple instances of views of a same graph. Prefer using
             `SigmaGrid` when able, it will handle this advanced aspect of the
             widget for you.
-        sync_targets (Iterable[str], optional): Names of targets to synchronize
+        sync_targets (Iterable, optional): Names of targets to synchronize
             through the `sync_key` kwarg. Targets include "layout", "camera",
             "selection" and "hover". Defaults to ("layout", "camera", "selection", "hover").
-
+        camera_state (dict, optional): Initial state for the widget's camera (which can be
+            retrieved using the `#.get_camera_state` method).
+            Defaults to {"x": 0.5, "y": 0.5, "ratio": 1, "angle": 0}.
+        selected_node (str or int, optional): Key of the initially selected node in
+            the widget (can be retrieved using the `#.get_selected_node` method).
+            Defaults to None.
+        selected_edge (tuple, optional): (source, target) tuple of the initially
+            selected edge in the widget (can be retrieved using the
+            `#.get_selected_edge` method).
+            Defaults to None.
+        selected_node_category_values (Iterable, optional): list of selected node category
+            values (can be retrieved using the `#.get_selected_node_category_values` method).
+            Defaults to None.
+        selected_edge_category_values (Iterable, optional): list of selected edge category
+            values (can be retrieved using the `#.get_selected_edge_category_values` method).
+            Defaults to None.
+        label_font (str, optional): font to be used with labels. Defaults to "sans-serif".
+        label_density (int, optional): number of labels to display per grid cell for
+            default camera zoom. Defaults to 1.
+        label_grid_cell_size (int, optional): size in pixels of a square cell in the label
+            selection grid. Defaults to 250.
+        label_rendered_size_threshold (int, optional): minimum actual rendered size
+            (after camera zoom operations) a node must have on screen for its label to
+            be allowed to be displayed. If None, the threshold will be inferred based
+            on the maximum node size of your graph.
+            Defaults to None.
+        show_all_labels (bool, optional): macro setting making sure most, if not all, labels
+            get displayed on screen. Might have an impact on performance with larger graphs.
+            Defaults to False.
+        layout (Mapping, optional): node positions, expressed as a mapping of nodes to a {x, y}
+            dict. Defaults to None.
+        node_color (VariableData, optional): data to be used as categorical or continuous node
+            color. Defaults to None.
+        raw_node_color (RawVariableData, optional): raw data (colors) to be used for nodes.
+            Defaults to "color".
+        node_color_gradient (Iterable or str, optional): gradient of colors to map to, for instance:
+            (["yellow", "red"]), or name of a d3 continuous color scale (found here:
+            https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
+            If given, node color will be interpreted as continuous rather than categorical.
+            Defaults to None.
+        node_color_scale (Iterable or str, optional): ...
+        node_color_palette (Mapping or str, optional): ...
+        default_node_color (str, optional): ...
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
