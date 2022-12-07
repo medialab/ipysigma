@@ -303,7 +303,7 @@ class Sigma(DOMWidget):
         node_size="size",
         raw_node_size=None,
         node_size_range=None,
-        node_size_scale="sqrt",
+        node_size_scale=None,
         default_node_size=None,
         # Node label
         raw_node_label="label",
