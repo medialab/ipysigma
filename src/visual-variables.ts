@@ -12,6 +12,7 @@ import * as d3Chromatic from 'd3-scale-chromatic';
  */
 const MAX_CATEGORICAL_COLORS = 10;
 const DEFAULT_DEFAULT_CONTINUOUS_VALUE = 1;
+const ESPILON = 1e-8;
 
 /**
  * Types.
@@ -102,41 +103,84 @@ function isValidNumber(value: any): value is number {
   return typeof value === 'number' && !Number.isNaN(value);
 }
 
-function createD3Scale(definiton: ScaleDefinition | undefined | null) {
-  if (!definiton) return scaleLinear();
+function rangeIsConstant(range: Range | string): boolean {
+  if (!Array.isArray(range)) return false;
 
-  const [type, param] = definiton;
+  if (typeof range[0] === 'string') return range[0] === range[1];
 
-  if (type === 'lin') {
-    return scaleLinear();
+  return Math.abs(range[0] - (range[1] as number)) <= ESPILON;
+}
+
+function createContinuousScale(
+  variable: ContinuousVisualVariable,
+  extent: Extent
+): AttributeScale {
+  if (rangeIsConstant(variable.range) || extent.isConstant()) {
+    const defaultValue = isValidNumber(variable.default)
+      ? variable.default
+      : variable.range[0];
+
+    return () => defaultValue;
   }
 
-  if (type === 'log') {
-    const scale = scaleLog();
+  let scale: ReturnType<typeof scaleLinear>;
 
-    if (param) scale.base(param);
+  const definition = variable.scale;
 
-    return scale;
+  if (!definition) scale = scaleLinear();
+  else {
+    const [type, param] = definition;
+
+    if (type === 'lin') scale = scaleLinear();
+    else if (type === 'log') {
+      scale = scaleLog();
+      if (param) (scale as ReturnType<typeof scaleLog>).base(param);
+    } else if (type === 'pow') {
+      scale = scalePow();
+      (scale as ReturnType<typeof scalePow>).exponent(param ? param : 2);
+    } else if (type === 'sqrt') {
+      scale = scaleSqrt();
+      if (param) (scale as ReturnType<typeof scaleSqrt>).exponent(1 / param);
+    } else throw new Error('unknown scale type');
   }
 
-  if (type === 'pow') {
-    const scale = scalePow();
+  scale.domain([extent.min, extent.max]);
 
-    if (param) scale.exponent(param);
-    else scale.exponent(2);
+  if (typeof variable.range === 'string') {
+    const chromatic = (
+      d3Chromatic as unknown as Record<string, (value: number) => string>
+    )['interpolate' + variable.range];
 
-    return scale;
+    return (attr) => {
+      const value = attr[variable.attribute];
+
+      if (!isValidNumber(value))
+        return (
+          variable.default ||
+          variable.range[0] ||
+          DEFAULT_DEFAULT_CONTINUOUS_VALUE
+        );
+
+      return chromatic(scale(value) as number);
+    };
+  } else if (variable.range) {
+    scale.range(variable.range);
+
+    return (attr) => {
+      const value = attr[variable.attribute];
+
+      if (!isValidNumber(value))
+        return (
+          variable.default ||
+          variable.range[0] ||
+          DEFAULT_DEFAULT_CONTINUOUS_VALUE
+        );
+
+      return scale(value) as number;
+    };
   }
 
-  if (type === 'sqrt') {
-    const scale = scaleSqrt();
-
-    if (param) scale.exponent(1 / param);
-
-    return scale;
-  }
-
-  throw new Error('unknown scale type');
+  throw new Error('could not create valid continuous scale');
 }
 
 /**
@@ -363,46 +407,7 @@ export class VisualVariableScalesBuilder {
 
         const extent = extents.attributes[variable.attribute];
 
-        if (typeof variable.range === 'string') {
-          const continuousScale = createD3Scale(variable.scale).domain([
-            extent.min as number,
-            extent.max as number,
-          ]);
-
-          const chromatic = (
-            d3Chromatic as unknown as Record<string, (value: number) => string>
-          )['interpolate' + variable.range];
-
-          scale = (attr) => {
-            const value = attr[variable.attribute];
-
-            if (!isValidNumber(value))
-              return variable.default || DEFAULT_DEFAULT_CONTINUOUS_VALUE;
-
-            return chromatic(continuousScale(value));
-          };
-        } else if (
-          variable.range[0] === variable.range[1] ||
-          extent.isConstant()
-        ) {
-          scale = () =>
-            isValidNumber(variable.default)
-              ? variable.default
-              : variable.range[0];
-        } else {
-          const continuousScale = createD3Scale(variable.scale)
-            .domain([extent.min as number, extent.max as number])
-            .range(variable.range as [number, number]);
-
-          scale = (attr) => {
-            const value = attr[variable.attribute];
-
-            if (!isValidNumber(value))
-              return variable.default || DEFAULT_DEFAULT_CONTINUOUS_VALUE;
-
-            return continuousScale(value);
-          };
-        }
+        scale = createContinuousScale(variable, extent);
       }
 
       if (scale) scales[variableName] = scale;
