@@ -19,7 +19,7 @@ const ESPILON = 1e-8;
  */
 export type Bound = number | string;
 export type Range = [Bound, Bound];
-export type ScaleType = 'lin' | 'log' | 'pow' | 'sqrt';
+export type ScaleType = 'lin' | 'log' | 'log+1' | 'pow' | 'sqrt';
 export type ScaleDefinition = [
   type: ScaleType,
   param: number | null | undefined
@@ -116,15 +116,20 @@ function rangeIsConstant(range: Range | string): boolean {
   return Math.abs(range[0] - (range[1] as number)) <= ESPILON;
 }
 
+function getContinuousDefaultValue(variable: ContinuousVisualVariable): number {
+  if (isValidNumber(variable.default)) return variable.default as number;
+  if (Array.isArray(variable.range) && isValidNumber(variable.range[0]))
+    return variable.range[0] as number;
+  return DEFAULT_DEFAULT_CONTINUOUS_VALUE;
+}
+
 function createContinuousScale(
   variable: ContinuousVisualVariable,
   extent: Extent
 ): AttributeScale {
-  if (rangeIsConstant(variable.range) || extent.isConstant()) {
-    const defaultValue = isValidNumber(variable.default)
-      ? variable.default
-      : variable.range[0];
+  const defaultValue = getContinuousDefaultValue(variable);
 
+  if (rangeIsConstant(variable.range) || extent.isConstant()) {
     return () => defaultValue;
   }
 
@@ -132,12 +137,15 @@ function createContinuousScale(
 
   const definition = variable.scale;
 
+  let isLogPlusOne = false;
+
   if (!definition) scale = scaleLinear();
   else {
     const [type, param] = definition;
 
     if (type === 'lin') scale = scaleLinear();
-    else if (type === 'log') {
+    else if (type === 'log' || type === 'log+1') {
+      isLogPlusOne = type === 'log+1';
       scale = scaleLog();
       if (param) (scale as ReturnType<typeof scaleLog>).base(param);
     } else if (type === 'pow') {
@@ -149,7 +157,9 @@ function createContinuousScale(
     } else throw new Error('unknown scale type');
   }
 
-  scale.domain([extent.min, extent.max]);
+  const offset = isLogPlusOne ? 1 : 0;
+
+  scale.domain([extent.min + offset, extent.max + offset]);
 
   if (typeof variable.range === 'string') {
     const chromatic = (
@@ -157,14 +167,11 @@ function createContinuousScale(
     )['interpolate' + variable.range];
 
     return (attr) => {
-      const value = attr[variable.attribute];
+      let value = attr[variable.attribute];
 
-      if (!isValidNumber(value))
-        return (
-          variable.default ||
-          variable.range[0] ||
-          DEFAULT_DEFAULT_CONTINUOUS_VALUE
-        );
+      if (!isValidNumber(value)) return defaultValue;
+
+      value += offset;
 
       return chromatic(scale(value) as number);
     };
@@ -172,14 +179,11 @@ function createContinuousScale(
     scale.range(variable.range);
 
     return (attr) => {
-      const value = attr[variable.attribute];
+      let value = attr[variable.attribute];
 
-      if (!isValidNumber(value))
-        return (
-          variable.default ||
-          variable.range[0] ||
-          DEFAULT_DEFAULT_CONTINUOUS_VALUE
-        );
+      if (!isValidNumber(value)) return defaultValue;
+
+      value += offset;
 
       return scale(value) as number;
     };
