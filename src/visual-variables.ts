@@ -11,6 +11,7 @@ import * as d3Chromatic from 'd3-scale-chromatic';
  * Constants.
  */
 const MAX_CATEGORICAL_COLORS = 10;
+const DEFAULT_DEFAULT_CONTINUOUS_VALUE = 1;
 
 /**
  * Types.
@@ -375,7 +376,8 @@ export class VisualVariableScalesBuilder {
           scale = (attr) => {
             const value = attr[variable.attribute];
 
-            if (!isValidNumber(value)) return variable.default || 2;
+            if (!isValidNumber(value))
+              return variable.default || DEFAULT_DEFAULT_CONTINUOUS_VALUE;
 
             return chromatic(continuousScale(value));
           };
@@ -395,7 +397,8 @@ export class VisualVariableScalesBuilder {
           scale = (attr) => {
             const value = attr[variable.attribute];
 
-            if (!isValidNumber(value)) return variable.default || 2;
+            if (!isValidNumber(value))
+              return variable.default || DEFAULT_DEFAULT_CONTINUOUS_VALUE;
 
             return continuousScale(value);
           };
