@@ -494,13 +494,13 @@ export class SigmaView extends DOMWidgetView {
 
     this.el.insertAdjacentHTML('beforeend', TEMPLATE);
     this.el.style.width = '100%';
-    this.el.style.height = height + 'px';
+    this.el.style.height = height;
 
     this.container = this.el.querySelector(
       '.ipysigma-container'
     ) as HTMLElement;
     this.container.style.width = '100%';
-    this.container.style.height = height + 'px';
+    this.container.style.height = height;
 
     // Description
     const description = this.el.querySelector(
@@ -1528,7 +1528,7 @@ export class SigmaView extends DOMWidgetView {
     };
 
     const exit = () => {
-      const targetHeight = this.model.get('height') + 'px';
+      const targetHeight = this.model.get('height');
       this.el.style.height = targetHeight;
       this.container.style.height = targetHeight;
       this.fullscreenButton.innerHTML = fullscreenEnterIcon;

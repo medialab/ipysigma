@@ -157,7 +157,7 @@ class Sigma(DOMWidget):
     default_edge_size_range = DEFAULT_EDGE_SIZE_RANGE
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
-    height = Int(DEFAULT_HEIGHT).tag(sync=True)
+    height = Unicode(str(DEFAULT_HEIGHT) + "px").tag(sync=True)
     name = Unicode(allow_none=True).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     start_layout_for_seconds = Float(allow_none=True).tag(sync=True)
@@ -223,6 +223,7 @@ class Sigma(DOMWidget):
         # Various options
         name=None,
         height=None,
+        raw_height=None,
         start_layout=False,
         node_metrics=None,
         layout_settings=None,
@@ -416,7 +417,7 @@ class Sigma(DOMWidget):
         self.graph_interface = get_graph_interface(self.graph)
 
         # Traits
-        self.height = height
+        self.height = raw_height if raw_height is not None else str(height) + "px"
         self.name = name
         self.max_categorical_colors = max_categorical_colors
         self.start_layout = bool(start_layout)
@@ -899,16 +900,20 @@ class Sigma(DOMWidget):
 
         return out
 
-    def to_html(self, path, **kwargs):
+    def to_html(self, path):
 
         # Snapshot data unnecessarily adds weight here, let's drop it
         current_snapshot = self.snapshot
         self.snapshot = None
 
-        embed_minimal_html(path, views=[self], **kwargs)
+        embed_minimal_html(path, views=[self])
 
         self.snapshot = current_snapshot
 
     @classmethod
-    def write_html(cls, graph, path, **kwargs):
-        return cls(graph, **kwargs).save_as_html(path)
+    def write_html(cls, graph, path, fullscreen=False, **kwargs):
+        if fullscreen:
+            kwargs["height"] = None
+            kwargs["raw_height"] = "calc(100vh - 16px)"
+
+        return cls(graph, **kwargs).to_html(path)
