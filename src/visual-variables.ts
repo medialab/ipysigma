@@ -11,7 +11,8 @@ import * as d3Chromatic from 'd3-scale-chromatic';
  * Constants.
  */
 const MAX_CATEGORICAL_COLORS = 10;
-const DEFAULT_DEFAULT_CONTINUOUS_VALUE = 1;
+const DEFAULT_DEFAULT_CONTINUOUS_NUMERICAL_VALUE = 1;
+const DEFAULT_DEFAULT_CONTINUOUS_COLOR_VALUE = 'black';
 const ESPILON = 1e-8;
 
 /**
@@ -116,11 +117,25 @@ function rangeIsConstant(range: Range | string): boolean {
   return Math.abs(range[0] - (range[1] as number)) <= ESPILON;
 }
 
-function getContinuousDefaultValue(variable: ContinuousVisualVariable): number {
-  if (isValidNumber(variable.default)) return variable.default as number;
-  if (Array.isArray(variable.range) && isValidNumber(variable.range[0]))
-    return variable.range[0] as number;
-  return DEFAULT_DEFAULT_CONTINUOUS_VALUE;
+function getContinuousDefaultValue(
+  variable: ContinuousVisualVariable
+): number | string {
+  if (
+    typeof variable.range === 'string' ||
+    typeof variable.range[0] === 'string'
+  ) {
+    // Color
+    if (typeof variable.default === 'string') return variable.default;
+    if (Array.isArray(variable.range) && typeof variable.range[0] === 'string')
+      return variable.range[0];
+    return DEFAULT_DEFAULT_CONTINUOUS_COLOR_VALUE;
+  } else {
+    // Size
+    if (isValidNumber(variable.default)) return variable.default;
+    if (Array.isArray(variable.range) && isValidNumber(variable.range[0]))
+      return variable.range[0];
+    return DEFAULT_DEFAULT_CONTINUOUS_NUMERICAL_VALUE;
+  }
 }
 
 function createContinuousScale(
@@ -185,7 +200,7 @@ function createContinuousScale(
 
       value += offset;
 
-      return scale(value) as number;
+      return scale(value) as number | string;
     };
   }
 
