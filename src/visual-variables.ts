@@ -100,7 +100,12 @@ export type VisualVariables = {
  * Helper functions.
  */
 function isValidNumber(value: any): value is number {
-  return typeof value === 'number' && !Number.isNaN(value);
+  return (
+    typeof value === 'number' &&
+    !Number.isNaN(value) &&
+    value !== Infinity &&
+    value !== -Infinity
+  );
 }
 
 function rangeIsConstant(range: Range | string): boolean {
