@@ -250,6 +250,9 @@ function renderTypedValue(value: any): string {
   } else if (typeof value === 'boolean') {
     type = 'boolean';
     safe = value ? 'True' : 'False';
+  } else if (value === null) {
+    type = 'keyword';
+    safe = 'null';
   }
 
   return `<span class="ipysigma-${type}" title="${type}">${safe}</span>`;

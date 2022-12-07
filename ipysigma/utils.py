@@ -1,6 +1,8 @@
 from inspect import signature, Parameter
+from datetime import date, datetime
 from collections.abc import Mapping, Sequence, Iterable
 
+from ipysigma.shim import is_nan
 from ipysigma.interfaces import is_networkx_degree_view
 from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
@@ -14,6 +16,18 @@ from ipysigma.constants import (
     DEFAULT_EDGE_SIZE_RANGE,
     DEFAULT_NODE_PICTOGRAM_COLOR,
 )
+
+
+def fix_items_for_json_serialization(items):
+    for item in items:
+        attr = item["attributes"]
+
+        for k, v in attr.items():
+            if is_nan(v):
+                attr[k] = None
+
+            elif isinstance(v, (date, datetime)):
+                attr[k] = v.isoformat()
 
 
 def count_arity(fn) -> int:

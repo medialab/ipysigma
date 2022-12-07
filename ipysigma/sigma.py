@@ -14,6 +14,7 @@ from ._frontend import module_name, module_version
 
 from ipysigma.interfaces import get_graph_interface, check_graph_is_valid
 from ipysigma.utils import (
+    fix_items_for_json_serialization,
     pretty_print_int,
     resolve_metrics,
     resolve_variable,
@@ -797,6 +798,9 @@ class Sigma(DOMWidget):
 
         # Building webgl program settings
         self.program_settings = {}
+
+        fix_items_for_json_serialization(nodes)
+        fix_items_for_json_serialization(edges)
 
         self.data = {
             "nodes": nodes,
