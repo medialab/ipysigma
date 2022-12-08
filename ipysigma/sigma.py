@@ -144,8 +144,8 @@ class Sigma(DOMWidget):
             Defaults to None.
         node_color_scale (tuple or str, optional): scale to use for node color. Can be a tuple
             containing the name of the scale and an additional param such as an exponent, or just
-            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
-            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`,
+            `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
             Defaults to None.
         node_color_palette (Mapping or str, optional): either a mapping from category values to css colors
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
@@ -235,8 +235,8 @@ class Sigma(DOMWidget):
             Defaults to `(3, 15)`.
         node_size_scale (tuple or str, optional): scale to use for node size. Can be a tuple
             containing the name of the scale and an additional param such as an exponent, or just
-            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
-            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`,
+            `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
             Defaults to None.
         default_node_size (int or float, optional): default size for nodes.
             Defaults to None.
@@ -277,8 +277,8 @@ class Sigma(DOMWidget):
             Defaults to None.
         edge_color_scale (tuple or str, optional): scale to use for edge color. Can be a tuple
             containing the name of the scale and an additional param such as an exponent, or just
-            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
-            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`,
+            `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
             Defaults to None.
         edge_color_palette (Mapping or str, optional): either a mapping from category values to css colors
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
@@ -286,8 +286,8 @@ class Sigma(DOMWidget):
         default_edge_color (str, optional): default color for edges.
             Defaults to "#999".
         default_edge_type (str, optional): default type used to draw edges. Can be selected from
-            "rectangle", "line", "curve", "arrow" & "triangle". Will raise if "arrow" or "triangle" is
-            selected with an undirected graph. If None, will default to "rectangle".
+            `"rectangle"`, `"line"`, `"curve"`, `"arrow"` & `"triangle"`. Will raise if `"arrow"` or `"triangle"` is
+            selected with an undirected graph. If None, will default to `"rectangle"`.
             Defaults to None.
         edge_size (VariableData, optional): data to be used as continuous edge size.
             Defaults to "size".
@@ -297,13 +297,13 @@ class Sigma(DOMWidget):
             Defaults to `(3, 15)`.
         edge_size_scale (tuple or str, optional): scale to use for edge size. Can be a tuple
             containing the name of the scale and an additional param such as an exponent, or just
-            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
-            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`,
+            `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
             Defaults to None.
         default_edge_size (int or float, optional): default size for edges.
             Defaults to None.
         default_edge_curveness (str, optional): curveness factor for edges when `default_edge_type`
-            is "curve". Defaults to 0.25.
+            is `"curve"`. Defaults to 0.25.
         edge_label (VariableData, optional): data to be used as edge label.
             Defaults to None.
         raw_edge_label (VariableData, optional): raw data (label string) to be used for edge labels.
