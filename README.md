@@ -193,10 +193,98 @@ If you want comprehensive examples of the widget's visual variables being used, 
 
 ![edge_label](./docs/img/edge_label.png)
 
-
 ## What data can be used as visual variable
 
-TODO...
+For convenience, a lot of different things can be given as data to visual variables and their raw counterparts (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
+
+Here is the exhaustive list of what is possible:
+
+*Name of a node or edge attribute*
+
+```python
+# Let's say your nodes have a "lang" attribute, we can use it as values for
+# a categorical color palette:
+Sigma(g, node_color='lang')
+```
+
+*Node or edge mapping*
+
+```python
+# You can store the data in a mapping, e.g. a dict, likewise:
+node_lang = {'node1': 'en', 'node2': 'fr', ...}
+Sigma(g, node_color=node_lang)
+
+# For edges, the mapping's key must be a 2-tuple containing source & target
+# Note that for undirected graph, the order of extremities in the tuple
+# does not make a difference as both will work.
+edge_type = {('node1', 'node2'): 'LIKES', ('node2', 'node3'): 'LOVES'}
+```
+
+*Arbitrary iterable*
+
+```python
+# Any arbitrary iterable such as generators, ranges, numpy vectors,
+# pandas series etc. will work. The only requirement is that they should
+# follow the order of iteration of nodes or edges in the graph so we may
+# align the data properly.
+
+# Creating a 0 to n generic label for my nodes
+Sigma(g, node_label=range(len(g)))
+
+# Random size for my edges
+Sigma(g, edge_size=(random() for _ in g.edges))
+```
+
+*Partition*
+
+```python
+# A partition, complete or not, but not overlapping, of nodes or edges:
+# Must be a list of lists or a list of sets.
+communities = [{2, 3, 6}, {0, 1}, {4, 6}]
+
+Sigma(g, node_color=communities)
+```
+
+*networkx/igraph degree view*
+
+```python
+# Mapping node size on degree is as simple as:
+Sigma(g, node_size=g.degree)
+```
+
+*Arbitrary callable*
+
+```python
+# Creating a label for my nodes
+Sigma(g, node_label=lambda node: 'Label of ' + str(node))
+
+# Using edge weight as size only if source is in precise part
+Sigma(g, edge_size=lambda u, v, a: attr['weight'] if g.nodes[u]['part'] == 'main' else 1)
+
+# Node callables will be given the following arguments:
+#   1. node key
+#   2. node attributes
+
+# Edge callables will be given the following arguments:
+#  1. source node key
+#  2. target node key
+#  3. edge attributes
+
+# Note that given callables may choose to take any number of those arguments.
+# For instance, the first example only uses the first argument but still works.
+```
+
+*Set*
+
+```python
+# A set will be understood as a binary partition with nodes or edges being
+# in it our outside it. This will be mapped to a boolean value, with `True`
+# meaning the node or edge was in the partition.
+
+# This will display the nodes 1, 5 and 6 in a color, and all the other ones
+# in a different color.
+Sigma(g, node_color={1, 5, 6})
+```
 
 ## Visual variables and kwarg naming rationale
 
