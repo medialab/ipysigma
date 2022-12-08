@@ -4,6 +4,7 @@
   - [How to see your changes](#how-to-see-your-changes)
     - [Typescript](#typescript)
     - [Python](#python)
+  - [How to update readme](#how-to-update-readme)
   - [How to bump version](#how-to-bump-version)
   - [How to release](#how-to-release)
 
@@ -47,6 +48,14 @@ After a change wait for the build to finish and then refresh your browser and th
 #### Python
 
 If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
+
+### How to update readme
+
+To update the readme, make your changes in `README.template.md` then run the following command:
+
+```
+make readme
+```
 
 ### How to bump version
 

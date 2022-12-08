@@ -135,10 +135,10 @@ class Sigma(DOMWidget):
             Defaults to None.
         node_color (VariableData, optional): data to be used as categorical or continuous node
             color. Defaults to None.
-        raw_node_color (RawVariableData, optional): raw data (colors) to be used for nodes.
+        raw_node_color (VariableData, optional): raw data (css colors) to be used for node colors.
             Defaults to "color".
         node_color_gradient (Iterable or str, optional): gradient of colors to map to, for instance:
-            (["yellow", "red"]), or name of a d3 continuous color scale (found here:
+            (`("yellow", "red")`), or name of a d3 continuous color scale (found here:
             https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
             If given, node color will be interpreted as continuous rather than categorical.
             Defaults to None.
@@ -151,6 +151,92 @@ class Sigma(DOMWidget):
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
             Defaults to None.
         default_node_color (str, optional): default color for nodes.
+        node_border_color (VariableData, optional): data to be used as categorical or continuous node
+            border color. Defaults to None.
+        raw_node_border_color (VariableData, optional): raw data (css colors) to be used for node border colors.
+            Defaults to "color".
+        node_border_color_gradient (Iterable or str, optional): gradient of colors to map to, for instance:
+            (`("yellow", "red")`), or name of a d3 continuous color scale (found here:
+            https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
+            If given, node border color will be interpreted as continuous rather than categorical.
+            Defaults to None.
+        node_border_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        node_border_color_from (str, optional): optionally select node border color from the following options: "node".
+            Defaults to None.
+        default_node_border_color (str, optional): default color for node borders.
+        node_border_size (VariableData, optional): data to be used as continuous node border size.
+            Defaults to None.
+        raw_node_border_size (VariableData, optional): raw data (size in pixels) to be used for node border sizes.
+            Defaults to None.
+        node_border_size_range (Iterable, optional): range of sizes in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(1, 5)`.
+        default_node_border_size (int or float, optional): default size for node borders.
+            Defaults to 1.
+        node_border_ratio (VariableData, optional): data to be used as continuous node border ratio.
+            Defaults to None.
+        raw_node_border_ratio (VariableData, optional): raw data (ratio in pixels) to be used for node border ratios.
+            Defaults to None.
+        node_border_ratio_range (Iterable, optional): range of ratios in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(0.1, 0.5)`.
+        default_node_border_ratio (int or float, optional): default ratio for node borders.
+            Defaults to 0.1.
+        raw_node_pictogram (VariableData, optional): raw data (pictogram name, as found here: https://fonts.google.com/icons
+            or publicly accessible svg icon url) to be used for node pictograms.
+            Defaults to None.
+        default_node_pictogram (str, optional): default pictogram for nodes.
+            Defaults to None.
+        node_pictogram_color (VariableData, optional): data to be used as categorical or continuous node
+            pictogram color. Defaults to None.
+        raw_node_pictogram_color (VariableData, optional): raw data (css colors) to be used for node pictogram colors.
+            Defaults to "color".
+        node_pictogram_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        default_node_pictogram_color (str, optional): default color for node pictograms.
+        node_shape (VariableData, optional): data to be used as categorical data to be mapped to node shapes.
+            Defaults to None.
+        raw_node_shape (VariableData, optional): raw data (shape name, or pictogram name as found here:
+            https://fonts.google.com/icons or publicly accessible svg icon url) to be used as node shapes.
+            Defaults to None.
+        node_shape_mapping (Mapping, optional): mapping from category values to node shapes.
+        default_node_shape (str, optional): default shape for nodes.
+            Defaults to None.
+        node_halo_color (VariableData, optional): data to be used as categorical or continuous node
+            halo color. Defaults to None.
+        raw_node_halo_color (VariableData, optional): raw data (css colors) to be used for node halo colors.
+            Defaults to "color".
+        node_halo_color_gradient (Iterable or str, optional): gradient of colors to map to, for instance:
+            (`("yellow", "red")`), or name of a d3 continuous color scale (found here:
+            https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
+            If given, node halo color will be interpreted as continuous rather than categorical.
+            Defaults to None.
+        node_halo_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        default_node_halo_color (str, optional): default color for node halos.
+        node_halo_size (VariableData, optional): data to be used as continuous node halo size.
+            Defaults to None.
+        raw_node_halo_size (VariableData, optional): raw data (size in pixels) to be used for node halo sizes.
+            Defaults to None.
+        node_halo_size_range (Iterable, optional): range of sizes in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(0, 20)`.
+        default_node_halo_size (int or float, optional): default size for node halos.
+            Defaults to 0.
+        node_size (VariableData, optional): data to be used as continuous node size.
+            Defaults to "size".
+        raw_node_size (VariableData, optional): raw data (size in pixels) to be used for node sizes.
+            Defaults to None.
+        node_size_range (Iterable, optional): range of sizes in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(3, 15)`.
+        node_size_scale (tuple or str, optional): scale to use for node size. Can be a tuple
+            containing the name of the scale and an additional param such as an exponent, or just
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
+            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            Defaults to None.
+        default_node_size (int or float, optional): default size for nodes.
+            Defaults to None.
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
