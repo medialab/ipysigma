@@ -118,7 +118,13 @@ If you want comprehensive examples of the widget's visual variables being used, 
 ## Available visual variables
 
 ### node_color
+
+![node_color](./docs/img/node_color.png)
+
 ### node_color_saturation
+
+![node_color_saturation](./docs/img/node_color_saturation.png)
+
 ### node_size
 ### node_label
 ### node_label_size
