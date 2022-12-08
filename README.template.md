@@ -126,22 +126,73 @@ If you want comprehensive examples of the widget's visual variables being used, 
 ![node_color_saturation](./docs/img/node_color_saturation.png)
 
 ### node_size
+
+![node_size](./docs/img/node_size.png)
+
 ### node_label
+
+![node_label](./docs/img/node_label.png)
+
 ### node_label_size
+
+![node_label_size](./docs/img/node_label_size.png)
+
 ### node_label_color
+
+![node_label_color](./docs/img/node_label_color.png)
+
 ### node_border_size
+
+![node_border_size](./docs/img/node_border_size.png)
+
 ### node_border_ratio
+
+![node_border_ratio](./docs/img/node_border_ratio.png)
+
 ### node_border_color
+
+![node_border_color](./docs/img/node_border_color.png)
+
 ### node_pictogram
+
+![node_pictogram](./docs/img/node_pictogram.png)
+
 ### node_pictogram_color
+
+![node_pictogram_color](./docs/img/node_pictogram_color.png)
+
 ### node_shape
+
+![node_shape](./docs/img/node_shape.png)
+
 ### node_halo_size
+
+![node_halo_size](./docs/img/node_halo_size.png)
+
 ### node_halo_color
+
+![node_halo_color](./docs/img/node_halo_color.png)
+
 ### edge_color
+
+![edge_color](./docs/img/edge_color.png)
+
 ### edge_type
+
+![edge_type](./docs/img/edge_type.png)
+
 ### edge_size
+
+![edge_size](./docs/img/edge_size.png)
+
 ### edge_curveness
+
+![edge_curveness](./docs/img/edge_curveness.png)
+
 ### edge_label
+
+![edge_label](./docs/img/edge_label.png)
+
 
 ## What data can be used as visual variable
 
