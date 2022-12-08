@@ -65,6 +65,9 @@ class Sigma(DOMWidget):
         name (str, optional): name of the graph. Defaults to None.
         height (int, optional): height of the widget container in pixels.
             Defaults to 500.
+        raw_height (str, optional): raw css height. Can be useful in some html
+            embedding scenarios. Only use this if you know what you are doing.
+            Defaults to None.
         start_layout (bool or float, optional): whether to automatically start
             the layout algorithm when mounting the widget. If a number is given
             instead, the layout algorithm will start and automatically stop
@@ -128,8 +131,8 @@ class Sigma(DOMWidget):
         show_all_labels (bool, optional): macro setting making sure most, if not all, labels
             get displayed on screen. Might have an impact on performance with larger graphs.
             Defaults to False.
-        layout (Mapping, optional): node positions, expressed as a mapping of nodes to a {x, y}
-            dict. Defaults to None.
+        layout (Mapping, optional): node positions, expressed as a `{node: {x, y}}` mapping.
+            Defaults to None.
         node_color (VariableData, optional): data to be used as categorical or continuous node
             color. Defaults to None.
         raw_node_color (RawVariableData, optional): raw data (colors) to be used for nodes.
@@ -139,9 +142,15 @@ class Sigma(DOMWidget):
             https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
             If given, node color will be interpreted as continuous rather than categorical.
             Defaults to None.
-        node_color_scale (Iterable or str, optional): ...
-        node_color_palette (Mapping or str, optional): ...
-        default_node_color (str, optional): ...
+        node_color_scale (tuple or str, optional): scale to use for node color. Can be a tuple
+            containing the name of the scale and an additional param such as an exponent, or just
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
+            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            Defaults to None.
+        node_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        default_node_color (str, optional): default color for nodes.
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
