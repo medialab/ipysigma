@@ -121,6 +121,8 @@ If you want comprehensive examples of the widget's visual variables being used, 
 
 ![node_color](./docs/img/node_color.png)
 
+<!-- kwargs, example of raw values, notes -->
+
 ### node_color_saturation
 
 ![node_color_saturation](./docs/img/node_color_saturation.png)
@@ -278,7 +280,7 @@ Sigma(g, edge_size=lambda u, v, a: attr['weight'] if g.nodes[u]['part'] == 'main
 
 ```python
 # A set will be understood as a binary partition with nodes or edges being
-# in it our outside it. This will be mapped to a boolean value, with `True`
+# in it or outside it. This will be mapped to a boolean value, with `True`
 # meaning the node or edge was in the partition.
 
 # This will display the nodes 1, 5 and 6 in a color, and all the other ones
@@ -287,6 +289,39 @@ Sigma(g, node_color={1, 5, 6})
 ```
 
 ## Visual variables and kwarg naming rationale
+
+`ipysigma` lets its users tweak a large number of [visual variables](#available-visual-variables). They all work through a similar variety of keyword arguments given to the [`Sigma`](#sigma) widget.
+
+In `ipysigma` visual variables can be given:
+
+* categorical data, which means they will map category values to a discrete mapping such as a node's category being associated with a given color.
+* continuous data, which means they will map numerical values to a range of sizes or a gradient of colors, like when representing a node's degree by a size on screen.
+
+*kwargs naming rationale*
+
+To be able to be drawn on screen, every visual variable must use values that have a meaning for the the widget's interactive renderer ([sigma.js](https://www.sigmajs.org/), as a matter of fact). For colors, it might need a HTML color name or one expressed in hexadecimal notation. For sizes, it might need a number of pixels etc.
+
+If you know what you are doing and want to give `ipysigma` "raw" values as those used by the visual representation directly, all variables have kwargs starting by `raw_`, such as `raw_node_color`.
+
+But if you want `ipysigma` to map your arbitrary values to a suitable visual representation, all variables have a kwarg without any prefix, for instance `node_color`.
+
+In which case, if you use categorical data, `ipysigma` can generate or use palettes to map the category values to e.g. colors on screen. You can always customize the palette or mapping using a kwarg suffixed with `_palette` or `_mapping` such as `node_color_palette` or `node_shape_mapping`.
+
+And if you use numerical data, then values will be mapped to an output range that can be configured with a kwarg suffixed with `_range` for sizes and with `_gradient` for colors, such as `node_size_range` or `node_color_gradient`.
+
+Sometimes, some values might fall out of the represented domain, such as non-numerical values for continuous variables, or categories outside of your analysis scope. Sometimes you might event want to use a constant value. In which case there always exists a kwarg prefixed with `default_`, such as `default_node_color`.
+
+Finally, it's usually possible to tweak the way numerical values will be mapped from their original domain to the visual one. This is what you do, for instance, when you choose to use a logarithmic scale on a chart to better visualize a specific distribution. In the same way, relevant `ipysigma` visual variables give access to a kwarg suffixed `_scale`, such as `node_color_scale` that lets you easily switch from a linear to a logarithmic or power scale etc. (for more information about this, check [this](#scales-palettes-and-gradients) next part of the documentation).
+
+To summarize, let's finish with two exhaustive examples: node color & node size.
+
+*Categorical or continuous variable: node color as an example*
+
+* **node_color**: this kwarg expects some arbitrary values related to your nodes. Those values can be given in multiple ways listed [here](#what-data-can-be-used-as-visual-variable). By default, `node_color` is a categorical variable. Hence, given values will be mapped to suitable colors, from a palette generated automatically for you. If you want your data to be interpreted as continuous instead, you will need to give a gradient to the variable through `node_color_gradient`.
+* **raw_node_color**: this kwarg expect data formatted the same way as `node_color`, but instead it does not expect arbitrary values but CSS colors instead. This way you can always regain full control on the colors you want for your nodes if none of `ipysigma` utilities suit your particular use-case.
+* TODO...
+
+*Continuous variable: node size as an example*
 
 TODO...
 
@@ -297,6 +332,10 @@ TODO...
 ## Frequently asked questions
 
 *How can I display more labels?*
+
+TODO...
+
+*Why are some of my categories mapped to a dull grey?*
 
 TODO...
 
