@@ -7,9 +7,9 @@ sigma_grid_fn = get_function(SigmaGrid)
 
 with open("./README.template.md") as f:
     txt = f.read()
-    templated = txt.format(
-        sigma_args=template_params(sigma_fn),
-        sigma_grid_args=template_params(sigma_grid_fn),
-    )
+    templated = txt % {
+        "sigma_args": template_params(sigma_fn),
+        "sigma_grid_args": template_params(sigma_grid_fn),
+    }
 
     print(templated.strip())
