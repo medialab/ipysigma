@@ -12,12 +12,31 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
-- [TODO: Examples](#examples)
-- [TODO: Available visual variables](#)
-- [TODO: What can be used as visual variable](#)
-- [TODO: Visual variables and kwarg naming rationale](#)
-- [TODO: Scales, palettes and gradients](#)
-- [TODO: Frequently asked questions](#frequently-asked-questions)
+- [Examples](#examples)
+- [Available visual variables](#available-visual-variables)
+  - [node_color](#node_color)
+  - [node_color_saturation](#node_color_saturation)
+  - [node_size](#node_size)
+  - [node_label](#node_label)
+  - [node_label_size](#node_label_size)
+  - [node_label_color](#node_label_color)
+  - [node_border_size](#node_border_size)
+  - [node_border_ratio](#node_border_ratio)
+  - [node_border_color](#node_border_color)
+  - [node_pictogram](#node_pictogram)
+  - [node_pictogram_color](#node_pictogram_color)
+  - [node_shape](#node_shape)
+  - [node_halo_size](#node_halo_size)
+  - [node_halo_color](#node_halo_color)
+  - [edge_color](#edge_color)
+  - [edge_type](#edge_type)
+  - [edge_size](#edge_size)
+  - [edge_curveness](#edge_curveness)
+  - [edge_label](#edge_label)
+- [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
+- [Visual variables and kwarg naming rationale](#visual-variables-and-kwarg-naming-rationale)
+- [Scales, palettes and gradients](#scales-palettes-and-gradients)
+- [Frequently asked questions](#frequently-asked-questions)
 - [API Reference](#api-reference)
   - [Sigma](#sigma)
     - [#.get_layout](#get_layout)
@@ -86,6 +105,50 @@ Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Vi
 
 ## Examples
 
+*Letting the widget compute a Louvain partition and using it as node colors*
+
+```python
+Sigma(g, node_metrics=['louvain'], node_color='louvain')
+```
+
+*Functional testing notebooks*
+
+If you want comprehensive examples of the widget's visual variables being used, you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
+
+## Available visual variables
+
+### node_color
+### node_color_saturation
+### node_size
+### node_label
+### node_label_size
+### node_label_color
+### node_border_size
+### node_border_ratio
+### node_border_color
+### node_pictogram
+### node_pictogram_color
+### node_shape
+### node_halo_size
+### node_halo_color
+### edge_color
+### edge_type
+### edge_size
+### edge_curveness
+### edge_label
+
+## What data can be used as visual variable
+
+TODO...
+
+## Visual variables and kwarg naming rationale
+
+TODO...
+
+## Scales, palettes and gradients
+
+TODO...
+
 ## Frequently asked questions
 
 *How can I display more labels?*
@@ -130,6 +193,11 @@ TODO...
 * **node_color_scale** *tuple or str, optional* `None` - scale to use for node color. Can be a tuple containing the name of the scale and an additional param such as an exponent, or just the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`, `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
 * **node_color_palette** *Mapping or str, optional* `None` - either a mapping from category values to css colors or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
 * **default_node_color** *str, optional* `"#999"` - default color for nodes.
+* **node_color_saturation** *VariableData, optional* `None` - data to be used as continuous node color saturation.
+* **raw_node_color_saturation** *VariableData, optional* `None` - raw data (percentage) to be used for node color saturation.
+* **node_color_saturation_scale** *tuple or str, optional* `None` - scale to use for node color saturation. Can be a tuple containing the name of the scale and an additional param such as an exponent, or just the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`, `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
+* **node_color_saturation_range** *Iterable, optional* `(0, 1)` - range of percentages to map to, for instance: `(0, 0.7)`.
+* **default_node_color_saturation** *str, optional* `None` - default color saturation for nodes.
 * **node_border_color** *VariableData, optional* `None` - data to be used as categorical or continuous node border color.
 * **raw_node_border_color** *VariableData, optional* `"color"` - raw data (css colors) to be used for node border colors.
 * **node_border_color_gradient** *Iterable or str, optional* `None` - gradient of colors to map to, for instance: (`("yellow", "red")`), or name of a d3 continuous color scale (found here: https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis". If given, node border color will be interpreted as continuous rather than categorical.

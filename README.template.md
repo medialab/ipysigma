@@ -12,12 +12,31 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 
 - [Installation](#installation)
 - [Quick start](#quick-start)
-- [TODO: Examples](#examples)
-- [TODO: Available visual variables](#)
-- [TODO: What can be used as visual variable](#)
-- [TODO: Visual variables and kwarg naming rationale](#)
-- [TODO: Scales, palettes and gradients](#)
-- [TODO: Frequently asked questions](#frequently-asked-questions)
+- [Examples](#examples)
+- [Available visual variables](#available-visual-variables)
+  - [node_color](#node_color)
+  - [node_color_saturation](#node_color_saturation)
+  - [node_size](#node_size)
+  - [node_label](#node_label)
+  - [node_label_size](#node_label_size)
+  - [node_label_color](#node_label_color)
+  - [node_border_size](#node_border_size)
+  - [node_border_ratio](#node_border_ratio)
+  - [node_border_color](#node_border_color)
+  - [node_pictogram](#node_pictogram)
+  - [node_pictogram_color](#node_pictogram_color)
+  - [node_shape](#node_shape)
+  - [node_halo_size](#node_halo_size)
+  - [node_halo_color](#node_halo_color)
+  - [edge_color](#edge_color)
+  - [edge_type](#edge_type)
+  - [edge_size](#edge_size)
+  - [edge_curveness](#edge_curveness)
+  - [edge_label](#edge_label)
+- [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
+- [Visual variables and kwarg naming rationale](#visual-variables-and-kwarg-naming-rationale)
+- [Scales, palettes and gradients](#scales-palettes-and-gradients)
+- [Frequently asked questions](#frequently-asked-questions)
 - [API Reference](#api-reference)
   - [Sigma](#sigma)
     - [#.get_layout](#get_layout)
@@ -85,6 +104,50 @@ Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Vi
 ```
 
 ## Examples
+
+*Letting the widget compute a Louvain partition and using it as node colors*
+
+```python
+Sigma(g, node_metrics=['louvain'], node_color='louvain')
+```
+
+*Functional testing notebooks*
+
+If you want comprehensive examples of the widget's visual variables being used, you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
+
+## Available visual variables
+
+### node_color
+### node_color_saturation
+### node_size
+### node_label
+### node_label_size
+### node_label_color
+### node_border_size
+### node_border_ratio
+### node_border_color
+### node_pictogram
+### node_pictogram_color
+### node_shape
+### node_halo_size
+### node_halo_color
+### edge_color
+### edge_type
+### edge_size
+### edge_curveness
+### edge_label
+
+## What data can be used as visual variable
+
+TODO...
+
+## Visual variables and kwarg naming rationale
+
+TODO...
+
+## Scales, palettes and gradients
+
+TODO...
 
 ## Frequently asked questions
 

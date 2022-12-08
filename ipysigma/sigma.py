@@ -152,6 +152,19 @@ class Sigma(DOMWidget):
             Defaults to None.
         default_node_color (str, optional): default color for nodes.
             Defaults to "#999".
+        node_color_saturation (VariableData, optional): data to be used as continuous node
+            color saturation. Defaults to None.
+        raw_node_color_saturation (VariableData, optional): raw data (percentage) to be used for node color saturation.
+            Defaults to None.
+        node_color_saturation_scale (tuple or str, optional): scale to use for node color saturation. Can be a tuple
+            containing the name of the scale and an additional param such as an exponent, or just
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: `"lin"`,
+            `"log"`, `"log+1"`, `"pow"` & `"sqrt"`. If None is given, scale will default to `"lin"` for linear.
+            Defaults to None.
+        node_color_saturation_range (Iterable, optional): range of percentages to map to, for instance: `(0, 0.7)`.
+            Defaults to `(0, 1)`.
+        default_node_color_saturation (str, optional): default color saturation for nodes.
+            Defaults to None.
         node_border_color (VariableData, optional): data to be used as categorical or continuous node
             border color. Defaults to None.
         raw_node_border_color (VariableData, optional): raw data (css colors) to be used for node border colors.
