@@ -151,6 +151,7 @@ class Sigma(DOMWidget):
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
             Defaults to None.
         default_node_color (str, optional): default color for nodes.
+            Defaults to "#999".
         node_border_color (VariableData, optional): data to be used as categorical or continuous node
             border color. Defaults to None.
         raw_node_border_color (VariableData, optional): raw data (css colors) to be used for node border colors.
@@ -195,6 +196,7 @@ class Sigma(DOMWidget):
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
             Defaults to None.
         default_node_pictogram_color (str, optional): default color for node pictograms.
+            Defaults to "black".
         node_shape (VariableData, optional): data to be used as categorical data to be mapped to node shapes.
             Defaults to None.
         raw_node_shape (VariableData, optional): raw data (shape name, or pictogram name as found here:
@@ -216,6 +218,7 @@ class Sigma(DOMWidget):
             or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
             Defaults to None.
         default_node_halo_color (str, optional): default color for node halos.
+            Defaults to "red".
         node_halo_size (VariableData, optional): data to be used as continuous node halo size.
             Defaults to None.
         raw_node_halo_size (VariableData, optional): raw data (size in pixels) to be used for node halo sizes.
@@ -237,6 +240,29 @@ class Sigma(DOMWidget):
             Defaults to None.
         default_node_size (int or float, optional): default size for nodes.
             Defaults to None.
+        node_label (VariableData, optional): data to be used as node label.
+            Defaults to None.
+        raw_node_label (VariableData, optional): raw data (label string) to be used for node labels.
+            Defaults to "label".
+        default_node_label (str, optional): default label for nodes.
+            Defaults to None.
+        node_label_size (VariableData, optional): data to be used as continuous node label size.
+            Defaults to None.
+        raw_node_label_size (VariableData, optional): raw data (size in pixels) to be used for node label sizes.
+            Defaults to None.
+        node_label_size_range (Iterable, optional): range of sizes in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(8, 25)`.
+        default_node_label_size (int or float, optional): default size for node labels.
+            Defaults to 12.
+        node_label_color (VariableData, optional): data to be used as categorical or continuous node
+            label color. Defaults to None.
+        raw_node_label_color (VariableData, optional): raw data (css colors) to be used for node label colors.
+            Defaults to None.
+        node_label_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        default_node_label_color (str, optional): default color for node labels.
+            Defaults to "black".
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)

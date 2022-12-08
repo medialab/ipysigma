@@ -119,7 +119,7 @@ TODO...
 * **node_color_gradient** *Iterable or str, optional* `None` - gradient of colors to map to, for instance: (`("yellow", "red")`), or name of a d3 continuous color scale (found here: https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis". If given, node color will be interpreted as continuous rather than categorical.
 * **node_color_scale** *tuple or str, optional* `None` - scale to use for node color. Can be a tuple containing the name of the scale and an additional param such as an exponent, or just the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin", "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
 * **node_color_palette** *Mapping or str, optional* `None` - either a mapping from category values to css colors or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
-* **default_node_color** *str, optional* - default color for nodes.
+* **default_node_color** *str, optional* `"#999"` - default color for nodes.
 * **node_border_color** *VariableData, optional* `None` - data to be used as categorical or continuous node border color.
 * **raw_node_border_color** *VariableData, optional* `"color"` - raw data (css colors) to be used for node border colors.
 * **node_border_color_gradient** *Iterable or str, optional* `None` - gradient of colors to map to, for instance: (`("yellow", "red")`), or name of a d3 continuous color scale (found here: https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis". If given, node border color will be interpreted as continuous rather than categorical.
@@ -139,7 +139,7 @@ TODO...
 * **node_pictogram_color** *VariableData, optional* `None` - data to be used as categorical or continuous node pictogram color.
 * **raw_node_pictogram_color** *VariableData, optional* `"color"` - raw data (css colors) to be used for node pictogram colors.
 * **node_pictogram_color_palette** *Mapping or str, optional* `None` - either a mapping from category values to css colors or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
-* **default_node_pictogram_color** *str, optional* - default color for node pictograms.
+* **default_node_pictogram_color** *str, optional* `"black"` - default color for node pictograms.
 * **node_shape** *VariableData, optional* `None` - data to be used as categorical data to be mapped to node shapes.
 * **raw_node_shape** *VariableData, optional* `None` - raw data (shape name, or pictogram name as found here: https://fonts.google.com/icons or publicly accessible svg icon url) to be used as node shapes.
 * **node_shape_mapping** *Mapping, optional* - mapping from category values to node shapes.
@@ -148,7 +148,7 @@ TODO...
 * **raw_node_halo_color** *VariableData, optional* `"color"` - raw data (css colors) to be used for node halo colors.
 * **node_halo_color_gradient** *Iterable or str, optional* `None` - gradient of colors to map to, for instance: (`("yellow", "red")`), or name of a d3 continuous color scale (found here: https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis". If given, node halo color will be interpreted as continuous rather than categorical.
 * **node_halo_color_palette** *Mapping or str, optional* `None` - either a mapping from category values to css colors or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
-* **default_node_halo_color** *str, optional* - default color for node halos.
+* **default_node_halo_color** *str, optional* `"red"` - default color for node halos.
 * **node_halo_size** *VariableData, optional* `None` - data to be used as continuous node halo size.
 * **raw_node_halo_size** *VariableData, optional* `None` - raw data (size in pixels) to be used for node halo sizes.
 * **node_halo_size_range** *Iterable, optional* `(0, 20)` - range of sizes in pixels to map to, for instance: `(1, 15)`.
@@ -158,6 +158,17 @@ TODO...
 * **node_size_range** *Iterable, optional* `(3, 15)` - range of sizes in pixels to map to, for instance: `(1, 15)`.
 * **node_size_scale** *tuple or str, optional* `None` - scale to use for node size. Can be a tuple containing the name of the scale and an additional param such as an exponent, or just the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin", "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
 * **default_node_size** *int or float, optional* `None` - default size for nodes.
+* **node_label** *VariableData, optional* `None` - data to be used as node label.
+* **raw_node_label** *VariableData, optional* `"label"` - raw data (label string) to be used for node labels.
+* **default_node_label** *str, optional* `None` - default label for nodes.
+* **node_label_size** *VariableData, optional* `None` - data to be used as continuous node label size.
+* **raw_node_label_size** *VariableData, optional* `None` - raw data (size in pixels) to be used for node label sizes.
+* **node_label_size_range** *Iterable, optional* `(8, 25)` - range of sizes in pixels to map to, for instance: `(1, 15)`.
+* **default_node_label_size** *int or float, optional* `12` - default size for node labels.
+* **node_label_color** *VariableData, optional* `None` - data to be used as categorical or continuous node label color.
+* **raw_node_label_color** *VariableData, optional* `None` - raw data (css colors) to be used for node label colors.
+* **node_label_color_palette** *Mapping or str, optional* `None` - either a mapping from category values to css colors or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+* **default_node_label_color** *str, optional* `"black"` - default color for node labels.
 
 ### SigmaGrid
 
