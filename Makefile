@@ -16,7 +16,7 @@ clean:
 deps:
 	npm i -g yarn
 	pip3 install -U pip
-	pip3 install build twine jupyter_packaging black
+	pip3 install build twine jupyter_packaging black docdocdoc
 	pip3 install jupyterlab
 	pip3 install networkx igraph pandas
 	pip3 install -e ".[test, examples]"
@@ -51,3 +51,7 @@ release:
 watch:
 	@echo Watching js files...
 	yarn run watch
+
+readme:
+	@echo Templating readme...
+	python -m scripts.readme > README.md
