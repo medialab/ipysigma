@@ -99,7 +99,7 @@ g = ig.Graph.Famous('Zachary')
 
 # Displaying the graph with a size mapped on degree and
 # a color mapped on node betweenness centrality, using
-# the a continuous color scale named "Viridis"
+# a continuous color scale named "Viridis"
 Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Viridis')
 ```
 
