@@ -263,6 +263,57 @@ class Sigma(DOMWidget):
             Defaults to None.
         default_node_label_color (str, optional): default color for node labels.
             Defaults to "black".
+        node_zindex (VariableData, optional): numerical data used to sort nodes before rendering.
+            Nodes having a higher zindex will be drawn on top of nodes having a lower one.
+            Defaults to None.
+        edge_color (VariableData, optional): data to be used as categorical or continuous edge
+            color. Defaults to None.
+        raw_edge_color (VariableData, optional): raw data (css colors) to be used for edge colors.
+            Defaults to "color".
+        edge_color_gradient (Iterable or str, optional): gradient of colors to map to, for instance:
+            (`("yellow", "red")`), or name of a d3 continuous color scale (found here:
+            https://github.com/d3/d3-scale-chromatic#readme), for instance: "Viridis".
+            If given, edge color will be interpreted as continuous rather than categorical.
+            Defaults to None.
+        edge_color_scale (tuple or str, optional): scale to use for edge color. Can be a tuple
+            containing the name of the scale and an additional param such as an exponent, or just
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
+            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            Defaults to None.
+        edge_color_palette (Mapping or str, optional): either a mapping from category values to css colors
+            or the name of a d3 categorical color scale (found here: https://github.com/d3/d3-scale-chromatic#readme).
+            Defaults to None.
+        default_edge_color (str, optional): default color for edges.
+            Defaults to "#999".
+        default_edge_type (str, optional): default type used to draw edges. Can be selected from
+            "rectangle", "line", "curve", "arrow" & "triangle". Will raise if "arrow" or "triangle" is
+            selected with an undirected graph. If None, will default to "rectangle".
+            Defaults to None.
+        edge_size (VariableData, optional): data to be used as continuous edge size.
+            Defaults to "size".
+        raw_edge_size (VariableData, optional): raw data (size in pixels) to be used for edge sizes.
+            Defaults to None.
+        edge_size_range (Iterable, optional): range of sizes in pixels to map to, for instance: `(1, 15)`.
+            Defaults to `(3, 15)`.
+        edge_size_scale (tuple or str, optional): scale to use for edge size. Can be a tuple
+            containing the name of the scale and an additional param such as an exponent, or just
+            the name of the scale to use: e.g. `("log", 2)` or `"pow"`. Available scales include: "lin",
+            "log", "log+1", "pow" & "sqrt". If None is given, scale will default to "lin" for linear.
+            Defaults to None.
+        default_edge_size (int or float, optional): default size for edges.
+            Defaults to None.
+        default_edge_curveness (str, optional): curveness factor for edges when `default_edge_type`
+            is "curve". Defaults to 0.25.
+        edge_label (VariableData, optional): data to be used as edge label.
+            Defaults to None.
+        raw_edge_label (VariableData, optional): raw data (label string) to be used for edge labels.
+            Defaults to "label".
+        edge_weight (VariableData, optional): numerical data to be used as edge weight for
+            weighted metrics & layout computations (distinct from size, which is used
+            for rendering).
+        edge_zindex (VariableData, optional): numerical data used to sort egdes before rendering.
+            Egdes having a higher zindex will be drawn on top of egdes having a lower one.
+            Defaults to None.
     """
 
     _model_name = Unicode("SigmaModel").tag(sync=True)
