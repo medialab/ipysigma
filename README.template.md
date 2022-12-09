@@ -60,7 +60,7 @@ You can install using `pip`:
 pip install ipysigma
 ```
 
-You will also need to install either `networkx` or `igraph` of course.
+You will also need to install either `networkx` or `igraph`.
 
 If you are using an older version of Jupyter, you might also need to enable the nbextension likewise:
 
@@ -113,7 +113,8 @@ Sigma(g, node_metrics=['louvain'], node_color='louvain')
 
 *Functional testing notebooks*
 
-If you want comprehensive examples of the widget's visual variables being used, you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
+If you want comprehensive examples of the widget's visual variables being used, 
+you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
 
 ## Available visual variables
 
@@ -197,14 +198,15 @@ If you want comprehensive examples of the widget's visual variables being used, 
 
 ## What data can be used as visual variable
 
-For convenience, a lot of different things can be given as data to visual variables and their raw counterparts (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
+Several things can be given as data to visual variables and their 
+raw counterparts (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
 
 Here is the exhaustive list of what is possible:
 
 *Name of a node or edge attribute*
 
 ```python
-# Let's say your nodes have a "lang" attribute, we can use it as values for
+# Let's say your nodes have a "lang" attribute, we can use its modalities as values for
 # a categorical color palette:
 Sigma(g, node_color='lang')
 ```
@@ -212,13 +214,13 @@ Sigma(g, node_color='lang')
 *Node or edge mapping*
 
 ```python
-# You can store the data in a mapping, e.g. a dict, likewise:
+# You can store the data in a mapping, e.g. a dictionary, likewise:
 node_lang = {'node1': 'en', 'node2': 'fr', ...}
 Sigma(g, node_color=node_lang)
 
-# For edges, the mapping's key must be a 2-tuple containing source & target
-# Note that for undirected graph, the order of extremities in the tuple
-# does not make a difference as both will work.
+# For edges, the mapping's key must be a 2-tuple containing source & target nodes.
+# Note that for undirected graphs, the order of nodes in the tuple
+# does not make any difference as both will work.
 edge_type = {('node1', 'node2'): 'LIKES', ('node2', 'node3'): 'LOVES'}
 ```
 
@@ -227,7 +229,7 @@ edge_type = {('node1', 'node2'): 'LIKES', ('node2', 'node3'): 'LOVES'}
 ```python
 # Any arbitrary iterable such as generators, ranges, numpy vectors,
 # pandas series etc. will work. The only requirement is that they should
-# follow the order of iteration of nodes or edges in the graph so we may
+# follow the order of iteration of nodes or edges in the graph, so we may
 # align the data properly.
 
 # Creating a 0 to n generic label for my nodes
@@ -260,7 +262,7 @@ Sigma(g, node_size=g.degree)
 # Creating a label for my nodes
 Sigma(g, node_label=lambda node: 'Label of ' + str(node))
 
-# Using edge weight as size only if source is in precise part
+# Using edge weight as size only for some source nodes
 Sigma(g, edge_size=lambda u, v, a: attr['weight'] if g.nodes[u]['part'] == 'main' else 1)
 
 # Node callables will be given the following arguments:
