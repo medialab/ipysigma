@@ -60,7 +60,6 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
     - [Sigma.write_html](#sigmawrite_html)
   - [SigmaGrid](#sigmagrid)
     - [#.add](#add)
-- [Using in Google Colab](#using-in-google-colab)
 
 ## Installation
 
@@ -81,6 +80,21 @@ jupyter nbextension enable --py --sys-prefix ipysigma
 jupyter nbextension enable --py --user ipysigma
 jupyter nbextension enable --py --system ipysigma
 ```
+
+If you want to use `ipysigma` on [Google Colab](https://colab.research.google.com), you will need to enable widget output using the following code:
+
+```python
+from google.colab import output
+
+output.enable_custom_widget_manager()
+```
+
+Remember you can always install packages in Colab by executing the following command in a cell:
+
+```
+!pip install networkx ipysigma
+```
+
 
 ## Quick start
 
@@ -434,20 +448,4 @@ Method one can use as an alternative or combined to `SigmaGrid` constructor's `v
 
 ```python
 SigmaGrid(g, node_color='category').add(node_size=g.degree).add(node_size='occurrences')
-```
-
-## Using in Google Colab
-
-If you want to be able to use `ipysigma` on [Google Colab](https://colab.research.google.com), you will need to enable widget output using the following code:
-
-```python
-from google.colab import output
-
-output.enable_custom_widget_manager()
-```
-
-Remember you can always install packages in Colab by executing the following command in a cell:
-
-```
-!pip install networkx ipysigma
 ```
