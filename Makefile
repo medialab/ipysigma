@@ -19,7 +19,7 @@ deps:
 	pip3 install build twine jupyter_packaging black docdocdoc
 	pip3 install jupyterlab
 	pip3 install networkx igraph pandas
-	pip3 install -e ".[test, examples]"
+	SETUPTOOLS_ENABLE_FEATURES="legacy-editable" pip3 install -e ".[test, examples]"
 	yarn install
 	yarn run build
 	jupyter labextension develop --overwrite .
