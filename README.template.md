@@ -23,6 +23,8 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Examples](#examples)
+  - [Compute a Louvain partition and use it as node color](#compute-a-louvain-partition-and-use-it-as-node-color)
+  - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph ) 
 - [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
 - [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
 - [Scales, palettes and gradients](#scales-palettes-and-gradients)
@@ -128,15 +130,50 @@ Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Vi
 
 ## Examples
 
-*Letting the widget compute a Louvain partition and using it as node colors*
+### Compute a Louvain partition and use it as node color
 
 ```python
 Sigma(g, node_metrics=['louvain'], node_color='louvain')
 ```
 
-*pandas*
+### Display a pandas DataFrame as a graph
 
-*Functional testing notebooks*
+You can use [pelote](https://github.com/medialab/pelote#readme), which is an ipysigma satellite library,
+to turn pandas DataFrame into networkx graphs. 
+
+As a first example, you can create a graph from a DataFrame of edges:
+```python
+import pandas as pd
+from pelote import edges_table_to_graph
+
+#Alice invited Bob and Chloe. Bob invited Chloe twice.
+df = pd.DataFrame({'hosts': ['Alice', 'Alice', 'Bob', 'Bob'], 'guests': ['Bob', 'Chloe', 'Chloe', 'Chloe']})
+g = edges_table_to_graph(
+  df, 
+  edge_source_col='hosts', 
+  edge_target_col='guests', 
+  count_rows_as_weight=True, 
+  directed=True
+)
+Sigma(g, edge_size='weight', default_edge_type='arrow')
+```
+
+Using pelote again, you can also create a bipartite network (students and their professors, for example) 
+with `table_to_bipartite_graph`:
+```python
+import pandas as pd
+from pelote import table_to_bipartite_graph
+
+df = pd.DataFrame({
+    'professor': ['A', 'A', 'A', 'B', 'B', 'B', 'B'], 
+    'student': ['C', 'D', 'E', 'C', 'F', 'G', 'H'],
+    })
+
+g = table_to_bipartite_graph(df, 'student', 'professor', node_part_attr='status')
+Sigma(g, node_color='status', default_node_size=10, show_all_labels=True)
+```
+
+### More examples: functional testing notebooks*
 
 If you want comprehensive examples of the widget's visual variables being used,
 you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
