@@ -307,7 +307,7 @@ Note also that the palette generation is seeded using the mapped attribute name 
 
 If you don't want `ipysigma` to generate color palettes for you, you can give your own palette through the relevant `_palette` kwarg such as `node_color_palette`, or use some [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) one (they have names starting with `scheme`).
 
-Here is the full list of those palettes supported by `ipysigma`: `PiYG`, `Greys`, `YlOrBr`, `Spectral`, `RdYlBu`, `Set3`, `Category10`, `Tableau10`, `GnBu`, `Purples`, `Set1`, `YlGn`, `BrBG`, `Greens`, `Oranges`, `YlOrRd`, `RdBu`, `Blues`, `PRGn`, `Pastel2`, `RdPu`, `Pastel1`, `BuPu`, `RdGy`, `PuBuGn`, `PuOr`, `Dark2`, `PuBu`, `PuRd`, `OrRd`, `YlGnBu`, `Accent`, `Set2`, `RdYlGn`, `BuGn`, `Reds`, `Paired`.
+Here is the full list of those palettes supported by `ipysigma`: `Accent`, `Blues`, `BrBG`, `BuGn`, `BuPu`, `Category10`, `Dark2`, `GnBu`, `Greens`, `Greys`, `OrRd`, `Oranges`, `PRGn`, `Paired`, `Pastel1`, `Pastel2`, `PiYG`, `PuBu`, `PuBuGn`, `PuOr`, `PuRd`, `Purples`, `RdBu`, `RdGy`, `RdPu`, `RdYlBu`, `RdYlGn`, `Reds`, `Set1`, `Set2`, `Set3`, `Spectral`, `Tableau10`, `YlGn`, `YlGnBu`, `YlOrBr`, `YlOrRd`.
 
 *Color gradients*
 
@@ -315,7 +315,7 @@ Color gradients can be defined as a range from "lowest" to "highest" color, e.g.
 
 They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
 
-Here is the full list of those gradients supported by `ipysigma`: `PiYG`, `Rainbow`, `Turbo`, `Viridis`, `Magma`, `Greys`, `YlOrBr`, `Spectral`, `Inferno`, `RdYlBu`, `Cividis`, `GnBu`, `Purples`, `YlGn`, `BrBG`, `Greens`, `Oranges`, `YlOrRd`, `RdBu`, `Blues`, `PRGn`, `CubehelixDefault`, `RdPu`, `BuPu`, `RdGy`, `PuBuGn`, `Warm`, `PuOr`, `PuBu`, `PuRd`, `OrRd`, `Plasma`, `YlGnBu`, `Sinebow`, `RdYlGn`, `BuGn`, `Cool`, `Reds`.
+Here is the full list of those gradients supported by `ipysigma`: `Blues`, `BrBG`, `BuGn`, `BuPu`, `Cividis`, `Cool`, `CubehelixDefault`, `GnBu`, `Greens`, `Greys`, `Inferno`, `Magma`, `OrRd`, `Oranges`, `PRGn`, `PiYG`, `Plasma`, `PuBu`, `PuBuGn`, `PuOr`, `PuRd`, `Purples`, `Rainbow`, `RdBu`, `RdGy`, `RdPu`, `RdYlBu`, `RdYlGn`, `Reds`, `Sinebow`, `Spectral`, `Turbo`, `Viridis`, `Warm`, `YlGn`, `YlGnBu`, `YlOrBr`, `YlOrRd`.
 
 ## Frequently asked questions
 

@@ -16,9 +16,9 @@ with open("./README.template.md") as f:
     templated = txt % {
         "sigma_args": template_params(sigma_fn),
         "sigma_grid_args": template_params(sigma_grid_fn),
-        "supported_color_gradients": format_name_list(SUPPORTED_NAMED_GRADIENTS),
+        "supported_color_gradients": format_name_list(sorted(SUPPORTED_NAMED_GRADIENTS)),
         "supported_color_palettes": format_name_list(
-            p for p in SUPPORTED_NAMED_PALETTES if p != "IWantHue"
+            p for p in sorted(SUPPORTED_NAMED_PALETTES) if p != "IWantHue"
         ),
     }
 
