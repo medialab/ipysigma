@@ -12,6 +12,12 @@ For an exhaustive list of what variables exist, check the "[Available visual var
   <img alt="ipysigma" src="./docs/img/ipysigma.gif">
 </p>
 
+`ipysigma` is also able to display synchronized & interactive "small multiples" of a same graph to easily compare some of its features.
+
+<p align="center">
+  <img alt="ipysigma-grid" src="./docs/img/ipysigma-grid.gif">
+</p>
+
 ## Summary
 
 - [Installation](#installation)
