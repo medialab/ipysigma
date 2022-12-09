@@ -287,14 +287,35 @@ For a comprehensive view of the available visual variables, the values they expe
 
 * **lin**: linear scale, used by default when scale is not specified.
 * **log**: logarithmic scale. Takes an optional base (`e` by default).
-* **log+1**: logarithmic scale incrementing your values by one. This is a well-known visualization trick designed to avoid issues with zeros, which is often the case with some typical node metrics. Takes an optional base (`e` by default).
+* **log+1**: logarithmic scale incrementing your values by one. This is a well-known visualization trick designed to avoid issues with zeros, which is often the case when using some typical node metrics. Takes an optional base (`e` by default)..
 * **pow**: power scale. Takes an optional exponent (`2` by default).
 * **sqrt**: square root scale (same as power scale but with inverted exponent). Takes an optional exponent (`2` by default).
 
 All the `_scale` kwargs can take the following:
 
+* Nothing (the default), then the scale remains linear: `node_size_scale=None`.
 * The name of the scale directly: `node_size_scale="log"`.
 * A 2-tuple containing the name of the scale and its parameter: `node_size_scale=("log", 2)`.
+
+*Color palettes*
+
+By default, color palettes are generated for you by `ipysigma` using [iwanthue](https://medialab.github.io/iwanthue/). `ipysigma` will first count the number of distinct categories to represent, sort them by frequency and generate a palette of up to `10` colors for the most used ones. The other one will use the default one given to the relevant `default_` kwarg such as `default_node_color` for instance.
+
+Note that this maximum number of `10` can be increased using the `max_categorical_colors` kwarg.
+
+Note also that the palette generation is seeded using the mapped attribute name in the data so that the palette is always the same (if the name and the category count remains the same), but is different from one attribute to the other.
+
+If you don't want `ipysigma` to generate color palettes for you, you can give your own palette through the relevant `_palette` kwarg such as `node_color_palette`, or use some [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) one (they have names starting with `scheme`).
+
+Here is the full list of those palettes supported by `ipysigma`: %(supported_color_palettes)s.
+
+*Color gradients*
+
+Color gradients can be defined as a range from "lowest" to "highest" color, e.g. `("yellow", "red)`.
+
+They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
+
+Here is the full list of those gradients supported by `ipysigma`: %(supported_color_gradients)s.
 
 ## Frequently asked questions
 
