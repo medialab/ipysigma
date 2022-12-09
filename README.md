@@ -357,7 +357,7 @@ Your GPU can only render so much webgl canvases in your browser tabs. So if you 
 
 ### My graph is ugly, make it beautiful like Gephi
 
-Use `default_edge_type="curve"`, `node_border_color_from="edge"`, `label_size=g.degree` and `label_font="cursive"` and you should have a dazzling Gephi graph.
+Use `default_edge_type="curve"`, `node_border_color_from="node"`, `label_size=g.degree` and `label_font="cursive"` and you should have a dazzling Gephi graph.
 
 <p align="center">
   <img alt="gephi" src="./docs/img/gephi.png">
