@@ -24,7 +24,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Quick start](#quick-start)
 - [Examples](#examples)
 - [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
-- [Visual variables and kwarg naming rationale](#visual-variables-and-kwarg-naming-rationale)
+- [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
 - [Scales, palettes and gradients](#scales-palettes-and-gradients)
 - [Frequently asked questions](#frequently-asked-questions)
 - [Available visual variables](#available-visual-variables)
@@ -235,7 +235,7 @@ Sigma(g, edge_size=lambda u, v, a: attr['weight'] if g.nodes[u]['part'] == 'main
 Sigma(g, node_color={1, 5, 6})
 ```
 
-## Visual variables and kwarg naming rationale
+## Visual variables and kwargs naming rationale
 
 `ipysigma` lets its users tweak a large number of [visual variables](#available-visual-variables). They all work through a similar variety of keyword arguments given to the [`Sigma`](#sigma) widget.
 
@@ -244,7 +244,7 @@ In `ipysigma` visual variables can be given:
 * categorical data, which means they will map category values to discrete visualization values such as a node's category being associated with a given color.
 * continuous data, which means they will map numerical values to a range of sizes or a gradient of colors, like when representing a node's degree by a size on screen.
 
-*kwarg naming rationale*
+*kwargs naming rationale*
 
 To be able to be drawn on screen, every visual variable must use values that have a meaning for the the widget's visual representation. For colors, it might be a HTML color name such as `#fa65ea` or `cyan`. For sizes, it might be a number of pixels etc.
 
@@ -254,7 +254,7 @@ But if you want `ipysigma` to map your arbitrary values to a suitable visual rep
 
 In which case, if you use categorical data, `ipysigma` can generate or use palettes to map the category values to e.g. colors on screen. You can always customize the palette or mapping using a kwarg suffixed with `_palette` or `_mapping` such as `node_color_palette` or `node_shape_mapping`.
 
-And if you use numerical data, then values will be mapped to an output range that can be configured with a kwarg suffixed with `_range` for sizes and with `_gradient` for colors, such as `node_size_range` or `node_color_gradient`.
+And if you use numerical data, then values will be mapped to an output range, usually in pixels, that can be configured with a kwarg suffixed with `_range` such as `node_size_range`. Similarly, if you want to map numerical data to a gradient of colors, you will find kwarg suffixed with `_gradient` such as `node_color_gradient`.
 
 Sometimes, some values might fall out of the represented domain, such as non-numerical values for continuous variables, or categories outside of the colors available in the given palette. In which case there always exists a kwarg prefixed with `default_`, such as `default_node_color`. A neat trick is also to use those kwargs as a way to indicate a constant value if you want all your edges to have the same color for instance, or your nodes to have the same size in pixels.
 
@@ -307,7 +307,7 @@ Note also that the palette generation is seeded using the mapped attribute name 
 
 If you don't want `ipysigma` to generate color palettes for you, you can give your own palette through the relevant `_palette` kwarg such as `node_color_palette`, or use some [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) one (they have names starting with `scheme`).
 
-Here is the full list of those palettes supported by `ipysigma`: `RdGy`, `Blues`, `Greys`, `YlGn`, `OrRd`, `Reds`, `Paired`, `RdPu`, `PRGn`, `GnBu`, `Oranges`, `BuGn`, `YlOrBr`, `BrBG`, `PuBu`, `YlOrRd`, `Set2`, `PiYG`, `PuBuGn`, `Pastel1`, `BuPu`, `Set3`, `Tableau10`, `YlGnBu`, `Dark2`, `Set1`, `RdYlBu`, `Purples`, `RdYlGn`, `RdBu`, `Spectral`, `Accent`, `Greens`, `Category10`, `PuOr`, `Pastel2`, `PuRd`.
+Here is the full list of those palettes supported by `ipysigma`: `Reds`, `Category10`, `Paired`, `YlOrBr`, `PuBu`, `YlGn`, `Pastel2`, `PuRd`, `Greens`, `YlOrRd`, `Oranges`, `Blues`, `Tableau10`, `PuOr`, `Set3`, `BuPu`, `RdYlGn`, `RdBu`, `Set2`, `Greys`, `Purples`, `RdPu`, `PiYG`, `RdYlBu`, `BuGn`, `GnBu`, `PuBuGn`, `BrBG`, `OrRd`, `YlGnBu`, `Pastel1`, `Spectral`, `RdGy`, `Set1`, `Dark2`, `PRGn`, `Accent`.
 
 *Color gradients*
 
@@ -315,7 +315,7 @@ Color gradients can be defined as a range from "lowest" to "highest" color, e.g.
 
 They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
 
-Here is the full list of those gradients supported by `ipysigma`: `RdGy`, `Blues`, `Greys`, `Turbo`, `YlGn`, `OrRd`, `Reds`, `RdPu`, `PRGn`, `Rainbow`, `Viridis`, `GnBu`, `Sinebow`, `Oranges`, `BuGn`, `YlOrBr`, `BrBG`, `Plasma`, `PuBu`, `YlOrRd`, `CubehelixDefault`, `Cividis`, `PiYG`, `PuBuGn`, `BuPu`, `YlGnBu`, `Cool`, `RdYlBu`, `Purples`, `RdYlGn`, `RdBu`, `Warm`, `Spectral`, `Magma`, `Inferno`, `Greens`, `PuOr`, `PuRd`.
+Here is the full list of those gradients supported by `ipysigma`: `Reds`, `YlOrBr`, `PuBu`, `YlGn`, `PuRd`, `Greens`, `Plasma`, `YlOrRd`, `Oranges`, `Blues`, `PuOr`, `CubehelixDefault`, `BuPu`, `RdYlGn`, `Cividis`, `RdBu`, `Greys`, `Purples`, `RdPu`, `PiYG`, `RdYlBu`, `BuGn`, `GnBu`, `PuBuGn`, `Inferno`, `Sinebow`, `BrBG`, `Rainbow`, `Turbo`, `OrRd`, `Cool`, `YlGnBu`, `Warm`, `Viridis`, `Spectral`, `RdGy`, `PRGn`, `Magma`.
 
 ## Frequently asked questions
 
