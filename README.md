@@ -474,7 +474,7 @@ Note that this border size will be added to the node's radius.
 
 *Notes*
 
-Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
+Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
 ### node_border_ratio
 
@@ -499,7 +499,7 @@ Note that this border ratio will eat the node's size.
 
 *Notes*
 
-Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
+Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
 ### node_border_color
 
@@ -524,31 +524,142 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 
 *Notes*
 
-Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
+Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
 ### node_pictogram
 
 ![node_pictogram](./docs/img/node_pictogram.png)
 
+*Type*
+
+Categorical.
+
+*Raw values*
+
+The name of any Google Material Icon as listed [here](https://fonts.google.com/icons) (the name must be lowercase and snake_case, e.g. the name "Arrow Drop Done" should be given to `ipysigma` as `arrow_drop_done`).
+
+Alternatively, one can also give urls of publicly accessible svg icons such as https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/arrow_drop_down/default/48px.svg
+
+*Related kwargs*
+
+* **raw_node_pictogram**
+* **default_node_pictogram**
+
+*Notes*
+
+Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [node_pictogram_color](#node_pictogram_color) are defined.
+
 ### node_pictogram_color
 
 ![node_pictogram_color](./docs/img/node_pictogram_color.png)
+
+*Type*
+
+Categorical.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **node_pictogram_color**
+* **raw_node_pictogram_color**
+* **default_node_pictogram_color**
+* **node_pictogram_color_palette**
+
+*Notes*
+
+Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [node_pictogram_color](#node_pictogram_color) are defined.
 
 ### node_shape
 
 ![node_shape](./docs/img/node_shape.png)
 
+*Type*
+
+Categorical.
+
+*Raw values*
+
+The name of a supported shape such as: `circle`, `triangle`, `square`, `pentagon`, `star`, `hexagon`, `heart` or `cloud`.
+
+Alternatively, if you are feeling adventurous, it can also be the name of any Google Material Icon as listed [here](https://fonts.google.com/icons) (the name must be lowercase and snake_case, e.g. the name "Arrow Drop Done" should be given to `ipysigma` as `arrow_drop_done`).
+
+Finally, one can also give urls of publicly accessible svg icons such as https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/arrow_drop_down/default/48px.svg
+
+*Related kwargs*
+
+* **node_shape**
+* **raw_node_shape**
+* **default_node_shape**
+* **node_shape_mapping**
+
+*Note*
+
+Node shapes cannot be used with borders nor pictograms nor halos, as of yet.
+
 ### node_halo_size
 
 ![node_halo_size](./docs/img/node_halo_size.png)
+
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A halo size offset in pixels, with default camera (not zoomed nor unzoomed). The full halo radius will therefore be its size + its node's radius.
+
+*Related kwargs*
+
+* **node_halo_size**
+* **raw_node_halo_size**
+* **default_node_halo_size**
+* **node_halo_size_range**
+* **node_halo_size_scale**
 
 ### node_halo_color
 
 ![node_halo_color](./docs/img/node_halo_color.png)
 
+*Type*
+
+Categorical or continuous.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **node_halo_color**
+* **raw_node_halo_color**
+* **default_node_halo_color**
+* **node_halo_color_palette**
+* **node_halo_color_gradient**
+* **node_halo_color_scale**
+
 ### edge_color
 
 ![edge_color](./docs/img/edge_color.png)
+
+*Type*
+
+Categorical or continuous.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **edge_color**
+* **raw_edge_color**
+* **default_edge_color**
+* **edge_color_palette**
+* **edge_color_gradient**
+* **edge_color_scale**
 
 ### edge_type
 
@@ -558,13 +669,55 @@ Borders are only shown on screen if a [border_size](#node_border_size) or a [bor
 
 ![edge_size](./docs/img/edge_size.png)
 
+*Type*
+
+Continuous.
+
+*Raw values*
+
+An edge thickness in pixels, with default camera (not zoomed nor unzoomed).
+
+*Related kwargs*
+
+* **edge_size**
+* **raw_edge_size**
+* **default_edge_size**
+* **edge_size_range**
+* **edge_size_scale**
+
 ### edge_curveness
 
 ![edge_curveness](./docs/img/edge_curveness.png)
 
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A percentage. Note that it can go beyond `1` and that `0` will make the edge disappear.
+
+*Related kwargs*
+
+* **default_edge_curveness**
+
 ### edge_label
 
 ![edge_label](./docs/img/edge_label.png)
+
+*Type*
+
+Raw only.
+
+*Raw values*
+
+A text label.
+
+*Related kwargs*
+
+* **edge_label**
+* **raw_edge_label**
+* **default_edge_label**
 
 ## API Reference
 
