@@ -95,7 +95,6 @@ Remember you can always install packages in Colab by executing the following com
 !pip install networkx ipysigma
 ```
 
-
 ## Quick start
 
 *Using networkx*
@@ -284,7 +283,18 @@ For a comprehensive view of the available visual variables, the values they expe
 
 ## Scales, palettes and gradients
 
-TODO...
+*Available scales*
+
+* **lin**: linear scale, used by default when scale is not specified.
+* **log**: logarithmic scale. Takes an optional base (`e` by default).
+* **log+1**: logarithmic scale incrementing your values by one. This is a well-known visualization trick designed to avoid issues with zeros, which is often the case with some typical node metrics. Takes an optional base (`e` by default).
+* **pow**: power scale. Takes an optional exponent (`2` by default).
+* **sqrt**: square root scale (same as power scale but with inverted exponent). Takes an optional exponent (`2` by default).
+
+All the `_scale` kwargs can take the following:
+
+* The name of the scale directly: `node_size_scale="log"`.
+* A 2-tuple containing the name of the scale and its parameter: `node_size_scale=("log", 2)`.
 
 ## Frequently asked questions
 
