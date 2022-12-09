@@ -6,7 +6,7 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 
 `ipysigma` lets you customize a large number of the graph's visual variables such as: node color, size, label, border, halo, pictogram, shape and edge color, size, type, label etc.
 
-For an exhaustive list of what variables exist, check the "[Available visual variables](#available-visual-variables)" part of the documentation.
+For an exhaustive list of what visual variables you may tweak, check the "[Available visual variables](#available-visual-variables)" part of the documentation.
 
 <p align="center">
   <img alt="ipysigma" src="./docs/img/ipysigma.gif">
@@ -228,14 +228,14 @@ Sigma(g, node_color={1, 5, 6})
 
 In `ipysigma` visual variables can be given:
 
-* categorical data, which means they will map category values to a discrete mapping such as a node's category being associated with a given color.
+* categorical data, which means they will map category values to discrete visualization values such as a node's category being associated with a given color.
 * continuous data, which means they will map numerical values to a range of sizes or a gradient of colors, like when representing a node's degree by a size on screen.
 
-*kwargs naming rationale*
+*kwarg naming rationale*
 
-To be able to be drawn on screen, every visual variable must use values that have a meaning for the the widget's interactive renderer ([sigma.js](https://www.sigmajs.org/), as a matter of fact). For colors, it might need a HTML color name or one expressed in hexadecimal notation. For sizes, it might need a number of pixels etc.
+To be able to be drawn on screen, every visual variable must use values that have a meaning for the the widget's visual representation. For colors, it might be a HTML color name such as `#fa65ea` or `cyan`. For sizes, it might be a number of pixels etc.
 
-If you know what you are doing and want to give `ipysigma` "raw" values as those used by the visual representation directly, all variables have kwargs starting by `raw_`, such as `raw_node_color`.
+If you know what you are doing and want to give `ipysigma` the same "raw" values as those expected by the visual representation directly, all variables have kwargs starting by `raw_`, such as `raw_node_color`.
 
 But if you want `ipysigma` to map your arbitrary values to a suitable visual representation, all variables have a kwarg without any prefix, for instance `node_color`.
 
@@ -243,21 +243,30 @@ In which case, if you use categorical data, `ipysigma` can generate or use palet
 
 And if you use numerical data, then values will be mapped to an output range that can be configured with a kwarg suffixed with `_range` for sizes and with `_gradient` for colors, such as `node_size_range` or `node_color_gradient`.
 
-Sometimes, some values might fall out of the represented domain, such as non-numerical values for continuous variables, or categories outside of your analysis scope. Sometimes you might event want to use a constant value. In which case there always exists a kwarg prefixed with `default_`, such as `default_node_color`.
+Sometimes, some values might fall out of the represented domain, such as non-numerical values for continuous variables, or categories outside of the colors available in the given palette. In which case there always exists a kwarg prefixed with `default_`, such as `default_node_color`. A neat trick is also to use those kwargs as a way to indicate a constant value if you want all your edges to have the same color for instance, or your nodes to have the same size in pixels.
 
-Finally, it's usually possible to tweak the way numerical values will be mapped from their original domain to the visual one. This is what you do, for instance, when you choose to use a logarithmic scale on a chart to better visualize a specific distribution. In the same way, relevant `ipysigma` visual variables give access to a kwarg suffixed `_scale`, such as `node_color_scale` that lets you easily switch from a linear to a logarithmic or power scale etc. (for more information about this, check [this](#scales-palettes-and-gradients) next part of the documentation).
+Finally, it's usually possible to tweak the way numerical values will be mapped from their original domain to the visual one. This is what you do, for instance, when you choose to use a logarithmic scale on a chart to better visualize a specific distribution. Similarly, relevant `ipysigma` visual variables give access to a kwarg suffixed `_scale`, such as `node_color_scale` that lets you easily switch from a linear to a logarithmic or power scale etc. (for more information about this, check [this](#scales-palettes-and-gradients) in the next part of the documentation).
 
 To summarize, let's finish with two exhaustive examples: node color & node size.
 
 *Categorical or continuous variable: node color as an example*
 
 * **node_color**: this kwarg expects some arbitrary values related to your nodes. Those values can be given in multiple ways listed [here](#what-data-can-be-used-as-visual-variable). By default, `node_color` is a categorical variable. Hence, given values will be mapped to suitable colors, from a palette generated automatically for you. If you want your data to be interpreted as continuous instead, you will need to give a gradient to the variable through `node_color_gradient`.
-* **raw_node_color**: this kwarg expect data formatted the same way as `node_color`, but instead it does not expect arbitrary values but CSS colors instead. This way you can always regain full control on the colors you want for your nodes if none of `ipysigma` utilities suit your particular use-case.
-* TODO...
+* **raw_node_color**: this kwarg does not expect arbitrary values but CSS colors instead. This way you can always regain full control on the colors you want for your nodes if none of `ipysigma` utilities suit your particular use-case.
+* **default_node_color**: the `default_` kwargs always expect a value that will be used in the final representation, so here a CSS color, that will be used if a node category is not found in the color palette or if a node value is not numerical and we are using a gradient.
+* **node_color_palette**: by default, `ipysigma` uses [`iwanthue`](https://medialab.github.io/iwanthue/) to automatically generate fitting color palettes for the categories present in the given data. But sometimes you might want to customize the colors used. In which case this kwarg expects either a dictionary mapping category values to a CSS color such as `{'en': 'blue, 'fr': 'red'}` or the name of a categorical color scheme from [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) such as `Tableau10` or `RdYlBu` for instance.
+* **node_color_gradient**: if you want to use a color gradient for your node to represent continuous data, you will need to give this kwarg either a 2-tuple containing the "lowest" and "highest" color such as `("yellow", "red")` or the name of a continuous color gradient from [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) such as `Inferno` or `YlGn` for instance.
+* **node_color_scale**: finally, if you gave a gradient to `node_color_gradient` and want to apply a nonlinear scale to the given data, you can pass the name of the scale to use such as `log` or a 2-tuple containing the name of the scale and an optional param such as the scale's base in the case of a logarithmic scale. Here is a binary log scale for instance: `("log", 2)`.
 
 *Continuous variable: node size as an example*
 
-TODO...
+* **node_size**: this kwarg expects some arbitrary numerical values related to your nodes. Those values can be given in multiple ways listed [here](#what-data-can-be-used-as-visual-variable). Then they will be mapped using a scale given to `node_size_scale` to a range in pixels given to `node_size_range` before being used on screen.
+* **raw_node_size**: if you want to bypass the scale and the range altogether, this kwarg directly takes values to be considered as pixels on screen.
+* **default_node_size**: if no relevant value can be found for a node, or if said value is not a valid number, the widget will use this size, expressed in pixels, instead.
+* **node_size_scale**: if you want to apply a nonlinear scale to the given data, you can pass the name of the scale to use such as `log` or a 2-tuple containing the name of the scale and an optional param such as the scale's base in the case of a logarithmic scale. Here is a binary log scale for instance: `("log", 2)`.
+* **node_size_range**: this kwarg lets you customize the output range in pixels we should map the node numerical values to. For instance, if we want to have our nodes to have sizes between `1` pixel and `25` pixels, we would give it `(1, 25)`. Note that most visual variables have a default range and this kwarg can usually be omitted if the defaults suit you.
+
+For a comprehensive view of the available visual variables, the values they expect and how they can be customized, read [this](#available-visual-variables) next part of the documentation.
 
 ## Scales, palettes and gradients
 
