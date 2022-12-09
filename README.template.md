@@ -4,6 +4,10 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 
 `ipysigma` has been designed to work with either [`networkx`](https://networkx.org/) or [`igraph`](https://igraph.readthedocs.io).
 
+`ipysigma` lets you customize a large number of the graph's visual variables such as: node color, size, label, border, halo, pictogram, shape and edge color, size, type, label etc.
+
+For an exhaustive list of what variables exist, check the "[Available visual variables](#available-visual-variables)" part of the documentation.
+
 <p align="center">
   <img alt="ipysigma" src="./docs/img/ipysigma.gif">
 </p>
@@ -13,6 +17,10 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Examples](#examples)
+- [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
+- [Visual variables and kwarg naming rationale](#visual-variables-and-kwarg-naming-rationale)
+- [Scales, palettes and gradients](#scales-palettes-and-gradients)
+- [Frequently asked questions](#frequently-asked-questions)
 - [Available visual variables](#available-visual-variables)
   - [node_color](#node_color)
   - [node_color_saturation](#node_color_saturation)
@@ -33,10 +41,6 @@ A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.or
   - [edge_size](#edge_size)
   - [edge_curveness](#edge_curveness)
   - [edge_label](#edge_label)
-- [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
-- [Visual variables and kwarg naming rationale](#visual-variables-and-kwarg-naming-rationale)
-- [Scales, palettes and gradients](#scales-palettes-and-gradients)
-- [Frequently asked questions](#frequently-asked-questions)
 - [API Reference](#api-reference)
   - [Sigma](#sigma)
     - [#.get_layout](#get_layout)
@@ -113,92 +117,12 @@ Sigma(g, node_metrics=['louvain'], node_color='louvain')
 
 *Functional testing notebooks*
 
-If you want comprehensive examples of the widget's visual variables being used, 
+If you want comprehensive examples of the widget's visual variables being used,
 you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
-
-## Available visual variables
-
-### node_color
-
-![node_color](./docs/img/node_color.png)
-
-<!-- kwargs, example of raw values, notes -->
-
-### node_color_saturation
-
-![node_color_saturation](./docs/img/node_color_saturation.png)
-
-### node_size
-
-![node_size](./docs/img/node_size.png)
-
-### node_label
-
-![node_label](./docs/img/node_label.png)
-
-### node_label_size
-
-![node_label_size](./docs/img/node_label_size.png)
-
-### node_label_color
-
-![node_label_color](./docs/img/node_label_color.png)
-
-### node_border_size
-
-![node_border_size](./docs/img/node_border_size.png)
-
-### node_border_ratio
-
-![node_border_ratio](./docs/img/node_border_ratio.png)
-
-### node_border_color
-
-![node_border_color](./docs/img/node_border_color.png)
-
-### node_pictogram
-
-![node_pictogram](./docs/img/node_pictogram.png)
-
-### node_pictogram_color
-
-![node_pictogram_color](./docs/img/node_pictogram_color.png)
-
-### node_shape
-
-![node_shape](./docs/img/node_shape.png)
-
-### node_halo_size
-
-![node_halo_size](./docs/img/node_halo_size.png)
-
-### node_halo_color
-
-![node_halo_color](./docs/img/node_halo_color.png)
-
-### edge_color
-
-![edge_color](./docs/img/edge_color.png)
-
-### edge_type
-
-![edge_type](./docs/img/edge_type.png)
-
-### edge_size
-
-![edge_size](./docs/img/edge_size.png)
-
-### edge_curveness
-
-![edge_curveness](./docs/img/edge_curveness.png)
-
-### edge_label
-
-![edge_label](./docs/img/edge_label.png)
 
 ## What data can be used as visual variable
 
-Several things can be given as data to visual variables and their 
+Several things can be given as data to visual variables and their
 raw counterparts (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
 
 Here is the exhaustive list of what is possible:
@@ -340,6 +264,86 @@ TODO...
 *Why are some of my categories mapped to a dull grey?*
 
 TODO...
+
+## Available visual variables
+
+### node_color
+
+![node_color](./docs/img/node_color.png)
+
+<!-- kwargs, example of raw values, notes -->
+
+### node_color_saturation
+
+![node_color_saturation](./docs/img/node_color_saturation.png)
+
+### node_size
+
+![node_size](./docs/img/node_size.png)
+
+### node_label
+
+![node_label](./docs/img/node_label.png)
+
+### node_label_size
+
+![node_label_size](./docs/img/node_label_size.png)
+
+### node_label_color
+
+![node_label_color](./docs/img/node_label_color.png)
+
+### node_border_size
+
+![node_border_size](./docs/img/node_border_size.png)
+
+### node_border_ratio
+
+![node_border_ratio](./docs/img/node_border_ratio.png)
+
+### node_border_color
+
+![node_border_color](./docs/img/node_border_color.png)
+
+### node_pictogram
+
+![node_pictogram](./docs/img/node_pictogram.png)
+
+### node_pictogram_color
+
+![node_pictogram_color](./docs/img/node_pictogram_color.png)
+
+### node_shape
+
+![node_shape](./docs/img/node_shape.png)
+
+### node_halo_size
+
+![node_halo_size](./docs/img/node_halo_size.png)
+
+### node_halo_color
+
+![node_halo_color](./docs/img/node_halo_color.png)
+
+### edge_color
+
+![edge_color](./docs/img/edge_color.png)
+
+### edge_type
+
+![edge_type](./docs/img/edge_type.png)
+
+### edge_size
+
+![edge_size](./docs/img/edge_size.png)
+
+### edge_curveness
+
+![edge_curveness](./docs/img/edge_curveness.png)
+
+### edge_label
+
+![edge_label](./docs/img/edge_label.png)
 
 ## API Reference
 
