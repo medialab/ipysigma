@@ -29,6 +29,12 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
 - [Scales, palettes and gradients](#scales-palettes-and-gradients)
 - [Frequently asked questions](#frequently-asked-questions)
+  - [Why are there so few labels displayed?](#why-are-there-so-few-labels-displayed)
+  - [Why are some of my categories mapped to a dull grey?](#why-are-some-of-my-categories-mapped-to-a-dull-grey)
+  - [I gave colors to node_color but arbitrary colors are displayed by the widget instead](#i-gave-colors-to-node_color-but-arbitrary-colors-are-displayed-by-the-widget-instead)
+  - [My computer sounds like an airplane taking off](#my-computer-sounds-like-an-airplane-taking-off)
+  - [Some of my widgets only display labels or a glitchy black box](#some-of-my-widgets-only-display-labels-or-a-glitchy-black-box)
+  - [My graph is ugly, make it beautiful like Gephi](#my-graph-is-ugly-make-it-beautiful-like-gephi)
 - [Available visual variables](#available-visual-variables)
   - [node_color](#node_color)
   - [node_color_saturation](#node_color_saturation)
@@ -60,6 +66,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
     - [#.render_snapshot](#render_snapshot)
     - [#.to_html](#to_html)
     - [Sigma.write_html](#sigmawrite_html)
+    - [Sigma.set_defaults](#sigmaset_defaults)
   - [SigmaGrid](#sigmagrid)
     - [#.add](#add)
 
@@ -358,19 +365,43 @@ Here is the full list of those gradients supported by `ipysigma`: %(supported_co
 
 ## Frequently asked questions
 
-*Why are there so few labels displayed?*
+### Why are there so few labels displayed?
 
-By default, the label of a node is displayed only if its size is larger than a threshold. You can either change that
-threshold using the `label_rendered_size_threshold` kwarg, or set `show_all_labels` to `True`. This might have an impact 
-on performance with larger graphs.
+Labels are costly to render and can negate the benefit of using a WebGL renderer such as sigma.js to render interactive graphs. As such, sigma.js relies on a constant size grid to select the "worthiest" labels to display, after taking camera zoom into account.
 
-*Why are some of my categories mapped to a dull grey?*
+You can tweak the parameters of this grid using `label_grid_cell_size` and `label_density`. Decreasing the first one or increasing the second one will result in more labels being displayed.
 
-TODO...
+Also, by default, the label of a node is displayed only if its size in pixels is larger than a threshold. You can change that threshold using the `label_rendered_size_threshold` kwarg.
 
-* node_color does not display my colors
-* if don't want to display the colors of my gexf
-* i want a fancy graph
+Finally, if you don't want to deal with all this nonsense and just want to display all labels because you know what you are doing and don't care about performance, you can just use `show_all_labels=True` instead.
+
+### Why are some of my categories mapped to a dull grey?
+
+When `ipysigma` generate palettes for you, it only does so up to `10` colors by default. This number can be increased using the `max_categorical_colors` kwarg. For more information about palette generation, read [this](#scales-palettes-and-gradients) part of the documentation.
+
+Some designer told me (while holding a baseball bat) that it is unwise to have more than 10 categorical colors because you won't be able to distinguish them anymore. My hands are tied. Don't ask me to change this.
+
+### I gave colors to node_color but arbitrary colors are displayed by the widget instead
+
+`node_color` does not expect colors per se but arbitrary data that will be mapped to a suitable color palette for you. If you want to give colors directly, use `raw_node_color` instead. For more information about the visual variables kwarg naming rationale, read [this](#visual-variables-and-kwargs-naming-rationale) part of the documentation.
+
+### My computer sounds like an airplane taking off
+
+Don't forget to turn off the layout when it has converged (the pause button on the left). There is no convincing way to automatically detect when layout has converged so we must rely on you, the user, to indicate when it's done.
+
+If you want to start the layout automatically when instantiating the widget and make sure it will automatically stop after, say, 10 seconds, use `start_layout=10`.
+
+### Some of my widgets only display labels or a glitchy black box
+
+Your GPU can only render so many webgl canvases in your browser tabs. So if you created too many widgets (too many depending on the specifics of your computer and graphics card), it may gracefully deal with the situation by erasing the graph (but not the labels since those are rendered using 2d canvases) or by glitching to death.
+
+### My graph is ugly, make it beautiful like Gephi
+
+Use `default_edge_type="curve"`, `node_border_color_from="node"`, `label_size=g.degree` and `label_font="cursive"` and you should have a dazzling Gephi graph.
+
+<p align="center">
+  <img alt="gephi" src="./docs/img/gephi.png">
+</p>
 
 ## Available visual variables
 
@@ -384,7 +415,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -482,7 +513,7 @@ Categorical.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -551,7 +582,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -599,7 +630,7 @@ Categorical.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -669,7 +700,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -690,7 +721,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -802,6 +833,17 @@ Method rendering the widget as a standalone HTML file that can be hosted statica
 *Arguments*
 
 * **path** *PathLike or file*: where to save the HTML file.
+
+#### Sigma.set_defaults
+
+Static method that can be used to override some default values of the `Sigma` class kwargs.
+
+*Arguments*
+
+* **height** *int, optional*: default widget height in pixels.
+* **max_categorical_colors** *int, optional*: default maximum number of colors for generated palettes.
+* **node_size_range** *tuple, optional*: default size range in pixels for nodes.
+* **edge_size_range** *tuple, optional*: default size range in pixels for edges.
 
 #### Sigma.write_html
 
