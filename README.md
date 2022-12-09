@@ -355,7 +355,7 @@ If you want to start the layout automatically when instantiating the widget and 
 
 ### Some of my widgets only display labels or a glitchy black box
 
-Your GPU can only render so much webgl canvases in your browser tabs. So if you created too much widgets (too much depending on the specifics of your computer and graphics card), it may gracefully deal with the situation by erasing the graph (but not the labels since those are rendered using 2d canvases) or by glitching to death.
+Your GPU can only render so many webgl canvases in your browser tabs. So if you created too many widgets (too many depending on the specifics of your computer and graphics card), it may gracefully deal with the situation by erasing the graph (but not the labels since those are rendered using 2d canvases) or by glitching to death.
 
 ### My graph is ugly, make it beautiful like Gephi
 
