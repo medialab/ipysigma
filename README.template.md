@@ -283,6 +283,9 @@ TODO...
 TODO...
 
 * pandas
+* node_color does not display my colors
+* if don't want to display the colors of my gexf
+* i want a fancy graph
 
 ## Available visual variables
 
