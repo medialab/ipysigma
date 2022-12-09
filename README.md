@@ -341,6 +341,8 @@ Finally, if you don't want to deal with all this nonsense and just want to displ
 
 When `ipysigma` generate palettes for you, it only does so up to `10` colors by default. This number can be increased using the `max_categorical_colors` kwarg. For more information about palette generation, read [this](#scales-palettes-and-gradients) part of the documentation.
 
+Some designer told me (while holding a baseball bat) that it is unwise to have more than 10 categorical colors because you won't be able to distinguish them anymore. My hands are tied. Don't ask me to change this.
+
 ### I gave colors to node_color but arbitrary colors are displayed by the widget instead
 
 `node_color` does not expect colors per se but arbitrary data that will be mapped to a suitable color palette for you. If you want to give colors directly, use `raw_node_color` instead. For more information about the visual variables kwarg naming rationale, read [this](#visual-variables-and-kwargs-naming-rationale) part of the documentation.
