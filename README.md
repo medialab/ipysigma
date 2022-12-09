@@ -139,7 +139,7 @@ Sigma(g, node_metrics=['louvain'], node_color='louvain')
 If you want comprehensive examples of the widget's visual variables being used,
 you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
 
-* todo: grid example
+* todo: grid example, zindex, constant borders
 
 ## What data can be used as visual variable
 
@@ -307,7 +307,7 @@ Note also that the palette generation is seeded using the mapped attribute name 
 
 If you don't want `ipysigma` to generate color palettes for you, you can give your own palette through the relevant `_palette` kwarg such as `node_color_palette`, or use some [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) one (they have names starting with `scheme`).
 
-Here is the full list of those palettes supported by `ipysigma`: `Reds`, `Category10`, `Paired`, `YlOrBr`, `PuBu`, `YlGn`, `Pastel2`, `PuRd`, `Greens`, `YlOrRd`, `Oranges`, `Blues`, `Tableau10`, `PuOr`, `Set3`, `BuPu`, `RdYlGn`, `RdBu`, `Set2`, `Greys`, `Purples`, `RdPu`, `PiYG`, `RdYlBu`, `BuGn`, `GnBu`, `PuBuGn`, `BrBG`, `OrRd`, `YlGnBu`, `Pastel1`, `Spectral`, `RdGy`, `Set1`, `Dark2`, `PRGn`, `Accent`.
+Here is the full list of those palettes supported by `ipysigma`: `PiYG`, `Greys`, `YlOrBr`, `Spectral`, `RdYlBu`, `Set3`, `Category10`, `Tableau10`, `GnBu`, `Purples`, `Set1`, `YlGn`, `BrBG`, `Greens`, `Oranges`, `YlOrRd`, `RdBu`, `Blues`, `PRGn`, `Pastel2`, `RdPu`, `Pastel1`, `BuPu`, `RdGy`, `PuBuGn`, `PuOr`, `Dark2`, `PuBu`, `PuRd`, `OrRd`, `YlGnBu`, `Accent`, `Set2`, `RdYlGn`, `BuGn`, `Reds`, `Paired`.
 
 *Color gradients*
 
@@ -315,7 +315,7 @@ Color gradients can be defined as a range from "lowest" to "highest" color, e.g.
 
 They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
 
-Here is the full list of those gradients supported by `ipysigma`: `Reds`, `YlOrBr`, `PuBu`, `YlGn`, `PuRd`, `Greens`, `Plasma`, `YlOrRd`, `Oranges`, `Blues`, `PuOr`, `CubehelixDefault`, `BuPu`, `RdYlGn`, `Cividis`, `RdBu`, `Greys`, `Purples`, `RdPu`, `PiYG`, `RdYlBu`, `BuGn`, `GnBu`, `PuBuGn`, `Inferno`, `Sinebow`, `BrBG`, `Rainbow`, `Turbo`, `OrRd`, `Cool`, `YlGnBu`, `Warm`, `Viridis`, `Spectral`, `RdGy`, `PRGn`, `Magma`.
+Here is the full list of those gradients supported by `ipysigma`: `PiYG`, `Rainbow`, `Turbo`, `Viridis`, `Magma`, `Greys`, `YlOrBr`, `Spectral`, `Inferno`, `RdYlBu`, `Cividis`, `GnBu`, `Purples`, `YlGn`, `BrBG`, `Greens`, `Oranges`, `YlOrRd`, `RdBu`, `Blues`, `PRGn`, `CubehelixDefault`, `RdPu`, `BuPu`, `RdGy`, `PuBuGn`, `Warm`, `PuOr`, `PuBu`, `PuRd`, `OrRd`, `Plasma`, `YlGnBu`, `Sinebow`, `RdYlGn`, `BuGn`, `Cool`, `Reds`.
 
 ## Frequently asked questions
 
@@ -338,39 +338,193 @@ TODO...
 
 ![node_color](./docs/img/node_color.png)
 
-<!-- kwargs, example of raw values, notes -->
+*Type*
+
+Categorical or continuous.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **node_color**
+* **raw_node_color**
+* **default_node_color**
+* **node_color_palette**
+* **node_color_gradient**
+* **node_color_scale**
 
 ### node_color_saturation
 
 ![node_color_saturation](./docs/img/node_color_saturation.png)
 
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A percentage of color saturation. Examples: `0.1`, `0.96`.
+
+*Related kwargs*
+
+* **node_color_saturation**
+* **raw_node_color_saturation**
+* **default_node_color_saturation**
+* **node_color_saturation_range**
+* **node_color_saturation_scale**
+
 ### node_size
 
 ![node_size](./docs/img/node_size.png)
+
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A node size, i.e. a circle radius, in pixels, with default camera (not zoomed nor unzoomed).
+
+*Related kwargs*
+
+* **node_size**
+* **raw_node_size**
+* **default_node_size**
+* **node_size_range**
+* **node_size_scale**
 
 ### node_label
 
 ![node_label](./docs/img/node_label.png)
 
+*Type*
+
+Raw only.
+
+*Raw values*
+
+A text label.
+
+*Related kwargs*
+
+* **node_label**
+* **raw_node_label**
+* **default_node_label**
+
 ### node_label_size
 
 ![node_label_size](./docs/img/node_label_size.png)
+
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A font size for the label text, in pixels.
+
+*Related kwargs*
+
+* **node_label_size**
+* **raw_node_label_size**
+* **default_node_label_size**
+* **node_label_size_range**
 
 ### node_label_color
 
 ![node_label_color](./docs/img/node_label_color.png)
 
+*Type*
+
+Categorical.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **node_label_color**
+* **raw_node_label_color**
+* **default_node_label_color**
+* **node_label_color_palette**
+
 ### node_border_size
 
 ![node_border_size](./docs/img/node_border_size.png)
+
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A border size, in pixels, with default camera (not zoomed nor unzoomed).
+
+Note that this border size will be added to the node's radius.
+
+*Related kwargs*
+
+* **node_border_size**
+* **raw_node_border_size**
+* **default_node_border_size**
+* **node_border_size_range**
+
+*Notes*
+
+Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
 
 ### node_border_ratio
 
 ![node_border_ratio](./docs/img/node_border_ratio.png)
 
+*Type*
+
+Continuous.
+
+*Raw values*
+
+A border ratio, in percentage, with default camera (not zoomed nor unzoomed).
+
+Note that this border ratio will eat the node's size.
+
+*Related kwargs*
+
+* **node_border_ratio**
+* **raw_node_border_ratio**
+* **default_node_border_ratio**
+* **node_border_ratio_range**
+
+*Notes*
+
+Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
+
 ### node_border_color
 
 ![node_border_color](./docs/img/node_border_color.png)
+
+*Type*
+
+Categorical or continuous.
+
+*Raw values*
+
+HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+
+*Related kwargs*
+
+* **node_border_color**
+* **raw_node_border_color**
+* **default_node_border_color**
+* **node_border_color_palette**
+* **node_border_color_gradient**
+* **node_border_color_scale**
+
+*Notes*
+
+Borders are only shown on screen if a [border_size](#node_border_size) or a [border_ratio](#node_border_ratio) AND a [border_color](#node_border_color) are defined.
 
 ### node_pictogram
 
