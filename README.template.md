@@ -64,6 +64,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
     - [#.render_snapshot](#render_snapshot)
     - [#.to_html](#to_html)
     - [Sigma.write_html](#sigmawrite_html)
+    - [Sigma.set_defaults](#sigmaset_defaults)
   - [SigmaGrid](#sigmagrid)
     - [#.add](#add)
 
@@ -795,6 +796,17 @@ Method rendering the widget as a standalone HTML file that can be hosted statica
 *Arguments*
 
 * **path** *PathLike or file*: where to save the HTML file.
+
+#### Sigma.set_defaults
+
+Static method that can be used to override some default values of the `Sigma` class kwargs.
+
+*Arguments*
+
+* **height** *int, optional*: default widget height in pixels.
+* **max_categorical_colors** *int, optional*: default maximum number of colors for generated palettes.
+* **node_size_range** *tuple, optional*: default size range in pixels for nodes.
+* **edge_size_range** *tuple, optional*: default size range in pixels for edges.
 
 #### Sigma.write_html
 
