@@ -64,7 +64,7 @@ setup_args = dict(
     version=version,
     scripts=glob(pjoin("scripts", "*")),
     cmdclass=cmdclass,
-    packages=find_packages(),
+    packages=find_packages(exclude=["scripts"]),
     author="Guillaume Plique",
     author_email="guillaume.plique@sciencespo.fr",
     url="https://github.com/medialab/ipysigma",
