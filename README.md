@@ -341,15 +341,15 @@ TODO...
 
 ![node_color](./docs/img/node_color.png)
 
-*Type*
+**Type**
 
 Categorical or continuous.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_color**
 * **raw_node_color**
@@ -362,15 +362,15 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 
 ![node_color_saturation](./docs/img/node_color_saturation.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A percentage of color saturation. Examples: `0.1`, `0.96`.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_color_saturation**
 * **raw_node_color_saturation**
@@ -382,15 +382,15 @@ A percentage of color saturation. Examples: `0.1`, `0.96`.
 
 ![node_size](./docs/img/node_size.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A node size, i.e. a circle radius, in pixels, with default camera (not zoomed nor unzoomed).
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_size**
 * **raw_node_size**
@@ -402,15 +402,15 @@ A node size, i.e. a circle radius, in pixels, with default camera (not zoomed no
 
 ![node_label](./docs/img/node_label.png)
 
-*Type*
+**Type**
 
 Raw only.
 
-*Raw values*
+**Raw values**
 
 A text label.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_label**
 * **raw_node_label**
@@ -420,15 +420,15 @@ A text label.
 
 ![node_label_size](./docs/img/node_label_size.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A font size for the label text, in pixels.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_label_size**
 * **raw_node_label_size**
@@ -439,15 +439,15 @@ A font size for the label text, in pixels.
 
 ![node_label_color](./docs/img/node_label_color.png)
 
-*Type*
+**Type**
 
 Categorical.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_label_color**
 * **raw_node_label_color**
@@ -458,24 +458,24 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 
 ![node_border_size](./docs/img/node_border_size.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A border size, in pixels, with default camera (not zoomed nor unzoomed).
 
 Note that this border size will be added to the node's radius.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_border_size**
 * **raw_node_border_size**
 * **default_node_border_size**
 * **node_border_size_range**
 
-*Notes*
+**Notes**
 
 Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
@@ -483,24 +483,24 @@ Borders are only shown on screen if a [node_border_size](#node_border_size) OR a
 
 ![node_border_ratio](./docs/img/node_border_ratio.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A border ratio, in percentage, with default camera (not zoomed nor unzoomed).
 
 Note that this border ratio will eat the node's size.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_border_ratio**
 * **raw_node_border_ratio**
 * **default_node_border_ratio**
 * **node_border_ratio_range**
 
-*Notes*
+**Notes**
 
 Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
@@ -508,15 +508,15 @@ Borders are only shown on screen if a [node_border_size](#node_border_size) OR a
 
 ![node_border_color](./docs/img/node_border_color.png)
 
-*Type*
+**Type**
 
 Categorical or continuous.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_border_color**
 * **raw_node_border_color**
@@ -525,7 +525,7 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 * **node_border_color_gradient**
 * **node_border_color_scale**
 
-*Notes*
+**Notes**
 
 Borders are only shown on screen if a [node_border_size](#node_border_size) OR a [node_border_ratio](#node_border_ratio) AND a [node_border_color](#node_border_color) are defined.
 
@@ -533,22 +533,22 @@ Borders are only shown on screen if a [node_border_size](#node_border_size) OR a
 
 ![node_pictogram](./docs/img/node_pictogram.png)
 
-*Type*
+**Type**
 
 Categorical.
 
-*Raw values*
+**Raw values**
 
 The name of any Google Material Icon as listed [here](https://fonts.google.com/icons) (the name must be lowercase and snake_case, e.g. the name "Arrow Drop Done" should be given to `ipysigma` as `arrow_drop_done`).
 
 Alternatively, one can also give urls of publicly accessible svg icons such as https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/arrow_drop_down/default/48px.svg
 
-*Related kwargs*
+**Related kwargs**
 
 * **raw_node_pictogram**
 * **default_node_pictogram**
 
-*Notes*
+**Notes**
 
 Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [node_pictogram_color](#node_pictogram_color) are defined.
 
@@ -556,22 +556,22 @@ Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [no
 
 ![node_pictogram_color](./docs/img/node_pictogram_color.png)
 
-*Type*
+**Type**
 
 Categorical.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_pictogram_color**
 * **raw_node_pictogram_color**
 * **default_node_pictogram_color**
 * **node_pictogram_color_palette**
 
-*Notes*
+**Notes**
 
 Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [node_pictogram_color](#node_pictogram_color) are defined.
 
@@ -579,11 +579,11 @@ Pictograms are only shown on screen if [node_pictogram](#node_pictogram) AND [no
 
 ![node_shape](./docs/img/node_shape.png)
 
-*Type*
+**Type**
 
 Categorical.
 
-*Raw values*
+**Raw values**
 
 The name of a supported shape such as: `circle`, `triangle`, `square`, `pentagon`, `star`, `hexagon`, `heart` or `cloud`.
 
@@ -591,7 +591,7 @@ Alternatively, if you are feeling adventurous, it can also be the name of any Go
 
 Finally, one can also give urls of publicly accessible svg icons such as https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/arrow_drop_down/default/48px.svg
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_shape**
 * **raw_node_shape**
@@ -606,15 +606,15 @@ Node shapes cannot be used with borders nor pictograms nor halos, as of yet.
 
 ![node_halo_size](./docs/img/node_halo_size.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A halo size offset in pixels, with default camera (not zoomed nor unzoomed). The full halo radius will therefore be its size + its node's radius.
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_halo_size**
 * **raw_node_halo_size**
@@ -626,15 +626,15 @@ A halo size offset in pixels, with default camera (not zoomed nor unzoomed). The
 
 ![node_halo_color](./docs/img/node_halo_color.png)
 
-*Type*
+**Type**
 
 Categorical or continuous.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **node_halo_color**
 * **raw_node_halo_color**
@@ -647,15 +647,15 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 
 ![edge_color](./docs/img/edge_color.png)
 
-*Type*
+**Type**
 
 Categorical or continuous.
 
-*Raw values*
+**Raw values**
 
 HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
-*Related kwargs*
+**Related kwargs**
 
 * **edge_color**
 * **raw_edge_color**
@@ -672,15 +672,15 @@ HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a899
 
 ![edge_size](./docs/img/edge_size.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 An edge thickness in pixels, with default camera (not zoomed nor unzoomed).
 
-*Related kwargs*
+**Related kwargs**
 
 * **edge_size**
 * **raw_edge_size**
@@ -692,15 +692,15 @@ An edge thickness in pixels, with default camera (not zoomed nor unzoomed).
 
 ![edge_curveness](./docs/img/edge_curveness.png)
 
-*Type*
+**Type**
 
 Continuous.
 
-*Raw values*
+**Raw values**
 
 A percentage. Note that it can go beyond `1` and that `0` will make the edge disappear.
 
-*Related kwargs*
+**Related kwargs**
 
 * **default_edge_curveness**
 
@@ -708,15 +708,15 @@ A percentage. Note that it can go beyond `1` and that `0` will make the edge dis
 
 ![edge_label](./docs/img/edge_label.png)
 
-*Type*
+**Type**
 
 Raw only.
 
-*Raw values*
+**Raw values**
 
 A text label.
 
-*Related kwargs*
+**Related kwargs**
 
 * **edge_label**
 * **raw_edge_label**
