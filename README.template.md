@@ -378,7 +378,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -476,7 +476,7 @@ Categorical.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -545,7 +545,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -593,7 +593,7 @@ Categorical.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -663,7 +663,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
@@ -684,7 +684,7 @@ Categorical or continuous.
 
 **Raw values**
 
-HTML named color or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
+HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex color or rgb/rgba color. Examples: `red`, `#fff`, `#a89971`, `rgb(25, 25, 25)`, `rgba(25, 145, 56, 0.5)`
 
 **Related kwargs**
 
