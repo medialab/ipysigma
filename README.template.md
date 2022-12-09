@@ -189,8 +189,8 @@ you can read the notebooks found [here](./notebooks/Tests/), which serve as func
 
 ## What data can be used as visual variable
 
-Several things can be given as data to visual variables and their
-raw counterparts (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
+There are several ways to specify what you want to use as visual variables 
+(read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
 
 Here is the exhaustive list of what is possible:
 
@@ -377,7 +377,7 @@ Finally, if you don't want to deal with all this nonsense and just want to displ
 
 ### Why are some of my categories mapped to a dull grey?
 
-When `ipysigma` generate palettes for you, it only does so up to `10` colors by default. This number can be increased using the `max_categorical_colors` kwarg. For more information about palette generation, read [this](#scales-palettes-and-gradients) part of the documentation.
+When `ipysigma` generates palettes for you, it only uses up to `10` colors by default. This number can be increased using the `max_categorical_colors` kwarg. For more information about palette generation, read [this](#scales-palettes-and-gradients) part of the documentation.
 
 Some designer told me (while holding a baseball bat) that it is unwise to have more than 10 categorical colors because you won't be able to distinguish them anymore. My hands are tied. Don't ask me to change this.
 
