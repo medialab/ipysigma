@@ -126,6 +126,8 @@ Sigma(g, node_metrics=['louvain'], node_color='louvain')
 If you want comprehensive examples of the widget's visual variables being used,
 you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
 
+* todo: grid example
+
 ## What data can be used as visual variable
 
 Several things can be given as data to visual variables and their
@@ -270,6 +272,8 @@ TODO...
 *Why are some of my categories mapped to a dull grey?*
 
 TODO...
+
+* pandas
 
 ## Available visual variables
 
