@@ -134,6 +134,8 @@ Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Vi
 Sigma(g, node_metrics=['louvain'], node_color='louvain')
 ```
 
+*pandas*
+
 *Functional testing notebooks*
 
 If you want comprehensive examples of the widget's visual variables being used,
@@ -319,15 +321,16 @@ Here is the full list of those gradients supported by `ipysigma`: `Blues`, `BrBG
 
 ## Frequently asked questions
 
-*How can I display more labels?*
+*Why are there so few labels displayed?*
 
-TODO...
+By default, the label of a node is displayed only if its size is larger than a threshold. You can either change that
+threshold using the `label_rendered_size_threshold` kwarg, or set `show_all_labels` to `True`. This might have an impact 
+on performance with larger graphs.
 
 *Why are some of my categories mapped to a dull grey?*
 
 TODO...
 
-* pandas
 * node_color does not display my colors
 * if don't want to display the colors of my gexf
 * i want a fancy graph
