@@ -24,7 +24,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Quick start](#quick-start)
 - [Examples](#examples)
   - [Compute a Louvain partition and use it as node color](#compute-a-louvain-partition-and-use-it-as-node-color)
-  - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph ) 
+  - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph )
 - [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
 - [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
 - [Scales, palettes and gradients](#scales-palettes-and-gradients)
@@ -146,7 +146,7 @@ Sigma(g, node_metrics=['louvain'], node_color='louvain')
 ### Display a pandas DataFrame as a graph
 
 You can use [pelote](https://github.com/medialab/pelote#readme), which is an ipysigma satellite library,
-to turn pandas DataFrame into networkx graphs. 
+to turn pandas DataFrame into networkx graphs.
 
 As a first example, you can create a graph from a DataFrame of edges:
 ```python
@@ -156,23 +156,23 @@ from pelote import edges_table_to_graph
 #Alice invited Bob and Chloe. Bob invited Chloe twice.
 df = pd.DataFrame({'hosts': ['Alice', 'Alice', 'Bob', 'Bob'], 'guests': ['Bob', 'Chloe', 'Chloe', 'Chloe']})
 g = edges_table_to_graph(
-  df, 
-  edge_source_col='hosts', 
-  edge_target_col='guests', 
-  count_rows_as_weight=True, 
+  df,
+  edge_source_col='hosts',
+  edge_target_col='guests',
+  count_rows_as_weight=True,
   directed=True
 )
 Sigma(g, edge_size='weight', default_edge_type='arrow')
 ```
 
-Using pelote again, you can also create a bipartite network (students and their professors, for example) 
+Using pelote again, you can also create a bipartite network (students and their professors, for example)
 with `table_to_bipartite_graph`:
 ```python
 import pandas as pd
 from pelote import table_to_bipartite_graph
 
 df = pd.DataFrame({
-    'professor': ['A', 'A', 'A', 'B', 'B', 'B', 'B'], 
+    'professor': ['A', 'A', 'A', 'B', 'B', 'B', 'B'],
     'student': ['C', 'D', 'E', 'C', 'F', 'G', 'H'],
     })
 
@@ -189,7 +189,7 @@ you can read the notebooks found [here](./notebooks/Tests/), which serve as func
 
 ## What data can be used as visual variable
 
-There are several ways to specify what you want to use as visual variables 
+There are several ways to specify what you want to use as visual variables
 (read [this](#visual-variables-and-kwarg-naming-rationale) for a detailed explanation).
 
 Here is the exhaustive list of what is possible:
@@ -393,7 +393,7 @@ If you want to start the layout automatically when instantiating the widget and 
 
 ### Some of my widgets only display labels or a glitchy black box
 
-Your GPU can only render so many webgl canvases in your browser tabs. So if you created too many widgets (too many depending on the specifics of your computer and graphics card), it may gracefully deal with the situation by erasing the graph (but not the labels since those are rendered using 2d canvases) or by glitching to death.
+Your GPU can only render so many webgl canvases in your browser tabs. So if you created too many widgets (this depends on the specifics of your computer and graphics card), it may gracefully deal with the situation by erasing the graph (but not the labels since those are rendered using 2d canvases) or by glitching to death.
 
 ### My graph is ugly, make it beautiful like Gephi
 
