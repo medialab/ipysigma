@@ -387,7 +387,31 @@ Here is the full list of those gradients supported by `ipysigma`: `Blues`, `BrBG
 
 ## Widget-side metrics
 
-TODO...
+Since `ipysigma` is using [graphology](https://graphology.github.io/), it can also draw from its library of graph theory metrics.
+
+As such, the `node_metrics` enables you to ask your widget to compute node metrics on its own and use to map the result on any visual variable.
+
+Here is how you can specify metrics to be computed:
+
+```python
+# node_metrics expects an iterable of metrics to compute:
+Sigma(g, node_metrics=["louvain"], node_color="louvain")
+
+# They can be specified by name, but you can also specify through
+# a dictionary if you need parameters for the metrics:
+Sigma(g, node_metrics=[{"name": "louvain", "resolution": 1.5}], node_color="louvain")
+
+# You can also give a dictionary mapping resulting attribute name to
+# the metric to compute if you don't want to map the result on an attribute
+# having the same name as the metric:
+Sigma(g, node_metrics={"community": "louvain"}, node_color="community")
+Sigma(g, node_metrics={"community": {"name": "louvain", "resolution": 1.5}}, node_color="community")
+```
+
+*Available node metrics & their parameters*
+
+* **louvain**: Louvain algorithm for community detection (through modularity optimization)
+  * **resolution** *?float* [`1`]: resolution parameter.
 
 ## Frequently asked questions
 
