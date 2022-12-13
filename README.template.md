@@ -24,10 +24,11 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Quick start](#quick-start)
 - [Examples](#examples)
   - [Compute a Louvain partition and use it as node color](#compute-a-louvain-partition-and-use-it-as-node-color)
-  - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph )
+  - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph)
 - [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
 - [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
 - [Scales, palettes and gradients](#scales-palettes-and-gradients)
+- [Widget-side metrics](#widget-side-metrics)
 - [Frequently asked questions](#frequently-asked-questions)
   - [Why are there so few labels displayed?](#why-are-there-so-few-labels-displayed)
   - [Why are some of my categories mapped to a dull grey?](#why-are-some-of-my-categories-mapped-to-a-dull-grey)
@@ -139,14 +140,27 @@ Sigma(g, node_size=g.degree, node_color=g.betweenness(), node_color_gradient='Vi
 
 ### Compute a Louvain partition and use it as node color
 
+`ipysigma` is able to compute metrics on the widget side using [graphology](https://graphology.github.io/). As such, you can ask it to compute e.g. a Louvain partitioning if you don't want or cannot do it on the python side.
+
+For more information about available metrics and how to specify them, check [this](#widget-side-metrics) part of the documentation.
+
 ```python
-Sigma(g, node_metrics=['louvain'], node_color='louvain')
+Sigma(g, node_metrics=["louvain"], node_color="louvain")
+
+# Renaming the target attribute
+Sigma(g, node_metrics={"community": "louvain"}, node_color="community")
+
+# Passing custom parameters
+Sigma(
+  g,
+  node_metrics={"community": {"name": "louvain", "resolution": 1.5}},
+  node_color="community"
+)
 ```
 
 ### Display a pandas DataFrame as a graph
 
-You can use [pelote](https://github.com/medialab/pelote#readme), which is an ipysigma satellite library,
-to turn pandas DataFrame into networkx graphs.
+You can use [pelote](https://github.com/medialab/pelote#readme), which is an ipysigma satellite library, to turn pandas DataFrame into networkx graphs.
 
 As a first example, you can create a graph from a DataFrame of edges:
 ```python
@@ -362,6 +376,10 @@ Color gradients can be defined as a range from "lowest" to "highest" color, e.g.
 They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
 
 Here is the full list of those gradients supported by `ipysigma`: %(supported_color_gradients)s.
+
+## Widget-side metrics
+
+TODO...
 
 ## Frequently asked questions
 
