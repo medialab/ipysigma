@@ -32,6 +32,10 @@ def is_igraph_graph(v):
     return IGRAPH_INSTALLED and isinstance(v, ig.GraphBase)
 
 
+def is_igraph_vertex_clustering(v):
+    return IGRAPH_INSTALLED and isinstance(v, ig.clustering.VertexClustering)
+
+
 def is_valid_graph(v):
     return is_networkx_graph(v) or is_igraph_graph(v)
 
