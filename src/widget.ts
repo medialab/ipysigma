@@ -711,11 +711,11 @@ export class SigmaView extends DOMWidgetView {
       };
 
       // Gathering info about the graph to build reducers correctly
-      const maxCategoryColors = this.model.get('max_category_colors') as number;
+      const maxCategoricalColors = this.model.get('max_categorical_colors') as number;
 
       const scaleBuilder = new VisualVariableScalesBuilder(
         visualVariables,
-        maxCategoryColors
+        maxCategoricalColors
       );
 
       scaleBuilder.readGraph(graph);
