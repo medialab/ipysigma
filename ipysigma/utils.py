@@ -3,7 +3,7 @@ from datetime import date, datetime
 from collections.abc import Mapping, Sequence, Iterable
 
 from ipysigma.shim import is_nan
-from ipysigma.interfaces import is_networkx_degree_view
+from ipysigma.interfaces import is_networkx_degree_view, is_igraph_vertex_clustering
 from ipysigma.constants import (
     SUPPORTED_RANGE_BOUNDS,
     SUPPORTED_SCALE_TYPES,
@@ -91,6 +91,10 @@ def resolve_palette(name, value):
 
 
 def resolve_variable(name, items, target, item_type="node", is_directed=False):
+
+    # If we have an igraph.Clustering.VertexClustering, we recast it as a partition
+    if is_igraph_vertex_clustering(target):
+        target = target._membership
 
     # If we have a partition, we recast it as a mapping
     if is_partition(target):
