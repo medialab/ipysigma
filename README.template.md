@@ -250,6 +250,12 @@ Sigma(g, node_label=range(len(g)))
 
 # Random size for my edges
 Sigma(g, edge_size=(random() for _ in g.edges))
+
+# Numpy vector
+Sigma(g, node_size=np.random.rand(len(g)))
+
+# Pandas series
+Sigma(g, edge_size=df.edge_weights)
 ```
 
 *Partition*
