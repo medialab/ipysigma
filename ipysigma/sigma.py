@@ -16,6 +16,7 @@ from ipysigma.interfaces import get_graph_interface, check_graph_is_valid
 from ipysigma.utils import (
     fix_items_for_json_serialization,
     pretty_print_int,
+    pretty_print_type_name,
     resolve_metrics,
     resolve_variable,
     sort_items_per_zindex,
@@ -566,7 +567,16 @@ class Sigma(DOMWidget):
 
         if selected_node is not None:
             if not isinstance(selected_node, SUPPORTED_NODE_TYPES):
-                raise TypeError("selected_node should be str, int or float")
+                raise TypeError(
+                    "selected_node should have one of the following types: %s (found type %s)"
+                    % (
+                        ", ".join(
+                            pretty_print_type_name(node_type)
+                            for node_type in SUPPORTED_NODE_TYPES
+                        ),
+                        pretty_print_type_name(type(selected_node)),
+                    )
+                )
 
             if selected_node not in graph:
                 raise KeyError("selected_node does not exist in the graph")
@@ -658,13 +668,22 @@ class Sigma(DOMWidget):
 
                 if not isinstance(node, SUPPORTED_NODE_TYPES):
                     raise TypeError(
-                        "ipysigma does not support graph with node keys which are not str, int or float (found a %s key)"
-                        % self.node_type.__name__
+                        "ipysigma only supports node keys that have one of the following types: %s (found a %s key)"
+                        % (
+                            ", ".join(
+                                pretty_print_type_name(node_type)
+                                for node_type in SUPPORTED_NODE_TYPES
+                            ),
+                            pretty_print_type_name(self.node_type),
+                        )
                     )
             elif type(node) is not self.node_type:
                 raise TypeError(
                     "ipysigma does not support mixed types for node keys (found %s and %s)"
-                    % (self.node_type.__name__, type(node).__name__)
+                    % (
+                        pretty_print_type_name(self.node_type),
+                        pretty_print_type_name(type(node)),
+                    )
                 )
 
             attr = attr.copy()

@@ -40,6 +40,13 @@ def pretty_print_int(v):
     return "{:,}".format(int(v))
 
 
+def pretty_print_type_name(t):
+    return "%s%s" % (
+        t.__module__ + "." if t.__module__ != "builtins" else "",
+        t.__name__,
+    )
+
+
 def is_partition(value):
     return (
         isinstance(value, list)
