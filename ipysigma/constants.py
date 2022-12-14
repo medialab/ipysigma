@@ -1,3 +1,5 @@
+from ipysigma.shim import np
+
 DEFAULT_MAX_CATEGORICAL_COLORS = 10
 DEFAULT_HEIGHT = 500
 MIN_HEIGHT = 250
@@ -19,7 +21,10 @@ DEFAULT_EDGE_COLOR = "#ccc"
 DEFAULT_EDGE_SIZE_RANGE = (0.5, 10)
 DEFAULT_EDGE_CURVENESS = 0.25
 DEFAULT_CAMERA_STATE = {"ratio": 1, "x": 0.5, "y": 0.5, "angle": 0}
-SUPPORTED_NODE_TYPES = (int, str, float)
+if np is None:
+    SUPPORTED_NODE_TYPES = (int, str, float)
+else:
+    SUPPORTED_NODE_TYPES = (int, str, float, np.integer, np.floating)
 SUPPORTED_RANGE_BOUNDS = (int, str, float)
 SUPPORTED_NODE_METRICS = {"louvain"}
 SUPPORTED_UNDIRECTED_EDGE_TYPES = {"rectangle", "line", "curve"}
