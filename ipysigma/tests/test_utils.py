@@ -166,6 +166,21 @@ class TestResolveVariable(object):
             {"key": "two", "attributes": {"ipysigma_kwarg_node_in": True}},
         ]
 
+    def test_igraph_vertex_clustering(self):
+        g = ig.Graph()
+        g.add_vertex(0)
+        g.add_vertex(1)
+
+        items = [{"key": 0, "attributes": {}}, {"key": 1, "attributes": {}}]
+
+        name = resolve_variable("node_color", items, g.connected_components())
+
+        assert name == "ipysigma_kwarg_node_color"
+        assert items == [
+            {"key": 0, "attributes": {"ipysigma_kwarg_node_color": 0}},
+            {"key": 1, "attributes": {"ipysigma_kwarg_node_color": 1}},
+        ]
+
     # TODO: edges (partitions)
 
 

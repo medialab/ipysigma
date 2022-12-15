@@ -136,6 +136,10 @@ def get_graph_interface(graph):
     )
 
 
+def is_igraph_vertex_clustering(v):
+    return IGRAPH_INSTALLED and isinstance(v, ig.clustering.VertexClustering)
+
+
 def is_networkx_degree_view(target) -> bool:
     if not NETWORKX_INSTALLED:
         return False
