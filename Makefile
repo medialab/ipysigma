@@ -14,6 +14,7 @@ clean:
 	$(call clean)
 
 deps:
+	$(call clean)
 	npm i -g yarn
 	pip3 install -U pip
 	pip3 install build twine jupyter_packaging black docdocdoc
