@@ -313,6 +313,15 @@ Sigma(g, node_color=communities)
 Sigma(g, node_size=g.degree)
 ```
 
+*igraph VertexClustering*
+
+```python
+# *IGraph community detection / clustering methods return a VertexClustering object
+Sigma(g, node_color=g.connected_components())
+
+Sigma(g, node_color=g.community_multilevel())
+```
+
 *Arbitrary callable*
 
 ```python
