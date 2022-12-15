@@ -27,6 +27,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Examples](#examples)
   - [Compute a Louvain partition and use it as node color](#compute-a-louvain-partition-and-use-it-as-node-color)
   - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph)
+  - [Comparing two features of a graph](#comparing-two-features-of-a-graph)
   - [More examples: functional testing notebooks](#more-examples-functional-testing-notebooks)
 - [What data can be used as visual variable](#what-data-can-be-used-as-visual-variable)
 - [Visual variables and kwargs naming rationale](#visual-variables-and-kwargs-naming-rationale)
@@ -204,12 +205,47 @@ g = table_to_bipartite_graph(df, 'student', 'professor', node_part_attr='status'
 Sigma(g, node_color='status', default_node_size=10, show_all_labels=True)
 ```
 
+### Comparing two features of a graph
+
+Let's say we have a graph of websites that we categorized by type and language and we want to compare the distribution of those categories on the graph's topology. We could use node color for language and border color for type but you will quickly see that this is probably not readable.
+
+To solve this kind of problems and enable its users to easily compare multiple features of a graph, `ipysigma` exposes a `SigmaGrid` widget that arranges multiple synchronized views of the same graph on a grid:
+
+```python
+from ipysigma import SigmaGrid
+
+# Views to display can be specified through the `views` kwarg, expecting
+# a list of dicts of keyword arguments to give to the underlying Sigma widgets:
+SigmaGrid(g, views=[
+  {"node_color": "type"},
+  {"node_color": "type"}
+])
+
+# You can do the same by using the `#.add` method of the grid to
+# dynamically add views:
+SigmaGrid(g).add(node_color="lang").add(node_color="type")
+
+# Any kwarg passed to the grid directly will be used by all of the views.
+# This is useful to avoid repetition:
+SigmaGrid(g, node_size=g.degree, views=[
+  {"node_color": "type"},
+  {"node_color": "type"}
+])
+
+# You can of course display more than 2 views
+# By default the grid has 2 columns and will wrap to new rows,
+# but you can change the number of columns using the `columns` kwarg:
+SigmaGrid(g, columns=3, views=[
+  {"node_size": g.degree},
+  {"node_size": g.in_degree},
+  {"node_size": g.out_degree}
+])
+```
+
 ### More examples: functional testing notebooks
 
 If you want comprehensive examples of the widget's visual variables being used,
 you can read the notebooks found [here](./notebooks/Tests/), which serve as functional tests to the library.
-
-<!-- todo: grid example, zindex -->
 
 ## What data can be used as visual variable
 
