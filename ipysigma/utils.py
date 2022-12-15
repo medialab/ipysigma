@@ -94,6 +94,12 @@ def resolve_variable(name, items, target, item_type="node", is_directed=False):
 
     # If we have an igraph.Clustering.VertexClustering, we recast it as a partition
     if is_igraph_vertex_clustering(target):
+        if item_type != "node":
+            raise TypeError(
+                "An igraph VertexClustering cannot be used to map a visual variable on %ss"
+                % item_type
+            )
+
         target = target._membership
 
     # If we have a partition, we recast it as a mapping

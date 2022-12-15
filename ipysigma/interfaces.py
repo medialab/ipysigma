@@ -32,10 +32,6 @@ def is_igraph_graph(v):
     return IGRAPH_INSTALLED and isinstance(v, ig.GraphBase)
 
 
-def is_igraph_vertex_clustering(v):
-    return IGRAPH_INSTALLED and isinstance(v, ig.clustering.VertexClustering)
-
-
 def is_valid_graph(v):
     return is_networkx_graph(v) or is_igraph_graph(v)
 
@@ -138,6 +134,10 @@ def get_graph_interface(graph):
     raise TypeError(
         "unknown graph type. expecting either a networkx or igraph instance."
     )
+
+
+def is_igraph_vertex_clustering(v):
+    return IGRAPH_INSTALLED and isinstance(v, ig.clustering.VertexClustering)
 
 
 def is_networkx_degree_view(target) -> bool:
