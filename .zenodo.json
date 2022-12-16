@@ -1,0 +1,16 @@
+{
+  "language": "eng",
+  "license": "MIT",
+  "title": "ipysigma",
+  "upload_type": "software",
+  "keywords": ["jupyter", "notebook", "graph", "network"],
+  "creators": [
+    {
+      "orcid": "0000-0003-4916-8472",
+      "affiliation": "médialab - Sciences Po",
+      "name": "Guillaume Plique"
+    }
+  ],
+  "access_right": "open",
+  "description": "<p>A Jupyter widget using sigma.js to render interactive networks.</p>"
+}
