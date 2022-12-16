@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7446060.svg)](https://doi.org/10.5281/zenodo.7446060)
+
 # ipysigma
 
 A [Jupyter](https://jupyter.org/) widget using [sigma.js](https://www.sigmajs.org/) and [graphology](https://graphology.github.io/) to render interactive networks directly within the result of a notebook cell.
@@ -74,6 +76,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
     - [Sigma.set_defaults](#sigmaset_defaults)
   - [SigmaGrid](#sigmagrid)
     - [#.add](#add)
+  - [How to cite](#how-to-cite)
 
 ## Installation
 
@@ -972,3 +975,7 @@ Method one can use as an alternative or combined to `SigmaGrid` constructor's `v
 ```python
 SigmaGrid(g, node_color='category').add(node_size=g.degree).add(node_size='occurrences')
 ```
+
+## How to cite
+
+> Guillaume Plique. (2022). ipysigma, A Jupyter widget using sigma.js to render interactive networks. Zenodo. https://doi.org/10.5281/zenodo.7446059
