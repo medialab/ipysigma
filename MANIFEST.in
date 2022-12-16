@@ -10,12 +10,15 @@ include package.json
 include webpack.config.js
 include ipysigma/labextension/*.tgz
 
+# Scripts
+prune scripts
+
 # Notebooks
-graft notebooks
+prune notebooks
 
 # Tests
-graft tests
-prune tests/build
+prune tests
+prune ipysigma/tests
 
 # Javascript files
 graft ipysigma/nbextension
@@ -30,3 +33,6 @@ global-exclude *.pyc
 global-exclude *.pyo
 global-exclude .git
 global-exclude .ipynb_checkpoints
+global-exclude .DS_Store
+global-exclude .vscode
+global-exclude .pytest_cache
