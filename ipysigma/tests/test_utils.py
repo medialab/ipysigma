@@ -173,12 +173,12 @@ class TestResolveVariable(object):
 
         items = [{"key": 0, "attributes": {}}, {"key": 1, "attributes": {}}]
 
-        name = resolve_variable("node_color", items, g.connected_components())
+        name = resolve_variable("node_size", items, g.betweenness())
 
-        assert name == "ipysigma_kwarg_node_color"
+        assert name == "ipysigma_kwarg_node_size"
         assert items == [
-            {"key": 0, "attributes": {"ipysigma_kwarg_node_color": 0}},
-            {"key": 1, "attributes": {"ipysigma_kwarg_node_color": 1}},
+            {"key": 0, "attributes": {"ipysigma_kwarg_node_size": 0.0}},
+            {"key": 1, "attributes": {"ipysigma_kwarg_node_size": 0.0}},
         ]
 
     # TODO: edges (partitions)
