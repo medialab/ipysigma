@@ -905,6 +905,7 @@ A text label.
 * **graph** *nx.AnyGraph or ig.AnyGraph* - networkx or igraph graph instance to explore.
 * **name** *str, optional* `None` - name of the graph.
 * **height** *int, optional* `500` - height of the widget container in pixels.
+* **background_color** *str, optional* `"white"` - css color to use as the graph's background.
 * **raw_height** *str, optional* `None` - raw css height. Can be useful in some html embedding scenarios. Only use this if you know what you are doing.
 * **start_layout** *bool or float, optional* `False` - whether to automatically start the layout algorithm when mounting the widget. If a number is given instead, the layout algorithm will start and automatically stop after this many seconds.
 * **node_metrics** *Iterable or Mapping, optional* `None` - node metrics to be computed by graphology by the widget's JavaScript code. Currently only supports "louvain" for community detection.
@@ -1050,6 +1051,7 @@ Static method that can be used to override some default values of the `Sigma` cl
 *Arguments*
 
 * **height** *int, optional*: default widget height in pixels.
+* **background_color** *str, optional*: default background color.
 * **max_categorical_colors** *int, optional*: default maximum number of colors for generated palettes.
 * **node_size_range** *tuple, optional*: default size range in pixels for nodes.
 * **edge_size_range** *tuple, optional*: default size range in pixels for edges.

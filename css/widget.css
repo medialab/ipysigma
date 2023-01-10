@@ -23,7 +23,8 @@
 
 /* Ipysigma own styles */
 .ipysigma-widget {
-  background-color: white;
+  /* Background color is now set by widget directly! */
+  /* background-color: white; */
   margin: 0;
   padding: 0;
   border: 1px solid #e0e0e0;

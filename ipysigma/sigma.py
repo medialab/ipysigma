@@ -27,6 +27,7 @@ from ipysigma.constants import (
     DEFAULT_MAX_CATEGORICAL_COLORS,
     DEFAULT_HEIGHT,
     MIN_HEIGHT,
+    DEFAULT_BACKGROUND_COLOR,
     DEFAULT_LABEL_FONT,
     DEFAULT_NODE_COLOR,
     DEFAULT_NODE_COLOR_SATURATION_RANGE,
@@ -66,6 +67,8 @@ class Sigma(DOMWidget):
         name (str, optional): name of the graph. Defaults to None.
         height (int, optional): height of the widget container in pixels.
             Defaults to 500.
+        background_color (str, optional): css color to use as the graph's background.
+            Defaults to "white".
         raw_height (str, optional): raw css height. Can be useful in some html
             embedding scenarios. Only use this if you know what you are doing.
             Defaults to None.
@@ -338,12 +341,14 @@ class Sigma(DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
 
     default_height = DEFAULT_HEIGHT
+    default_background_color = DEFAULT_BACKGROUND_COLOR
     default_max_categorical_colors = DEFAULT_MAX_CATEGORICAL_COLORS
     default_node_size_range = DEFAULT_NODE_SIZE_RANGE
     default_edge_size_range = DEFAULT_EDGE_SIZE_RANGE
 
     data = Dict({"nodes": [], "edges": []}).tag(sync=True)
     height = Unicode(str(DEFAULT_HEIGHT) + "px").tag(sync=True)
+    background_color = Unicode(DEFAULT_BACKGROUND_COLOR).tag(sync=True)
     name = Unicode(allow_none=True).tag(sync=True)
     start_layout = Bool(False).tag(sync=True)
     start_layout_for_seconds = Float(allow_none=True).tag(sync=True)
@@ -375,6 +380,7 @@ class Sigma(DOMWidget):
     def set_defaults(
         cls,
         height=None,
+        background_color=None,
         max_categorical_colors=None,
         node_size_range=None,
         edge_size_range=None,
@@ -386,6 +392,12 @@ class Sigma(DOMWidget):
                 )
 
             cls.default_height = height
+
+        if background_color is not None:
+            if not isinstance(background_color, str):
+                raise TypeError("background_color should be a string")
+
+            cls.default_background_color = background_color
 
         if max_categorical_colors is not None:
             if (
@@ -409,6 +421,7 @@ class Sigma(DOMWidget):
         # Various options
         name=None,
         height=None,
+        background_color=None,
         raw_height=None,
         start_layout=False,
         node_metrics=None,
@@ -544,6 +557,9 @@ class Sigma(DOMWidget):
         if height is None:
             height = self.default_height
 
+        if background_color is None:
+            background_color = self.default_background_color
+
         if max_categorical_colors is None:
             max_categorical_colors = self.default_max_categorical_colors
 
@@ -559,6 +575,9 @@ class Sigma(DOMWidget):
 
         if not isinstance(max_categorical_colors, int) or max_categorical_colors < 0:
             raise TypeError("max_categorical_colors should be a positive integer")
+
+        if not isinstance(background_color, str):
+            raise TypeError("background_color should be a string")
 
         if selected_node is not None and selected_edge is not None:
             raise TypeError(
@@ -613,6 +632,7 @@ class Sigma(DOMWidget):
 
         # Traits
         self.height = raw_height if raw_height is not None else str(height) + "px"
+        self.background_color = background_color
         self.name = name
         self.max_categorical_colors = max_categorical_colors
         self.start_layout = bool(start_layout)

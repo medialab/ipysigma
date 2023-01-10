@@ -947,6 +947,7 @@ Static method that can be used to override some default values of the `Sigma` cl
 *Arguments*
 
 * **height** *int, optional*: default widget height in pixels.
+* **background_color** *str, optional*: default background color.
 * **max_categorical_colors** *int, optional*: default maximum number of colors for generated palettes.
 * **node_size_range** *tuple, optional*: default size range in pixels for nodes.
 * **edge_size_range** *tuple, optional*: default size range in pixels for edges.

@@ -426,8 +426,11 @@ export class SigmaView extends DOMWidgetView {
     this.el.classList.add('ipysigma-widget');
 
     const height = this.model.get('height');
+    const backgroundColor = this.model.get('background_color');
     const name = this.model.get('name');
     const data = this.model.get('data');
+
+    this.el.style.backgroundColor = backgroundColor;
 
     const graph = buildGraph(data, createRng());
     this.graph = graph;
