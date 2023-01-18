@@ -5,6 +5,7 @@ import * as gexf from 'graphology-gexf/browser';
 import renderAsSVG from 'graphology-svg/renderer';
 // @ts-ignore
 import { DEFAULTS as SVG_DEFAULTS } from 'graphology-svg/defaults';
+import { AbstractGraph as Graph, Attributes } from 'graphology-types';
 
 // Taken and adapted from: https://github.com/jacomyal/sigma.js/blob/main/examples/png-snapshot/saveAsPNG.ts
 function renderToAuxiliaryCanvas(
@@ -79,6 +80,39 @@ function renderToAuxiliaryCanvas(
   ];
 }
 
+function copyGraphForGexf(renderer: Sigma): Graph {
+  const original = renderer.getGraph();
+  const copy = original.copy();
+
+  copy.updateEachNodeAttributes((node, attr) => {
+    const displayData = renderer.getNodeDisplayData(node) as Attributes & {
+      x: number;
+      y: number;
+    };
+    const { x, y } = renderer.graphToViewport(displayData);
+
+    return {
+      ...attr,
+      color: displayData.color,
+      size: displayData.size,
+      x,
+      y,
+    };
+  });
+
+  copy.updateEachEdgeAttributes((edge, attr) => {
+    const displayData = renderer.getEdgeDisplayData(edge) as Attributes;
+
+    return {
+      ...attr,
+      color: displayData.color,
+      size: displayData.size,
+    };
+  });
+
+  return copy;
+}
+
 export function renderAsDataURL(renderer: Sigma): string {
   const [canvas, cleanup] = renderToAuxiliaryCanvas(renderer);
 
@@ -108,7 +142,7 @@ export function saveAsJSON(renderer: Sigma): void {
 }
 
 export function saveAsGEXF(renderer: Sigma): void {
-  const data = gexf.write(renderer.getGraph());
+  const data = gexf.write(copyGraphForGexf(renderer));
   FileSaver.saveAs(new Blob([data], { type: 'application/xml' }), 'graph.gexf');
 }
 
