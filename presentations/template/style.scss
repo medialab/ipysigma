@@ -1,0 +1,233 @@
+@use "sass:math";
+
+// Theme
+// ---------------------------------------------------------------------------
+
+$primary          : #e6142d;
+$secondary        : #009688;
+$tertiary         : #757575;
+$light            : #FFF;
+$dark             : #333;
+$text-dark        : #212121;
+$text-light       : $light;
+$code-background  : #F8F8F8;
+$overlay          : transparentize(#000, .5);
+$font-size        : 28px;
+$font-size-impact : 128px;
+$font             : Arial, Helvetica, sans-serif;
+$font-title       : Arial, Helvetica, sans-serif;
+$font-fixed       : 'Lucida Console', Monaco, monospace;
+$margin           : 20px;
+$iframe-scale     : 1.5;
+
+
+// CSS Base
+// ---------------------------------------------------------------------------
+
+* { box-sizing: border-box; }
+body { font-family: $font; }
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 $margin 0;
+  font-family: $font-title;
+}
+h1 { color: $primary; }
+h2 { color: $secondary; }
+h3 { color: $tertiary; }
+li { margin-bottom: .25em; };
+pre, code {
+  text-align: left;
+  font-family: $font-fixed;
+  color: $secondary;
+  background: $code-background;
+}
+a, a:visited, a:hover, a:active { color: $text-dark; }
+img { vertical-align: inherit; }
+blockquote {
+  border-left: 8px solid;
+  padding-left: .5em;
+  color: $tertiary;
+  text-align: left;
+  margin: 1em 0;
+  & > p { margin: 0; }
+}
+
+
+// Remark base
+// ---------------------------------------------------------------------------
+
+.remark-code { font-size: .9em; }
+.remark-container { background: $dark; }
+.remark-slide-scaler { box-shadow: none; }
+.remark-notes { font-size: 1.5em; }
+
+.remark-slide-content {
+  font-size: $font-size;
+  padding: 1em 2em;
+  color: $text-dark;
+  background-size: cover;
+}
+
+.remark-slide-number {
+  color: $text-light;
+  right: 1em;
+  opacity: .6;
+  font-size: 0.8em;
+  z-index: 2;
+  .no-counter & { display: none; }
+}
+
+hr {
+  border: none;
+  height: 1px;
+}
+
+// Additions
+.impact {
+  background-color: $primary;
+  vertical-align: middle;
+  text-align: center;
+  &, h1, h2 { color: $text-light; }
+  hr { background-color: $text-light; }
+  h1 { font-size: $font-size-impact; }
+}
+
+.full {
+  &, h1, h2 { color: $text-light; }
+  &iframe {
+    height: calc(math.div(100%, $iframe-scale) - 1.2em);
+    width: math.div(100%, $iframe-scale);
+    transform: scale($iframe-scale);
+    transform-origin: 0 0;
+    border: 0;
+  }
+}
+
+.bottom-bar {
+  background-color: $primary;
+  color: $text-light;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 20px;
+  padding: .8em;
+  text-align: left;
+  z-index: 1;
+  p { margin: 0;}
+  .impact &, .full & { display: none; }
+}
+
+
+// Utilities
+// ---------------------------------------------------------------------------
+
+// Positioning
+.side-layer {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  padding: 0 2em;
+}
+.middle { &, & img, & span { vertical-align: middle; } };
+.top { vertical-align: top; };
+.bottom { vertical-align: bottom; };
+.inline-block {
+  p, ul, ol, blockquote {
+    display: inline-block;
+    text-align: left;
+  }
+}
+.no-margin { &, & > p, & > pre, & > ul, & > ol { margin: 0; } }
+.no-padding { padding: 0; }
+.space-left { padding-left: 1em; }
+.space-right { padding-right: 1em; }
+
+// Images
+.responsive > img { width: 100%; height: auto; };
+.contain { background-size: contain; };
+.overlay { box-shadow: inset 0 0 0 9999px $overlay; }
+
+// Text
+.left { text-align: left; }
+.right { text-align: right; }
+.center { text-align: center; }
+.justify { text-align: justify; }
+.primary { color: $primary; }
+.primary-bg { background-color: $primary; }
+.secondary { color: $secondary; }
+.secondary-bg { background-color: $secondary; }
+.tertiary { color: $tertiary; }
+.tertiary-bg { background-color: $tertiary; }
+.alt { color: $secondary; };
+.em { color: $tertiary; };
+.thin { font-weight: 200; }
+.huge { font-size: 2em; }
+.big { font-size: 1.5em; }
+.small { font-size: .8em; }
+.strike { text-decoration: line-through; }
+.dark { color: $dark; }
+.dark-bg { background-color: $dark; }
+.light { color: $light; }
+.light-bg { background-color: $light; }
+.alt-bg { background-color: $secondary; };
+
+// Simple 12-columns grid system
+.row {
+  width: 100%;
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+  &.table { display: table; };
+  &.table [class^="col-"] {
+    float: none;
+    display: table-cell;
+    vertical-align: inherit;
+  }
+}
+
+[class^="col-"] {
+  float: left;
+  &.inline-block {
+    float: none;
+    display: inline-block;
+  }
+}
+
+@for $i from 1 through 12 {
+  .col-#{$i} {width: math.div(100%, 12) * $i; }
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animation-fade {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+  animation-timing-function: ease-out;
+  .remark-visible & { animation-name: fadeIn; }
+}
+
+
+// Fix PDF print with chrome
+// ---------------------------------------------------------------------------
+
+@page {
+  // 908px 681px for 4/3 slides
+  size: 1210px 681px;
+  margin: 0;
+}
+
+@media print {
+  .remark-slide-scaler {
+    width: 100% !important;
+    height: 100% !important;
+    transform: scale(1) !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+}
