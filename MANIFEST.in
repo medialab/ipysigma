@@ -16,6 +16,10 @@ prune scripts
 # Notebooks
 prune notebooks
 
+# Docs
+prune docs
+prune presentations
+
 # Tests
 prune tests
 prune ipysigma/tests
