@@ -19,10 +19,14 @@ class: impact
 
 <hr>
 
-_Guillaume Plique, médialab SciencesPo_
-
 _Graph devroom, FOSDEM 2023_
 
 ---
 
-TODO...
+class: impact
+
+_Guillaume Plique, médialab SciencesPo_
+
+_Special thanks to ✨Laura Miguel✨ for data collection and processing_
+
+---
