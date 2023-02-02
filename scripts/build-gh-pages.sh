@@ -13,6 +13,9 @@ bs export -o $DIST/presentations
 cd ..
 
 echo "Copying demo"
-cp -R ./docs/demo $DIST/demo
+cp -R ./docs/demo/demo.html $DIST/demo.html
+
+echo "Config"
+touch $DIST/.nojekyll
 
 echo "Done"
