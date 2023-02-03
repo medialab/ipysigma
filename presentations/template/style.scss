@@ -41,7 +41,7 @@ pre, code {
   background: $code-background;
 }
 a, a:visited, a:hover, a:active { color: $text-dark; }
-img { vertical-align: inherit; }
+img { vertical-align: inherit; max-height: 75%; text-align:center; margin: auto; }
 blockquote {
   border-left: 8px solid;
   padding-left: .5em;
@@ -65,6 +65,7 @@ blockquote {
   padding: 1em 2em;
   color: $text-dark;
   background-size: cover;
+  & > h2 { font-size: 42px; }
 }
 
 .remark-slide-number {
@@ -86,9 +87,10 @@ hr {
   background-color: $primary;
   vertical-align: middle;
   text-align: center;
-  &, h1, h2 { color: $text-light; }
+  &, h1, h2, h3 { color: $text-light; }
   hr { background-color: $text-light; }
   h1 { font-size: $font-size-impact; }
+  h3 { font-size: 60px; }
 }
 
 .full {
