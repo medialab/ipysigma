@@ -31,7 +31,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: $font-title;
 }
 h1 { color: $primary; }
-h2 { color: $secondary; }
+h2 { color: $primary; }
 h3 { color: $tertiary; }
 li { margin-bottom: .25em; };
 pre, code {
