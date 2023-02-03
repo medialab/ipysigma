@@ -162,7 +162,14 @@ class: impact
 ## Let's mix Jupyter notebooks and Sigma.js!
 
 <center>
-  <img src="img/interactive-exploration.gif" height="450"/>
+  <img src="img/ipysigma.gif" height="500"/>
 </center>
 
+---
+
+class: impact
+
+## DEMO
+
+---
 
