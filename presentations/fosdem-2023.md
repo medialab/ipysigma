@@ -121,7 +121,7 @@ Like MiniVaN, [Nansi](https://medialab.github.io/nansi/), ...
 
 ## which enabled developing Gephi-like tools for the web
 
-Like MiniVaN, Nansi, [Retina](https://ouestware.gitlab.io/retina/1.0.0-beta.1/), etc.
+Like MiniVaN, Nansi, [Retina](https://ouestware.gitlab.io/retina/1.0.0-beta.1/), ...
 
 <center>
   <img src="img/retina.png" height="450"/>
@@ -129,9 +129,19 @@ Like MiniVaN, Nansi, [Retina](https://ouestware.gitlab.io/retina/1.0.0-beta.1/),
 
 ---
 
+## which enabled developing Gephi-like tools for the web
+
+Like MiniVaN, Nansi, Retina, and soon [Gephi-lite](https://github.com/gephi/gephi-lite)!
+
+<center>
+  <img src="img/gephi-lite.png" height="450"/>
+</center>
+
+---
+
 class: impact
 
-### We now have many rich interactive tools allowing us to visualize, explore and manipulate graphs.
+### We now have many rich interactive tools allowing us to visualize, explore, manipulate and publish graphs.
 
 ### &nbsp;
 
@@ -141,14 +151,18 @@ class: impact
 
 class: impact
 
-### ...all of them work with graph files (GEXF, GraphML, JSON, etc)
+### ...all of them require pre-computed graphs (saved as GEXF, GraphML, JSON, etc.).
 
 ### &nbsp;
 
-### What if we want to juggle between building/prototyping our graph and exploring it?
+### What if we want to juggle between building/coding our graph and quickly visualizing/exploring it interactively?
 
 ---
 
-# We need a tool for prototyping graphs while coding and having a quick way to visualize results
+## Let's mix Jupyter notebooks and Sigma.js!
+
+<center>
+  <img src="img/interactive-exploration.gif" height="450"/>
+</center>
 
 
