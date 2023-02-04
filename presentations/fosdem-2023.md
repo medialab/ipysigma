@@ -159,7 +159,7 @@ class: impact
 
 ---
 
-## Let's mix Jupyter notebooks and Sigma.js!
+## We can mix Jupyter notebooks and Sigma.js!
 
 <center>
   <img src="img/ipysigma.gif" height="500"/>
@@ -169,7 +169,12 @@ class: impact
 
 class: impact
 
-## DEMO
+### Let's play with it!
 
----
+<pre><code>
+    pip install jupyter
+    pip install networkx        # or igraph
+    pip install ipysigma
+
+</code></pre>
 
