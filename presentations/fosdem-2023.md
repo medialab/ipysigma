@@ -1,5 +1,5 @@
 title: ipysigma - a Jupyter widget for interactive visual network analysis
-slug: ipysigma
+slug: fosdem-2023
 class: animation-fade responsive
 layout: true
 
@@ -83,7 +83,7 @@ class: impact
 
 ---
 
-## For the desktop first, for instance [Gephi](https://gephi.org/) 
+## For the desktop first, for instance [Gephi](https://gephi.org/)
 
 <center>
   <img src="img/gephi.png" height="520"/>

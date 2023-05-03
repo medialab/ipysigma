@@ -1,4 +1,4 @@
-# Notes
+# FOSDEM 2023 Notes
 
 * A little bit of history about how it came to life: Gephi, MiniVaN, Nansi, Retina. Explain the reasons why, to have a tool between programming, prototyping graph processing and having a quick way to visualize the results (vs. metrics or stats), using a graph like a map.
 * Laius about visual network exploration, sociograms, modern & interactive visual analysis
