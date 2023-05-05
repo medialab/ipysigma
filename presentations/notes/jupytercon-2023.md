@@ -13,3 +13,7 @@
 5. Demoing ipysigma (don't forget the grid & the embed export).
 6. Future directions, specialized representations for temporal, bipartite etc.
 7. Difficulties of developing a custom Jupyter widget (the docs are all over the place).
+
+## Misc
+
+* EuroSiS was created by Mathieu Jacomy & Franck Ghitalla.
