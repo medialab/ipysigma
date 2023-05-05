@@ -40,7 +40,7 @@ class: impact
 ## 1736: Leonhard Euler & the 7 Bridges of Königsberg
 
 <center>
-  <img src="img/konigsberg.png"/>
+  <img src="img/koenigsberg.png"/>
 </center>
 
 ---

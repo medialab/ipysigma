@@ -149,6 +149,20 @@ hr {
 .contain { background-size: contain; };
 .overlay { box-shadow: inset 0 0 0 9999px $overlay; }
 
+// Tables
+table, th, td {
+  border: 1px solid;
+}
+
+th {
+  background-color: $code-background;
+}
+
+th, td {
+  padding: 0.5em;
+  font-size: 0.8em;
+}
+
 // Text
 .left { text-align: left; }
 .right { text-align: right; }
