@@ -38,6 +38,7 @@
     "build:lib": "tsc",
     "build:nbextension": "webpack",
     "build:gh-pages": "./scripts/build-gh-pages.sh",
+    "build:pdf": "cd presentations && bs pdf",
     "clean": "yarn run clean:lib && yarn run clean:nbextension && yarn run clean:labextension",
     "clean:lib": "rimraf lib",
     "clean:labextension": "rimraf ipysigma/labextension",
