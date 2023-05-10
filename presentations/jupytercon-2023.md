@@ -267,7 +267,17 @@ class: impact
 
 ---
 
-## Nansi
+## The iterative process
+
+<br>
+
+<center>
+  <img src="img/iterative-process.png" height="300px"/>
+</center>
+
+---
+
+## Designing Nansi
 
 Two conflicting objectives:
 
@@ -279,16 +289,6 @@ Two conflicting objectives:
 <center>⁂</center>
 
 It was *doomed* from the start.
-
----
-
-## The iterative process
-
-<br>
-
-<center>
-  <img src="img/iterative-process.png" height="300px"/>
-</center>
 
 ---
 
@@ -315,6 +315,24 @@ pip install ipysigma
 class: impact
 
 ## (Hopefully working) Demo time!
+
+---
+
+## A treasure trove of visual variables
+
+* **node**
+  * color, saturation
+  * size
+  * label, label size, label color, label font
+  * border size, border ratio, border color
+  * pictogram, pictogram color, shape
+  * halo size, halo color
+* **edge**
+  * color
+  * type
+  * size
+  * curveness
+  * label
 
 ---
 
