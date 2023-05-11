@@ -378,6 +378,14 @@ class: impact
 
 ---
 
+## Open Source (of course)
+
+* GitHub repository & docs: https://github.com/medialab/ipysigma
+* Slides: https://medialab.github.io/ipysigma/presentations/jupytercon-2023
+* Embed demo: https://medialab.github.io/ipysigma/demo.html
+
+---
+
 # Thank you for listening!
 
 <center>
