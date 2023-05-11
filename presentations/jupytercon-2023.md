@@ -384,6 +384,11 @@ class: impact
 * Slides: https://medialab.github.io/ipysigma/presentations/jupytercon-2023
 * Embed demo: https://medialab.github.io/ipysigma/demo.html
 
+*Dependencies*
+
+* graphology: https://graphology.github.io/
+* Sigma.js: https://www.sigmajs.org/
+
 ---
 
 # Thank you for listening!
