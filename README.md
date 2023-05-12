@@ -28,6 +28,7 @@ For an exhaustive list of what visual variables you may tweak, check the "[Avail
 - [Quick start](#quick-start)
 - [Examples](#examples)
   - [Compute a Louvain partition and use it as node color](#compute-a-louvain-partition-and-use-it-as-node-color)
+  - [Use networkx/igraph/custom metrics as visual variables](#use-networkxigraphcustom-metrics-as-visual-variables)
   - [Display a pandas DataFrame as a graph](#display-a-pandas-dataframe-as-a-graph)
   - [Comparing two features of a graph](#comparing-two-features-of-a-graph)
   - [More examples: functional testing notebooks](#more-examples-functional-testing-notebooks)
@@ -164,6 +165,36 @@ Sigma(
   node_color="community"
 )
 ```
+
+### Use networkx/igraph/custom metrics as visual variables
+
+Use networkx metrics:
+```python
+import networkx as nx
+
+g = nx.path_graph(5)
+Sigma(g, node_size=nx.eigenvector_centrality(g))
+```
+
+Use igraph metrics:
+```python
+import igraph as ig
+
+g = ig.Graph.GRG(5, 0.5)
+Sigma(g, node_size=g.pagerank(), node_color=g.connected_components())
+```
+
+Use custom metrics:
+```python
+import networkx as nx
+
+def even_or_odd(node):
+  return node % 2 == 0
+
+g = nx.path_graph(5)
+Sigma(g, node_color=even_or_odd)
+```
+Read [this](#what-data-can-be-used-as-visual-variable) for an exhaustive list of what can be used as visual variables.
 
 ### Display a pandas DataFrame as a graph
 
