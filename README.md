@@ -172,7 +172,7 @@ Use networkx metrics:
 ```python
 import networkx as nx
 
-g=nx.path_graph(5)
+g = nx.path_graph(5)
 Sigma(g, node_size=nx.eigenvector_centrality(g))
 ```
 
@@ -188,8 +188,11 @@ Use custom metrics:
 ```python
 import networkx as nx
 
-g=nx.path_graph(5)
-Sigma(g, node_color=[0, 0, 1, 1, 1])
+def even_or_odd(node):
+  return node % 2 == 0
+
+g = nx.path_graph(5)
+Sigma(g, node_color=even_or_odd)
 ```
 Read [this](#what-data-can-be-used-as-visual-variable) for an exhaustive list of what can be used as visual variables.
 

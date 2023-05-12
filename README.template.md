@@ -172,7 +172,7 @@ Use networkx metrics:
 ```python
 import networkx as nx
 
-g=nx.path_graph(5)
+g = nx.path_graph(5)
 Sigma(g, node_size=nx.eigenvector_centrality(g))
 ```
 
@@ -188,8 +188,11 @@ Use custom metrics:
 ```python
 import networkx as nx
 
-g=nx.path_graph(5)
-Sigma(g, node_color=[0, 0, 1, 1, 1])
+def even_or_odd(node):
+  return node % 2 == 0
+
+g = nx.path_graph(5)
+Sigma(g, node_color=even_or_odd)
 ```
 Read [this](#what-data-can-be-used-as-visual-variable) for an exhaustive list of what can be used as visual variables.
 
@@ -459,7 +462,7 @@ Note also that the palette generation is seeded using the mapped attribute name 
 
 If you don't want `ipysigma` to generate color palettes for you, you can give your own palette through the relevant `_palette` kwarg such as `node_color_palette`, or use some [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) one (they have names starting with `scheme`).
 
-Here is the full list of those palettes supported by `ipysigma`: %(supported_color_palettes)s.
+Here is the full list of those palettes supported by `ipysigma`: <% supported_color_palettes %>.
 
 *Color gradients*
 
@@ -467,7 +470,7 @@ Color gradients can be defined as a range from "lowest" to "highest" color, e.g.
 
 They can also be taken from any [d3-scale-chromatic](https://github.com/d3/d3-scale-chromatic#readme) continuous gradient (they have names starting with `interpolate`).
 
-Here is the full list of those gradients supported by `ipysigma`: %(supported_color_gradients)s.
+Here is the full list of those gradients supported by `ipysigma`: <% supported_color_gradients %>.
 
 ## Widget-side metrics
 
@@ -930,7 +933,7 @@ A text label.
 
 *Arguments*
 
-%(sigma_args)s
+<% sigma_args %>
 
 #### #.get_layout
 
@@ -995,7 +998,7 @@ Static method taking the same kwargs as [`Sigma`](#sigma) and rendering the widg
 
 *Arguments*
 
-%(sigma_grid_args)s
+<% sigma_grid_args %>
 
 #### #.add
 
