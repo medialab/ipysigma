@@ -2179,10 +2179,10 @@
   resolved "https://registry.npmjs.org/@yomguithereal/helpers/-/helpers-1.1.1.tgz"
   integrity sha512-UYvAq/XCA7xoh1juWDYsq3W0WywOB+pz8cgVnE1b45ZfdMhBvHDrgmSFG3jXeZSr2tMTYLGHFHON+ekG05Jebg==
 
-"@yomguithereal/sigma-experiments-renderers@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@yomguithereal/sigma-experiments-renderers/-/sigma-experiments-renderers-0.2.1.tgz#9eb3586c7069432aea5fa58b10c6b0627b7c52a3"
-  integrity sha512-5XZvFiZ/uC/d+vdixjSPGVEPB5EY8g9JCQPRSEqLZbRAWYtQTBBSeJI56+ZohdxsXfMxCFstft6+Z8VxOu35bA==
+"@yomguithereal/sigma-experiments-renderers@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@yomguithereal/sigma-experiments-renderers/-/sigma-experiments-renderers-0.2.2.tgz#fa0ed171f79c33e704a4928d7c88cb993f0cb532"
+  integrity sha512-kc8SN6pF/G6NDOi28D6Zpmudty+eIDSD3VU6gsYmzFa3JddjpISl5PGAgIFq1imGttn/IV9gt1bi6Vu1JR8/PQ==
 
 JSONStream@1.3.5:
   version "1.3.5"
