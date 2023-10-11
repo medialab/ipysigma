@@ -383,7 +383,7 @@ class: impact
 * Slides: https://medialab.github.io/ipysigma/presentations/digithum-2023
 * Demo: https://medialab.github.io/ipysigma/demo.html
 
-*Dépendences*
+*ipysigma fonctionne grâce à ces librairies :*
 
 * graphology: https://graphology.github.io/
 * Sigma.js: https://www.sigmajs.org/
