@@ -358,6 +358,11 @@ class: impact
 * Sigma.js: https://www.sigmajs.org/
 
 ---
+## Comment citer ipysigma ?
+
+Guillaume Plique. (2022). ipysigma, A Jupyter widget using sigma.js to render interactive networks. Zenodo. [https://doi.org/10.5281/zenodo.7446059]()
+
+---
 
 # Merci pour votre attention !
 
