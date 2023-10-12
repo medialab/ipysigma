@@ -65,47 +65,6 @@ Un ensemble de **nœuds** et de **liens**, et les métadonnées associées.
 
 class: impact
 
-## L'analyse visuelle de réseaux
-
----
-
-## Une approche statistique des graphes
-
-* Diamètre
-* Densité
-* Distribution des degrés
-* Plus court chemin
-* Centralité
-* Valeurs propres
-* Algèbre linéaire (un graphe est une matrice, une matrice est un graphe)
-* Pagerank
-* etc.
-
----
-
-## Que nous apporte la visualisation de graphes ?
-
-<br>
-
-<center>
-  <img src="img/koenigsberg.png"/>
-</center>
-
----
-
-## Que nous apporte la visualisation de graphes ?
-
-<br>
-<br>
-
-<center>
-  <img src="img/koenigsberg-graph.png"/>
-</center>
-
----
-
-class: impact
-
 ## L'analyse visuelle de réseaux en sciences sociales
 
 ---
@@ -321,6 +280,16 @@ pip install ipysigma
 
 ---
 
+## Un outil intégré dans l'écosystème Python
+
+* Compatible avec les deux principales librairies de réseaux :
+  * [**networkx**](https://networkx.org/)
+  * [**python-igraph**](https://python.igraph.org/)
+
+
+* Prévu pour fonctionner avec [**pelote**](https://github.com/medialab/pelote#pelote), un module Python de création de réseaux
+
+---
 class: impact
 
 ## Demo time! (En espérant que ça fonctionne)
@@ -379,7 +348,7 @@ class: impact
 
 ## Un logiciel libre
 
-* GitHub : https://github.com/medialab/ipysigma
+* GitHub (Documentation et code source) : https://github.com/medialab/ipysigma#ipysigma
 * Slides: https://medialab.github.io/ipysigma/presentations/digithum-2023
 * Demo: https://medialab.github.io/ipysigma/demo.html
 
