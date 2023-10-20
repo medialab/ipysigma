@@ -1,7 +1,9 @@
 from itertools import count
 from ipywidgets import VBox, HBox
+from ipywidgets.embed import embed_minimal_html
 from IPython.display import display
 from collections.abc import Iterable
+
 
 from ipysigma.sigma import Sigma
 from ipysigma.interfaces import check_graph_is_valid
@@ -82,3 +84,49 @@ class SigmaGrid(object):
         hboxes.append(current_hbox)
 
         display(VBox([HBox(hbox) for hbox in hboxes]))
+
+    def to_html(self, path):
+        """
+        Method to save the grid of graphs to an HTML file.
+
+        Args:
+            path (str): The path where the HTML file will be saved.
+        """
+        try:
+            # Create a list to hold the views for embedding
+            views_to_embed = self.__views
+
+            # Save the grid to an HTML file
+            embed_minimal_html(path, views=views_to_embed)
+            print(f"Grid successfully saved to {path}")
+
+        except Exception as e:
+            print(f"An error occurred while saving the grid to HTML: {e}")
+
+    @classmethod
+    def write_html(cls, graph, path, columns=2, sync_key=None, views=None, fullscreen=False, **kwargs):
+        """
+        Class method to write the grid to an HTML file.
+
+        Args:
+            graph: The graph to visualize.
+            path (str): The path where the HTML file will be saved.
+            columns (int, optional): The number of columns in the grid.
+            sync_key (str, optional): The synchronization key.
+            views (list, optional): List of views.
+            fullscreen (bool, optional): Whether to display the grid in fullscreen.
+            **kwargs: Additional keyword arguments.
+        """
+        try:
+            if fullscreen:
+                kwargs["height"] = None
+                kwargs["raw_height"] = "calc(100vh - 16px)"
+
+            # Create an instance of SigmaGrid
+            grid_instance = cls(graph, columns, sync_key, views, **kwargs)
+
+            # Save the grid to an HTML file
+            grid_instance.to_html(path)
+
+        except Exception as e:
+            print(f"An error occurred while creating the SigmaGrid instance or saving to HTML: {e}")
