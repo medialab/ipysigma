@@ -89,14 +89,18 @@ pip install ipysigma
 
 You will also need to install either `networkx` or `igraph`.
 
-If you are using an older version of Jupyter, you might also need to enable the nbextension likewise:
+If you are using an older version of Jupyter, or if the extension does not appear to be installed automatically, you might also need to run some nbextension/labextension commands likewise:
 
 ```bash
+# Try one/all of those for jupyter notebook:
 jupyter nbextension enable --py --sys-prefix ipysigma
-
-# You might need one of those other commands
 jupyter nbextension enable --py --user ipysigma
 jupyter nbextension enable --py --system ipysigma
+
+# Try one/all of those for jupyter lab:
+jupyter labextension enable ipysigma
+jupyter labextension enable ipysigma user
+jupyter labextension enable ipysigma sys-prefix
 ```
 
 If you want to use `ipysigma` on [Google Colab](https://colab.research.google.com), you will need to enable widget output using the following code:
