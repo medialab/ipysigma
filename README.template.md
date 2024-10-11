@@ -877,6 +877,18 @@ HTML [named color](https://www.w3schools.com/tags/ref_colornames.asp) or hex col
 
 ![edge_type](./docs/img/edge_type.png)
 
+**Type**
+
+Name of renderer to use to draw the graph's edges. One of `arrow`, `triangle`, `rectangle`, `line` or `curve`.
+
+Usually defaults to `rectangle` for undirected graphs and `arrow` for directed graphs, or `curve` if [edge_curveness](#edge_curveness) is activated.
+
+It cannot be mapped to some edge attribute or data as of yet.
+
+**Related_kwargs**
+
+* **default_edge_type**
+
 ### edge_size
 
 ![edge_size](./docs/img/edge_size.png)
