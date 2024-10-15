@@ -378,6 +378,7 @@ export class SigmaView extends DOMWidgetView {
   graph: Graph;
   emitter: EventEmitter = new EventEmitter();
   edgeWeightAttribute: string | null = null;
+  backgroundColor: string;
 
   syncKey: string | undefined;
   syncHoveredNode: string | null = null;
@@ -431,6 +432,7 @@ export class SigmaView extends DOMWidgetView {
     const data = this.model.get('data');
 
     this.el.style.backgroundColor = backgroundColor;
+    this.backgroundColor = backgroundColor;
 
     const graph = buildGraph(data, createRng());
     this.graph = graph;
@@ -714,7 +716,9 @@ export class SigmaView extends DOMWidgetView {
       };
 
       // Gathering info about the graph to build reducers correctly
-      const maxCategoricalColors = this.model.get('max_categorical_colors') as number;
+      const maxCategoricalColors = this.model.get(
+        'max_categorical_colors'
+      ) as number;
 
       const scaleBuilder = new VisualVariableScalesBuilder(
         visualVariables,
@@ -1524,7 +1528,9 @@ export class SigmaView extends DOMWidgetView {
   bindFullscreenHandlers() {
     const enter = () => {
       this.el.style.height = '100%';
+      this.el.style.backgroundColor = this.backgroundColor;
       this.container.style.height = '100%';
+      this.container.style.backgroundColor = this.backgroundColor;
       this.fullscreenButton.innerHTML = fullscreenExitIcon;
       this.fullscreenButton.setAttribute('title', 'exit fullscreen');
       this.renderer.scheduleRefresh();
@@ -1532,8 +1538,10 @@ export class SigmaView extends DOMWidgetView {
 
     const exit = () => {
       const targetHeight = this.model.get('height');
+      this.el.style.backgroundColor = this.backgroundColor;
       this.el.style.height = targetHeight;
       this.container.style.height = targetHeight;
+      this.container.style.backgroundColor = this.backgroundColor;
       this.fullscreenButton.innerHTML = fullscreenEnterIcon;
       this.fullscreenButton.setAttribute('title', 'enter fullscreen');
       this.renderer.scheduleRefresh();
