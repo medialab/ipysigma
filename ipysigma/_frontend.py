@@ -6,4 +6,4 @@ Information about the frontend package of the widgets.
 """
 
 module_name = "ipysigma"
-module_version = "^0.24.2"
+module_version = "^0.24.3"
