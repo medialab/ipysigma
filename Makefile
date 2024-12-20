@@ -13,19 +13,19 @@ test: unit
 clean:
 	$(call clean)
 
+# jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
+# jupyter nbextension enable --sys-prefix --py ipysigma
 deps:
 	$(call clean)
 	npm i -g yarn
 	pip3 install -U pip
 	pip3 install build twine jupyter_packaging black docdocdoc
-	pip3 install jupyterlab
+	pip3 install jupyterlab jupyter
 	pip3 install networkx igraph pandas
 	SETUPTOOLS_ENABLE_FEATURES="legacy-editable" pip3 install -e ".[test, examples]"
 	yarn install
 	yarn run build
 	jupyter labextension develop --overwrite .
-	jupyter nbextension install --sys-prefix --symlink --overwrite --py ipysigma
-	jupyter nbextension enable --sys-prefix --py ipysigma
 
 format:
 	black ipysigma
