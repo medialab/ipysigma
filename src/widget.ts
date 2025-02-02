@@ -427,7 +427,13 @@ export class SigmaView extends DOMWidgetView {
     this.el.classList.add('ipysigma-widget');
 
     const height = this.model.get('height');
-    const backgroundColor = this.model.get('background_color');
+    let backgroundColor = this.model.get('background_color');
+
+    // NOTE: ipywidget is performing shitty white magic in static embeds...
+    if (backgroundColor === "white") {
+      backgroundColor = "rgb(255, 255, 255);"
+    }
+
     const name = this.model.get('name');
     const data = this.model.get('data');
 
