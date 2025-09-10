@@ -918,8 +918,7 @@ export class SigmaView extends DOMWidgetView {
           typeof data.parallelIndex === 'number' &&
           typeof data.parallelMaxIndex === 'number'
         ) {
-          displayData.type =
-            this.graph.directedSize > 0 ? 'curved-arrow' : 'curve';
+          displayData.type = 'curve';
           displayData.curveness = getCurvature(
             data.parallelIndex,
             data.parallelMaxIndex
