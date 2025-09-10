@@ -353,6 +353,7 @@ class Sigma(DOMWidget):
     start_layout = Bool(False).tag(sync=True)
     start_layout_for_seconds = Float(allow_none=True).tag(sync=True)
     clickable_edges = Bool(False).tag(sync=True)
+    handle_parallel_edges = Bool(False).tag(sync=True)
     snapshot = Unicode(allow_none=True).tag(sync=True)
     layout = Dict(allow_none=True).tag(sync=True)
     camera_state = Dict(DEFAULT_CAMERA_STATE).tag(sync=True)
@@ -427,6 +428,7 @@ class Sigma(DOMWidget):
         node_metrics=None,
         layout_settings=None,
         clickable_edges=False,
+        handle_parallel_edges=False,
         process_gexf_viz=True,
         max_categorical_colors=None,
         hide_info_panel=False,
@@ -646,6 +648,7 @@ class Sigma(DOMWidget):
         self.layout_settings = layout_settings
         self.ui_settings = {"hideInfoPanel": hide_info_panel, "hideSearch": hide_search}
         self.clickable_edges = clickable_edges
+        self.handle_parallel_edges = handle_parallel_edges
         self.camera_state = camera_state
         self.selected_node = str(selected_node) if selected_node is not None else None
         self.selected_edge = (
