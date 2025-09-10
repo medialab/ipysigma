@@ -26,7 +26,9 @@ import createNodePictogramProgram from '@yomguithereal/sigma-experiments-rendere
 import EdgeLineProgram from 'sigma/rendering/webgl/programs/edge.line';
 import EdgeRectangleProgram from 'sigma/rendering/webgl/programs/edge.rectangle';
 import EdgeTriangleProgram from 'sigma/rendering/webgl/programs/edge.triangle';
+import EdgeArrowProgram from 'sigma/rendering/webgl/programs/edge.arrow';
 import EdgeCurveProgram from '@yomguithereal/sigma-experiments-renderers/edge/edge.curve';
+import indexParallelEdgesIndex, { getCurvature } from './edge-curve';
 
 import EventEmitter from 'events';
 import seedrandom from 'seedrandom';
@@ -202,6 +204,7 @@ export class SigmaModel extends DOMWidgetModel {
       layout: null,
       clickableEdges: false,
       visual_variables: {},
+      handle_parallel_edges: false,
     };
   }
 
@@ -624,6 +627,13 @@ export class SigmaView extends DOMWidgetView {
 
     // Waiting for widget to be mounted to register events
     this.displayed.then(() => {
+      // Activating parallel edges so they curve
+      if (this.model.get('handle_parallel_edges')) {
+        indexParallelEdgesIndex(graph, {
+          edgeIndexAttribute: 'parallelIndex',
+        });
+      }
+
       // const programSettings = this.model.get(
       //   'program_settings'
       // ) as IPysigmaProgramSettings;
@@ -646,6 +656,7 @@ export class SigmaView extends DOMWidgetView {
         visualVariables.nodeHaloColor.type !== 'disabled';
 
       const edgeProgramClasses = {
+        arrow: EdgeArrowProgram,
         rectangle: EdgeRectangleProgram,
         line: EdgeLineProgram,
         triangle: EdgeTriangleProgram,
@@ -903,7 +914,17 @@ export class SigmaView extends DOMWidgetView {
         if (scales.edgeLabel)
           displayData.label = scales.edgeLabel(data) as string;
 
-        if (rendererSettings.defaultEdgeType === 'curve') {
+        if (
+          typeof data.parallelIndex === 'number' &&
+          typeof data.parallelMaxIndex === 'number'
+        ) {
+          displayData.type =
+            this.graph.directedSize > 0 ? 'curved-arrow' : 'curve';
+          displayData.curveness = getCurvature(
+            data.parallelIndex,
+            data.parallelMaxIndex
+          );
+        } else if (rendererSettings.defaultEdgeType === 'curve') {
           displayData.curveness = scales.edgeCurveness(data) as number;
         }
 

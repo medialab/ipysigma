@@ -8,6 +8,8 @@ module.exports = {
   testPathIgnorePatterns: ['/lib/', '/node_modules/'],
   testRegex: '/__tests__/.*.spec.ts[x]?$',
   transformIgnorePatterns: ['/node_modules/(?!(@jupyter(lab|-widgets)/.*)/)'],
+  testEnvironment: 'jsdom',
+  setupFiles: ['jest-webgl-canvas-mock'],
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.json',
