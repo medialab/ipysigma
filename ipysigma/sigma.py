@@ -200,9 +200,12 @@ class Sigma(DOMWidget):
             Defaults to `(0.1, 0.5)`.
         default_node_border_ratio (int or float, optional): default ratio for node borders.
             Defaults to 0.1.
+        node_pictogram (VariableData, optional): data to be used as categorical data to be mapped to node pictograms.
+            Defaults to None.
         raw_node_pictogram (VariableData, optional): raw data (pictogram name, as found here: https://fonts.google.com/icons
             or publicly accessible svg icon url) to be used for node pictograms.
             Defaults to None.
+        node_pictogram_mapping (Mapping, optional): mapping from category values to node pictograms.
         default_node_pictogram (str, optional): default pictogram for nodes.
             Defaults to None.
         node_pictogram_color (VariableData, optional): data to be used as categorical or continuous node
@@ -476,7 +479,9 @@ class Sigma(DOMWidget):
         node_border_size_range=DEFAULT_NODE_BORDER_SIZE_RANGE,
         default_node_border_size=DEFAULT_NODE_BORDER_SIZE,
         # Node pictogram
+        node_pictogram=None,
         raw_node_pictogram=None,
+        node_pictogram_mapping=None,
         default_node_pictogram=None,
         # Node pictogram color
         node_pictogram_color=None,
@@ -835,9 +840,10 @@ class Sigma(DOMWidget):
 
         visual_variables_builder.build_categorical_or_continuous(
             "nodePictogram",
-            None,
+            node_pictogram,
             raw_node_pictogram,
             default=default_node_pictogram,
+            palette=node_pictogram_mapping,
             kind="pictogram",
         )
 

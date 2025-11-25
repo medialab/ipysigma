@@ -754,8 +754,10 @@ Alternatively, one can also give urls of publicly accessible svg icons such as h
 
 **Related kwargs**
 
+* **node_pictogram**
 * **raw_node_pictogram**
 * **default_node_pictogram**
+* **node_pictogram_mapping**
 
 **Notes**
 
@@ -1001,7 +1003,9 @@ A text label.
 * **raw_node_border_ratio** *VariableData, optional* `None` - raw data (ratio in pixels) to be used for node border ratios.
 * **node_border_ratio_range** *Iterable, optional* `(0.1, 0.5)` - range of ratios in pixels to map to, for instance: `(1, 15)`.
 * **default_node_border_ratio** *int or float, optional* `0.1` - default ratio for node borders.
+* **node_pictogram** *VariableData, optional* `None` - data to be used as categorical data to be mapped to node pictograms.
 * **raw_node_pictogram** *VariableData, optional* `None` - raw data (pictogram name, as found here: https://fonts.google.com/icons or publicly accessible svg icon url) to be used for node pictograms.
+* **node_pictogram_mapping** *Mapping, optional* - mapping from category values to node pictograms.
 * **default_node_pictogram** *str, optional* `None` - default pictogram for nodes.
 * **node_pictogram_color** *VariableData, optional* `None` - data to be used as categorical or continuous node pictogram color.
 * **raw_node_pictogram_color** *VariableData, optional* `"color"` - raw data (css colors) to be used for node pictogram colors.

@@ -754,8 +754,10 @@ Alternatively, one can also give urls of publicly accessible svg icons such as h
 
 **Related kwargs**
 
+* **node_pictogram**
 * **raw_node_pictogram**
 * **default_node_pictogram**
+* **node_pictogram_mapping**
 
 **Notes**
 
