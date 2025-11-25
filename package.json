@@ -1,6 +1,6 @@
 {
   "name": "ipysigma",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "description": "A Jupyter widget using sigma.js to render interactive networks.",
   "keywords": [
     "sigma",
